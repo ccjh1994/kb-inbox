@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="灵感收件箱">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#4f46e5">
+<title>灵感收件箱 · 我的知识库入口</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik00NiA3MGg4OGw4IDMySDQ2eiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik00NiA3MEw2MiA0OGg1NmwxNiAyMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjYiLz48L3N2Zz4=">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzRmNDZlNSIvPjxwYXRoIGQ9Ik00NiA3MGg4OGw4IDMySDQ2eiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik00NiA3MEw2MiA0OGg1NmwxNiAyMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjYiLz48L3N2Zz4=">
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --line:#e6e8ec; --text:#1c1f26; --muted:#6b7280;
+  --primary:#4f46e5; --primary-soft:#eef2ff; --danger:#e5484d; --danger-soft:#fef1f1;
+  --ok:#12a150; --ok-soft:#e8f7ef; --warn:#b45309; --warn-soft:#fff7ed;
+  --radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:16px; line-height:1.55;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px}
+
+/* header */
+header{
+  background:linear-gradient(135deg,#4f46e5,#6366f1); color:#fff;
+  padding:calc(18px + env(safe-area-inset-top)) 0 20px;
+}
+.hd{display:flex;align-items:center;gap:10px}
+.hd h1{margin:0;font-size:19px;font-weight:650;letter-spacing:.3px}
+.hd .sub{font-size:13px;opacity:.85;margin-top:2px}
+.logo{width:34px;height:34px;flex:0 0 34px;background:rgba(255,255,255,.18);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.stat-row{display:flex;gap:8px;margin-top:14px}
+.stat{flex:1;background:rgba(255,255,255,.15);border-radius:12px;padding:9px 10px;text-align:center}
+.stat b{display:block;font-size:20px;line-height:1.2}
+.stat span{font-size:11px;opacity:.9}
+.stat.alert{background:rgba(255,90,90,.32)}
+
+/* banner */
+.banner{
+  display:none;margin:12px 0 0;background:var(--warn-soft);border:1px solid #fcd9a8;
+  color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13.5px;align-items:center;gap:8px
+}
+.banner.show{display:flex}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:14px}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:650;display:flex;align-items:center;gap:8px}
+.card .desc{margin:0 0 12px;font-size:13px;color:var(--muted)}
+.sec-ic{width:24px;height:24px;flex:0 0 24px;color:var(--primary)}
+
+/* forms */
+.field{margin-bottom:10px}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+input[type=text],input[type=date],textarea{
+  width:100%;font-size:16px;font-family:inherit;color:var(--text);
+  padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#fbfbfc;outline:none
+}
+input:focus,textarea:focus{border-color:var(--primary);background:#fff}
+textarea{min-height:88px;resize:vertical}
+.row{display:flex;gap:8px}
+.row>*{flex:1;min-width:0}
+
+/* buttons */
+button{font-family:inherit;font-size:15px;cursor:pointer;border:none;border-radius:11px;min-height:44px}
+.btn{background:var(--primary);color:#fff;font-weight:600;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
+.btn:active{opacity:.85}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line)}
+.btn.soft{background:var(--primary-soft);color:var(--primary)}
+.btn.danger{background:#fff;color:var(--danger);border:1px solid #f3c9ca}
+.btn.sm{min-height:44px;font-size:14px;padding:0 14px;width:auto}
+.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-row .btn{width:auto;flex:1;min-width:120px}
+
+/* todo item */
+.item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:none}
+.chk{
+  flex:0 0 24px;width:24px;height:24px;margin-top:2px;border:2px solid #c7cad3;border-radius:7px;
+  background:#fff;display:flex;align-items:center;justify-content:center;padding:0;min-height:24px
+}
+.chk.on{background:var(--ok);border-color:var(--ok)}
+.chk svg{width:14px;height:14px;color:#fff;display:none}
+.chk.on svg{display:block}
+.it-main{flex:1;min-width:0}
+.it-txt{font-size:15px;word-break:break-word}
+.it-meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.item.done .it-txt{color:#9aa0ab;text-decoration:line-through}
+.tag{display:inline-block;padding:1px 7px;border-radius:6px;font-size:11.5px;background:#f1f2f5;color:var(--muted)}
+.tag.red{background:var(--danger-soft);color:var(--danger);font-weight:600}
+.tag.green{background:var(--ok-soft);color:var(--ok)}
+.it-act{display:flex;gap:6px;flex:0 0 auto}
+.icon-btn{
+  width:44px;height:44px;min-height:44px;border-radius:11px;background:#f6f7f9;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;padding:0;color:var(--muted)
+}
+.icon-btn svg{width:16px;height:16px}
+.icon-btn.del:hover{color:var(--danger)}
+
+/* inbox item */
+.ib{background:#fafbfc;border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-top:10px}
+.ib-txt{font-size:15px;white-space:pre-wrap;word-break:break-word}
+.ib-meta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ib-act{display:flex;gap:6px;margin-top:9px}
+
+/* preview */
+pre.prev{
+  background:#1e2130;color:#dfe3ee;border-radius:12px;padding:12px;font-size:12.5px;
+  overflow:auto;max-height:260px;margin:10px 0 0;white-space:pre-wrap;word-break:break-word;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5
+}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:18px 0}
+.hint{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+.hint b{color:var(--text)}
+hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 8px}
+.toast{
+  position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+  background:#1c1f26;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;
+  transition:.25s;pointer-events:none;z-index:99;max-width:88%;text-align:center
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(min-width:640px){
+  .row{display:flex}
+  .card{padding:18px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hd">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12h5l2 5 4-10 2 5h5"/>
+        </svg>
+      </div>
+      <div>
+        <h1>灵感收件箱</h1>
+        <div class="sub">随手收 → 回电脑一键导出 → 进 Obsidian 灵感库</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat" id="stat-overdue"><b id="s-overdue">0</b><span>逾期</span></div>
+      <div class="stat"><b id="s-today">0</b><span>今天要做</span></div>
+      <div class="stat"><b id="s-inbox">0</b><span>待导出</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="banner" id="banner">
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+    <span id="banner-txt"></span>
+  </div>
+
+  <!-- 1. 今天要处理 -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+      今天要处理
+    </h2>
+    <p class="desc">昨天没做完的会自动滚到今天，标红的就是欠着的账。</p>
+
+    <div id="today-list"></div>
+
+    <hr class="sep">
+    <div class="row">
+      <div class="field" style="flex:2">
+        <label>加一条要做的事</label>
+        <input type="text" id="todo-input" placeholder="动词开头，10 分钟内能开始">
+      </div>
+      <div class="field" style="flex:1">
+        <label>哪天做</label>
+        <input type="date" id="todo-date">
+      </div>
+    </div>
+    <button class="btn" id="btn-add-todo">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      加进今天要处理
+    </button>
+  </section>
+
+  <!-- 2. 随手收一条 -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h5l2 5 4-10 2 5h5"/></svg>
+      随手收一条
+    </h2>
+    <p class="desc">看到什么想到什么，别分类别纠结，先丢进来。回去再让 AI 处理。</p>
+
+    <div class="field">
+      <label>内容（原样存，别加工）</label>
+      <textarea id="ib-input" placeholder="比如：再好的软件，也装不上低版本的操作系统"></textarea>
+    </div>
+    <div class="field">
+      <label>来源（选填）</label>
+      <input type="text" id="ib-source" placeholder="书名 / 视频 / 谁说的 / 在哪看到的">
+    </div>
+    <button class="btn" id="btn-add-ib">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      收进灵感库
+    </button>
+
+    <hr class="sep">
+    <div id="ib-list"></div>
+  </section>
+
+  <!-- 3. 导出到 Obsidian -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+      导出到 Obsidian
+    </h2>
+    <p class="desc">导出的是带 frontmatter 的 Markdown，文件名按 <b>日期 + 关键词</b> 生成，直接扔进 <b>00-灵感库</b> 就行，AI 认得这个格式。</p>
+
+    <pre class="prev" id="md-preview"></pre>
+
+    <div class="btn-row">
+      <button class="btn soft" id="btn-copy">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h8"/></svg>
+        复制全部
+      </button>
+      <button class="btn ghost" id="btn-download">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+        下载 .md
+      </button>
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" id="btn-mark-exported">标记为已导出</button>
+      <button class="btn danger" id="btn-clear-ib">清空灵感库</button>
+    </div>
+
+    <p class="hint">
+      怎么用：手机上收一堆 → 回电脑点「下载 .md」→ 把文件拖进 Obsidian 的 <b>00-灵感库</b> → 跟 AI 说「处理一下灵感库里积压的」。<br>
+      嫌麻烦就点「复制全部」，在 Obsidian 里新建笔记粘贴，一条一条拆。
+    </p>
+  </section>
+
+  <!-- 数据备份 -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/></svg>
+      备份与恢复
+    </h2>
+    <p class="desc">数据存在这台手机的浏览器里。换设备、清缓存之前，先导出一份。</p>
+    <div class="btn-row">
+      <button class="btn ghost" id="btn-export-json">导出 JSON 备份</button>
+      <button class="btn ghost" id="btn-import-json">导入恢复</button>
+    </div>
+    <input type="file" id="file-input" accept=".json,application/json" style="display:none">
+    <div class="btn-row">
+      <button class="btn danger" id="btn-clear-all">清空全部数据</button>
+    </div>
+    <p class="hint" id="store-hint"></p>
+  </section>
+
+  <footer>单文件网页 · 数据只存在本机浏览器 · 不联网不上传</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   灵感收件箱 — 单文件，零外部依赖
+   分层：数据层 → 计算层 → 渲染层，只允许上层调下层
+   所有渲染由 refreshAll() 统一调度，渲染函数之间严禁互调
+   ============================================================ */
+
+var KEY = 'wb_kb_inbox_v1';
+var state = { todos: [], inbox: [], demo: true };
+
+/* ---------- 工具（纯函数，不碰 DOM） ---------- */
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function fmt(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function todayStr(){ return fmt(new Date()); }
+function shiftDays(baseStr, n){
+  var d = new Date(baseStr + 'T00:00:00');
+  if (isNaN(d.getTime())) d = new Date();
+  d.setDate(d.getDate() + n);
+  return fmt(d);
+}
+function diffDays(a, b){
+  var d1 = new Date(a + 'T00:00:00'), d2 = new Date(b + 'T00:00:00');
+  if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 0;
+  return Math.round((d2 - d1) / 86400000);
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function esc(s){
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function firstLine(s){
+  var t = String(s || '').trim().replace(/[\r\n]+/g, ' ');
+  return t.slice(0, 14) || '未命名';
+}
+
+/* ---------- 数据层 ---------- */
+function seed(){
+  var t = todayStr();
+  state = {
+    demo: true,
+    todos: [
+      { id: uid(), text: '列出我现在常用的 3 个核心工具，逐个问：用到几成？', due: shiftDays(t, -2), done: false },
+      { id: uid(), text: '打开 Obsidian，点一下资产卡片里的双链，看它怎么跳', due: t, done: false },
+      { id: uid(), text: '清空示例数据，往灵感库丢第一条我自己真实看到的东西', due: t, done: false },
+      { id: uid(), text: '连续 3 天每天丢一条，第 3 天让 AI 一次性处理', due: shiftDays(t, 3), done: false },
+      { id: uid(), text: '搭好 PARA 目录骨架（项目/资产/资源/归档 + 灵感库/技能）', due: shiftDays(t, -1), done: true }
+    ],
+    inbox: [
+      { id: uid(), text: '再好的软件，也装不上低版本的操作系统。\n软件 = 新工具、新方法、AI；操作系统 = 我自己的认知框架。', source: '姜胡说《AI+知识库》', date: t, exported: false },
+      { id: uid(), text: '知识不是用来存的，是用来查自己的。', source: '姜胡说《AI+知识库》', date: t, exported: false },
+      { id: uid(), text: '试一下：把这句话丢进系统，让 AI 跟已有知识建连接，然后反过来问我——我的操作系统版本够不够？', source: '示例', date: t, exported: false }
+    ]
+  };
+  saveData();
+}
+function loadData(){
+  var raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { raw = null; }
+  if (!raw) { seed(); return; }
+  try {
+    var obj = JSON.parse(raw);
+    state = {
+      demo: !!obj.demo,
+      todos: Array.isArray(obj.todos) ? obj.todos : [],
+      inbox: Array.isArray(obj.inbox) ? obj.inbox : []
+    };
+  } catch (e) { seed(); }
+}
+function saveData(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* 隐私模式，内存里跑 */ }
+}
+
+/* ---------- 计算层 ---------- */
+function overdueTodos(){
+  var t = todayStr();
+  return state.todos.filter(function(x){ return !x.done && x.due && diffDays(x.due, t) > 0; })
+    .sort(function(a, b){ return diffDays(b.due, t) - diffDays(a.due, t); });
+}
+function todayTodos(){
+  var t = todayStr();
+  return state.todos.filter(function(x){ return !x.done && x.due === t; });
+}
+function soonTodos(){
+  var t = todayStr();
+  return state.todos.filter(function(x){ return !x.done && x.due && diffDays(t, x.due) > 0 && diffDays(t, x.due) <= 7; })
+    .sort(function(a, b){ return diffDays(t, a.due) - diffDays(t, b.due); });
+}
+function doneTodos(){
+  return state.todos.filter(function(x){ return x.done; }).slice(-6).reverse();
+}
+function pendingInbox(){
+  return state.inbox.filter(function(x){ return !x.exported; });
+}
+function buildItemMd(it){
+  var kw = firstLine(it.text);
+  var fm = '---\n来源: ' + (it.source || '未注明') + '\n日期: ' + (it.date || todayStr()) + '\n状态: 未处理\n---\n\n';
+  return '<!-- 文件名：' + (it.date || todayStr()) + ' ' + kw + '.md -->\n' + fm + '# ' + kw + '\n\n' + it.text + '\n';
+}
+function buildMarkdown(){
+  var list = pendingInbox();
+  if (!list.length) return '';
+  return list.map(buildItemMd).join('\n---\n\n');
+}
+
+/* ---------- 渲染层（互不调用，只被 refreshAll 调） ---------- */
+function renderStats(){
+  var od = overdueTodos().length, td = todayTodos().length, ib = pendingInbox().length;
+  document.getElementById('s-overdue').textContent = od;
+  document.getElementById('s-today').textContent = td;
+  document.getElementById('s-inbox').textContent = ib;
+  document.getElementById('stat-overdue').className = 'stat' + (od > 0 ? ' alert' : '');
+}
+
+function renderBanner(){
+  var el = document.getElementById('banner');
+  var total = state.todos.length + state.inbox.length;
+  var msg = '';
+  if (state.demo) msg = '现在看到的是示例数据。用顺手之后，点下面「清空灵感库」换成你自己的。';
+  else if (total >= 30) msg = '数据已经攒到 ' + total + ' 条了，建议导出一份 JSON 备份，别等清缓存才后悔。';
+  if (msg) {
+    document.getElementById('banner-txt').textContent = msg;
+    el.className = 'banner show';
+  } else {
+    el.className = 'banner';
+  }
+}
+
+function todoRow(x, kind){
+  var t = todayStr();
+  var meta = '';
+  if (kind === 'od') {
+    meta = '<span class="tag red">逾期 ' + diffDays(x.due, t) + ' 天</span>';
+  } else if (kind === 'today') {
+    meta = '<span class="tag">今天</span>';
+  } else if (kind === 'soon') {
+    meta = '<span class="tag">' + diffDays(t, x.due) + ' 天后</span>';
+  } else {
+    meta = '<span class="tag green">已完成</span>';
+  }
+  if (x.due) meta += '<span>' + x.due + '</span>';
+  return '<div class="item' + (x.done ? ' done' : '') + '">' +
+    '<button class="chk' + (x.done ? ' on' : '') + '" data-act="toggle" data-id="' + x.id + '" aria-label="完成">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>' +
+    '</button>' +
+    '<div class="it-main"><div class="it-txt">' + esc(x.text) + '</div><div class="it-meta">' + meta + '</div></div>' +
+    '<div class="it-act">' +
+      (x.done ? '' : '<button class="icon-btn" data-act="tomorrow" data-id="' + x.id + '" title="推到明天" aria-label="推到明天"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>') +
+      '<button class="icon-btn del" data-act="del-todo" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>' +
+    '</div></div>';
+}
+
+function renderToday(){
+  var od = overdueTodos(), td = todayTodos(), soon = soonTodos(), done = doneTodos();
+  var html = '';
+  if (!od.length && !td.length && !soon.length && !done.length) {
+    html = '<div class="empty">还没有要做的事。上面加一条试试。</div>';
+  } else {
+    if (od.length)  html += '<div class="tag red" style="margin:6px 0 2px">欠着的（' + od.length + '）</div>' + od.map(function(x){ return todoRow(x, 'od'); }).join('');
+    if (td.length)  html += '<div class="tag" style="margin:14px 0 2px">今天（' + td.length + '）</div>' + td.map(function(x){ return todoRow(x, 'today'); }).join('');
+    if (soon.length) html += '<div class="tag" style="margin:14px 0 2px">这周之内（' + soon.length + '）</div>' + soon.map(function(x){ return todoRow(x, 'soon'); }).join('');
+    if (done.length) html += '<div class="tag green" style="margin:14px 0 2px">刚做完（' + done.length + '）</div>' + done.map(function(x){ return todoRow(x, 'done'); }).join('');
+  }
+  document.getElementById('today-list').innerHTML = html;
+}
+
+function renderInbox(){
+  var list = state.inbox.slice().reverse();
+  var el = document.getElementById('ib-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">灵感库是空的。看到什么随手丢一条进来。</div>';
+    return;
+  }
+  el.innerHTML = list.map(function(it){
+    return '<div class="ib">' +
+      '<div class="ib-txt">' + esc(it.text) + '</div>' +
+      '<div class="ib-meta"><span>' + (it.date || '') + '</span>' +
+        (it.source ? '<span class="tag">' + esc(it.source) + '</span>' : '') +
+        (it.exported ? '<span class="tag green">已导出</span>' : '<span class="tag">待导出</span>') +
+      '</div>' +
+      '<div class="ib-act">' +
+        '<button class="btn ghost sm" data-act="copy-one" data-id="' + it.id + '">复制这条</button>' +
+        '<button class="btn ghost sm" data-act="del-ib" data-id="' + it.id + '">删除</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+function renderPreview(){
+  var md = buildMarkdown();
+  document.getElementById('md-preview').textContent = md || '（灵感库里没有待导出的内容）';
+}
+
+function renderStoreHint(){
+  var ok = true;
+  try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); } catch (e) { ok = false; }
+  document.getElementById('store-hint').textContent = ok
+    ? '当前设备存储正常，数据保存在本机浏览器里。'
+    : '检测到浏览器禁用了本地存储（可能开了无痕模式），这次的数据刷新后会丢，记得先导出备份。';
+}
+
+/* ---------- 统一刷新入口 ---------- */
+function refreshAll(){
+  renderStats();
+  renderBanner();
+  renderToday();
+  renderInbox();
+  renderPreview();
+  renderStoreHint();
+}
+
+/* ---------- 交互（改数据 → 调 refreshAll） ---------- */
+var toastTimer = null;
+function toast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show';
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.className = 'toast'; }, 2000);
+}
+
+function addTodo(){
+  var txt = document.getElementById('todo-input').value.trim();
+  if (!txt) { toast('先写点什么'); return; }
+  var due = document.getElementById('todo-date').value || todayStr();
+  state.todos.push({ id: uid(), text: txt, due: due, done: false });
+  state.demo = false;
+  saveData();
+  document.getElementById('todo-input').value = '';
+  document.getElementById('todo-date').value = todayStr();
+  refreshAll();
+  toast('加好了');
+}
+
+function addInbox(){
+  var txt = document.getElementById('ib-input').value.trim();
+  if (!txt) { toast('先写点什么'); return; }
+  state.inbox.push({
+    id: uid(), text: txt,
+    source: document.getElementById('ib-source').value.trim(),
+    date: todayStr(), exported: false
+  });
+  state.demo = false;
+  saveData();
+  document.getElementById('ib-input').value = '';
+  document.getElementById('ib-source').value = '';
+  refreshAll();
+  toast('收进灵感库了');
+}
+
+function toggleTodo(id){
+  state.todos.forEach(function(x){ if (x.id === id) x.done = !x.done; });
+  saveData(); refreshAll();
+}
+function pushTomorrow(id){
+  state.todos.forEach(function(x){ if (x.id === id) x.due = shiftDays(todayStr(), 1); });
+  saveData(); refreshAll(); toast('推到明天了');
+}
+function delTodo(id){
+  state.todos = state.todos.filter(function(x){ return x.id !== id; });
+  saveData(); refreshAll();
+}
+function delInbox(id){
+  state.inbox = state.inbox.filter(function(x){ return x.id !== id; });
+  saveData(); refreshAll();
+}
+function copyOne(id){
+  var it = null;
+  state.inbox.forEach(function(x){ if (x.id === id) it = x; });
+  if (!it) return;
+  copyText(buildItemMd(it), '这条复制好了');
+}
+function copyText(text, okMsg){
+  var done = function(){ toast(okMsg || '复制好了'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, function(){ fallbackCopy(text, done); });
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，长按下面的预览手动复制'); }
+  document.body.removeChild(ta);
+}
+function downloadMd(){
+  var md = buildMarkdown();
+  if (!md) { toast('没有待导出的内容'); return; }
+  var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '灵感库导出-' + todayStr() + '.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  toast('下载好了，拖进 00-灵感库 就行');
+}
+function markExported(){
+  var n = 0;
+  state.inbox.forEach(function(x){ if (!x.exported) { x.exported = true; n++; } });
+  if (!n) { toast('没有待导出的内容'); return; }
+  saveData(); refreshAll(); toast(n + ' 条标记为已导出');
+}
+function clearInbox(){
+  if (!state.inbox.length) { toast('已经是空的'); return; }
+  if (!confirm('清空灵感库里所有内容？（已经导出的也一起清）\n这个操作不能撤销。')) return;
+  state.inbox = [];
+  saveData(); refreshAll(); toast('清空了');
+}
+function exportJson(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '灵感收件箱备份-' + todayStr() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  toast('备份文件下载好了');
+}
+function importJson(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    try {
+      var obj = JSON.parse(reader.result);
+      if (!obj || (!Array.isArray(obj.todos) && !Array.isArray(obj.inbox))) throw new Error('bad');
+      var n = (obj.todos || []).length + (obj.inbox || []).length;
+      if (!confirm('确认导入 ' + n + ' 条数据？\n当前数据会被覆盖。')) return;
+      state = {
+        demo: !!obj.demo,
+        todos: Array.isArray(obj.todos) ? obj.todos : [],
+        inbox: Array.isArray(obj.inbox) ? obj.inbox : []
+      };
+      saveData(); refreshAll(); toast('导入了 ' + n + ' 条');
+    } catch (e) { toast('文件读不出来，确认是本页导出的 JSON'); }
+  };
+  reader.readAsText(file);
+}
+function clearAll(){
+  if (!confirm('清空全部数据（待办 + 灵感库）？\n这个操作不能撤销，建议先导出备份。')) return;
+  if (!confirm('再确认一次：真的要清空吗？')) return;
+  state = { todos: [], inbox: [], demo: false };
+  saveData(); refreshAll(); toast('全部清空了');
+}
+
+/* ---------- 事件绑定 ---------- */
+function bindEvents(){
+  document.getElementById('btn-add-todo').addEventListener('click', addTodo);
+  document.getElementById('todo-input').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') addTodo();
+  });
+  document.getElementById('btn-add-ib').addEventListener('click', addInbox);
+  document.getElementById('btn-copy').addEventListener('click', function(){
+    var md = buildMarkdown();
+    if (!md) { toast('没有待导出的内容'); return; }
+    copyText(md, '全部复制好了');
+  });
+  document.getElementById('btn-download').addEventListener('click', downloadMd);
+  document.getElementById('btn-mark-exported').addEventListener('click', markExported);
+  document.getElementById('btn-clear-ib').addEventListener('click', clearInbox);
+  document.getElementById('btn-export-json').addEventListener('click', exportJson);
+  document.getElementById('btn-clear-all').addEventListener('click', clearAll);
+
+  var fi = document.getElementById('file-input');
+  document.getElementById('btn-import-json').addEventListener('click', function(){ fi.click(); });
+  fi.addEventListener('change', function(){
+    if (fi.files && fi.files[0]) importJson(fi.files[0]);
+    fi.value = '';
+  });
+
+  // 事件委托：列表里的按钮
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!btn) return;
+    var act = btn.getAttribute('data-act');
+    var id = btn.getAttribute('data-id');
+    if (act === 'toggle') toggleTodo(id);
+    else if (act === 'tomorrow') pushTomorrow(id);
+    else if (act === 'del-todo') delTodo(id);
+    else if (act === 'del-ib') delInbox(id);
+    else if (act === 'copy-one') copyOne(id);
+  });
+}
+
+/* ---------- 初始化 ---------- */
+function init(){
+  loadData();
+  var d = document.getElementById('todo-date');
+  if (d) d.value = todayStr();
+  bindEvents();
+  refreshAll();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
