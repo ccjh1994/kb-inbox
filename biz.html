@@ -287,31 +287,26 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
   </button>
   <button class="nav-item" data-view="biz">
     <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
-    <span class="n-num">2</span><span class="n-label">门店盈利</span>
+    <span class="n-num">2</span><span class="n-label">门店（零食+水果）</span>
     <span class="badge" id="bd-biz">0</span>
-  </button>
-  <button class="nav-item" data-view="fruit">
-    <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M10 10.5c.5-3 2-5.5 5-7.5"/><path d="M15 3c1.5.5 3 .5 4.5 0-.5 1.8-1.5 3-3 3.5"/></svg>
-    <span class="n-num">3</span><span class="n-label">水果板块</span>
-    <span class="badge" id="bd-fruit">0</span>
   </button>
   <button class="nav-item" data-view="pet">
     <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
-    <span class="n-num">4</span><span class="n-label">宠物业务</span>
+    <span class="n-num">3</span><span class="n-label">宠物业务</span>
     <span class="badge" id="bd-pet">0</span>
   </button>
 
   <div class="nav-group">内容运营</div>
   <button class="nav-item" data-view="media">
     <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M9 21H4v-5"/><path d="M4 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
-    <span class="n-num">5</span><span class="n-label">等等你吖数据</span>
+    <span class="n-num">4</span><span class="n-label">等等你吖数据</span>
     <span class="badge" id="bd-media">0</span>
   </button>
 
   <div class="nav-group">系统</div>
   <button class="nav-item" data-view="backup">
     <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/></svg>
-    <span class="n-num">6</span><span class="n-label">备份恢复</span>
+    <span class="n-num">5</span><span class="n-label">备份恢复</span>
   </button>
 
   <div class="side-foot">
@@ -335,10 +330,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
     门店
   </button>
-  <button data-view="fruit">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M10 10.5c.5-3 2-5.5 5-7.5"/><path d="M15 3c1.5.5 3 .5 4.5 0-.5 1.8-1.5 3-3 3.5"/></svg>
-    水果
-  </button>
   <button data-view="pet">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
     宠物
@@ -354,6 +345,12 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
   <div class="page-head">
     <h1 id="pg-title">首页总览</h1>
     <span class="pd" id="pg-desc">两家公司，一眼看完</span>
+  </div>
+
+  <!-- 门店页二级切换：零食账本 / 水果板块 -->
+  <div class="seg" id="biz-pane-seg" style="display:none;margin:0 0 14px">
+    <button class="seg-btn active" id="bp-snack" type="button">零食账本</button>
+    <button class="seg-btn" id="bp-fruit" type="button">水果板块</button>
   </div>
 
   <!-- ===== 0 首页总览 ===== -->
@@ -494,6 +491,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
 
   <!-- ===== 2 门店盈利 ===== -->
   <section class="view" id="view-biz">
+    <div id="biz-pane-snack">
     <section class="card">
       <h2>
         <svg class="sec-ic ic-biz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
@@ -545,6 +543,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         </button>
       </div>
     </section>
+    </div>
   </section>
 
   <!-- ===== 3 宠物业务 ===== -->
@@ -619,7 +618,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
     </section>
   </section>
 
-  <!-- ===== 3.5 水果板块 ===== -->
+  <!-- ===== 水果板块（门店页二级面板，随 #biz-pane-fruit 切换显示） ===== -->
   <section class="view" id="view-fruit">
     <section class="card">
       <h2>
@@ -818,6 +817,7 @@ var KEY = 'wb_biz_v1';
 var state = { demo:true, shops:[], todos:[], profits:[], pet:[], media:[], fruitPurchases:[], fruitSales:[] };
 var viewMonth = '';
 var currentView = 'home';
+var bizPane = 'snack'; /* 门店页二级面板：snack=零食账本 / fruit=水果板块 */
 var petViewMode = 'month';
 var petYear = '';
 var pendingVisit = null;
@@ -1474,17 +1474,20 @@ function lineChart(series){
 var VIEW_META = {
   home:   { title: '首页总览',   desc: '两家公司，一眼看完' },
   todo:   { title: '今日待办',   desc: '欠着的先处理，再干今天的' },
-  biz:    { title: '门店盈利',   desc: '来伊份 · 每店每月一本账' },
-  fruit:  { title: '水果板块',   desc: '进货、销量、大盘，一页看全' },
+  biz:    { title: '门店（零食+水果）', desc: '来伊份 · 零食账本 + 水果板块' },
   pet:    { title: '宠物业务',   desc: '上门喂养 + 宠物零食' },
   media:  { title: '等等你吖数据', desc: '涨粉曲线不会骗人' },
   backup: { title: '备份恢复',   desc: '换设备前先导出一份' }
 };
+var FRUIT_META = { title: '水果板块', desc: '进货、销量、大盘，一页看全' };
 
 function renderHeader(){
-  var meta = VIEW_META[currentView] || VIEW_META.home;
+  var isFruitPane = currentView === 'biz' && bizPane === 'fruit';
+  var meta = isFruitPane ? FRUIT_META : (VIEW_META[currentView] || VIEW_META.home);
   document.getElementById('pg-title').textContent = meta.title;
   document.getElementById('pg-desc').textContent = meta.desc;
+  var seg = document.getElementById('biz-pane-seg');
+  if (seg) seg.style.display = currentView === 'biz' ? 'flex' : 'none';
 }
 
 function renderNavBadges(){
@@ -1495,6 +1498,7 @@ function renderNavBadges(){
   var petN = state.pet.filter(function(x){ return monthKeyOf(x.date) === mk; }).length;
   var fruitN = state.fruitPurchases.filter(function(x){ return monthKeyOf(x.date) === mk; }).length +
                state.fruitSales.filter(function(x){ return monthKeyOf(x.date) === mk; }).length;
+  bizN += fruitN; /* 水果已归入门店，角标合并 */
   var mediaN = state.media.length;
 
   var bd = document.getElementById('bd-todo');
@@ -1504,8 +1508,6 @@ function renderNavBadges(){
   document.getElementById('bd-biz').className = 'badge' + (bizN ? ' olive' : '');
   document.getElementById('bd-pet').textContent = petN;
   document.getElementById('bd-pet').className = 'badge' + (petN ? ' olive' : '');
-  document.getElementById('bd-fruit').textContent = fruitN;
-  document.getElementById('bd-fruit').className = 'badge' + (fruitN ? ' olive' : '');
   document.getElementById('bd-media').textContent = mediaN;
   document.getElementById('bd-media').className = 'badge' + (mediaN ? ' olive' : '');
 
@@ -1814,22 +1816,41 @@ function refreshAll(){
 }
 
 /* ---------- 视图切换 ---------- */
-function switchView(name){
-  if (!document.getElementById('view-' + name)) name = 'home';
-  currentView = name;
-  try { history.replaceState(null, '', '#' + name); } catch (e) {}
+function applyViewClasses(name){
+  /* 门店页双面板：零食账本=只显示 view-biz；水果板块=只显示 view-fruit */
+  var showFruitPane = name === 'biz' && bizPane === 'fruit';
   var views = document.querySelectorAll('.view');
   for (var i = 0; i < views.length; i++) {
-    views[i].className = views[i].id === 'view-' + name ? 'view active' : 'view';
+    var id = views[i].id;
+    var on;
+    if (name === 'biz') on = showFruitPane ? (id === 'view-fruit') : (id === 'view-biz');
+    else on = (id === 'view-' + name);
+    views[i].className = on ? 'view active' : 'view';
   }
   var navs = document.querySelectorAll('.nav-item, .tabbar button');
   for (var j = 0; j < navs.length; j++) {
     var v = navs[j].getAttribute('data-view');
     if (v) navs[j].className = navs[j].className.replace(/\s*active/g, '') + (v === name ? ' active' : '');
   }
+}
+
+function switchView(name){
+  if (name === 'fruit') { name = 'biz'; bizPane = 'fruit'; }
+  if (!document.getElementById('view-' + name)) name = 'home';
+  currentView = name;
+  try { history.replaceState(null, '', '#' + (name === 'biz' && bizPane === 'fruit' ? 'fruit' : name)); } catch (e) {}
+  applyViewClasses(name);
   renderHeader();
-  if (name === 'home') { window.scrollTo(0, 0); }
-  else { window.scrollTo(0, 0); }
+  window.scrollTo(0, 0);
+}
+
+function setBizPane(p){
+  bizPane = p;
+  var a = document.getElementById('bp-snack'), b = document.getElementById('bp-fruit');
+  if (a) a.className = 'seg-btn' + (p === 'snack' ? ' active' : '');
+  if (b) b.className = 'seg-btn' + (p === 'fruit' ? ' active' : '');
+  if (currentView === 'biz') applyViewClasses('biz');
+  renderHeader();
 }
 
 /* ---------- 交互 ---------- */
@@ -2088,6 +2109,8 @@ function bindEvents(){
   document.getElementById('qk-text').addEventListener('keydown', function(e){
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) doParseVisit();
   });
+  document.getElementById('bp-snack').addEventListener('click', function(){ setBizPane('snack'); });
+  document.getElementById('bp-fruit').addEventListener('click', function(){ setBizPane('fruit'); });
   document.getElementById('pm-month').addEventListener('click', function(){
     petViewMode = 'month';
     document.getElementById('pm-month').className = 'seg-btn active';
@@ -2159,7 +2182,7 @@ function init(){
   d = document.getElementById('fr-month'); if (d) d.value = viewMonth;
   bindEvents();
   refreshAll();
-  /* 支持 #todo / #biz / #pet / #media / #backup / #home 锚点直达 */
+  /* 支持 #todo / #biz / #pet / #fruit / #media / #backup / #home 锚点直达（#fruit 直达门店的水果面板） */
   var h = (location.hash || '').replace('#', '');
   if (h) switchView(h);
 }
