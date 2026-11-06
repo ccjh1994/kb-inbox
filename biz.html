@@ -6,20 +6,21 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="生意驾驶舱">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#1e3a5f">
+<meta name="theme-color" content="#6f7f2a">
 <title>生意驾驶舱 · 两家公司一个页面</title>
-<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzFlM2E1ZiIvPjxwYXRoIGQ9Ik0zMCAxMzBMMzAgMTAwTDcwIDEwMEw3MCA2MEwxMTAgNjBMMTEwIDMwTDE1MCAzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMzAiIHI9IjEwIiBmaWxsPSIjZmZkNjAwIi8+PC9zdmc+">
-<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzFlM2E1ZiIvPjxwYXRoIGQ9Ik0zMCAxMzBMMzAgMTAwTDcwIDEwMEw3MCA2MEwxMTAgNjBMMTEwIDMwTDE1MCAzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMzAiIHI9IjEwIiBmaWxsPSIjZmZkNjAwIi8+PC9zdmc+">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjNmY3ZjJhIi8+PHBhdGggZD0iTTMwIDEzME0zMCAxMzBMMzAgMTAwTDcwIDEwMEw3MCA2MEwxMTAgNjBMMTEwIDMwTDE1MCAzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMzAiIHI9IjEwIiBmaWxsPSIjZmZkNjAwIi8+PC9zdmc+">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjNmY3ZjJhIi8+PHBhdGggZD0iTTMwIDEzME0zMCAxMzBMMzAgMTAwTDcwIDEwMEw3MCA2MEwxMTAgNjBMMTEwIDMwTDE1MCAzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMzAiIHI9IjEwIiBmaWxsPSIjZmZkNjAwIi8+PC9zdmc+">
 <style>
 :root{
-  --bg:#f4f5f7; --card:#fff; --line:#e5e7eb; --text:#1b1f27; --muted:#6b7280;
-  --navy:#1e3a5f; --navy-soft:#eaf0f6;
-  --red:#e5484d; --red-soft:#fdf0f0;
-  --green:#12a150; --green-soft:#e9f7ef;
-  --amber:#b45309; --amber-soft:#fff7e8;
-  --pet:#0f766e; --pet-soft:#e6f4f2;
-  --media:#7c3aed; --media-soft:#f3eefe;
+  --bg:#f5f6f4; --card:#fff; --line:#e6e8e2; --text:#232620; --muted:#75796e;
+  --olive:#6f7f2a; --olive-deep:#57641f; --olive-soft:#eef1dd; --olive-softer:#f6f8ec;
+  --red:#d64545; --red-soft:#fbeeee;
+  --green:#1e9e5a; --green-soft:#e7f5ee;
+  --amber:#a16207; --amber-soft:#fff7e6;
+  --pet:#0f766e; --pet-soft:#e4f2f0;
+  --media:#7c3aed; --media-soft:#f1ebfd;
   --radius:14px;
+  --sidebar-w:236px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -27,346 +28,604 @@ body{
   background:var(--bg); color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
   font-size:16px; line-height:1.55;
-  padding-bottom:calc(24px + env(safe-area-inset-bottom));
   -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:760px;margin:0 auto;padding:0 14px}
 
-header{
-  background:linear-gradient(135deg,#1e3a5f,#2c5282); color:#fff;
-  padding:calc(18px + env(safe-area-inset-top)) 0 20px;
+/* ========== 左侧目录 ========== */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:#fff;border-right:1px solid var(--line);
+  display:flex;flex-direction:column;padding:16px 10px 12px;overflow-y:auto;z-index:30;
 }
-.hd{display:flex;align-items:center;gap:10px}
-.hd h1{margin:0;font-size:19px;font-weight:650;letter-spacing:.3px}
-.hd .sub{font-size:12.5px;opacity:.85;margin-top:2px}
-.logo{width:36px;height:36px;flex:0 0 36px;background:rgba(255,255,255,.16);border-radius:10px;display:flex;align-items:center;justify-content:center}
-.stat-row{display:flex;gap:8px;margin-top:14px}
-.stat{flex:1;background:rgba(255,255,255,.14);border-radius:12px;padding:9px 8px;text-align:center;min-width:0}
-.stat b{display:block;font-size:18px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stat span{font-size:11px;opacity:.9}
-.stat.alert{background:rgba(255,90,90,.34)}
-.stat .up{color:#7ef0b0}
-.stat .down{color:#ff9b9e}
-
-.banner{
-  display:none;margin:12px 0 0;background:var(--amber-soft);border:1px solid #f3d9a9;
-  color:var(--amber);border-radius:12px;padding:10px 12px;font-size:13.5px;align-items:center;gap:8px
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.brand .mark{width:38px;height:38px;flex:0 0 38px;background:var(--olive);border-radius:11px;display:flex;align-items:center;justify-content:center}
+.brand .mark svg{width:22px;height:22px}
+.brand .bt{font-size:16px;font-weight:700;letter-spacing:.3px}
+.brand .bs{font-size:10.5px;color:var(--muted);letter-spacing:1.5px;margin-top:1px}
+.nav-group{font-size:11px;color:var(--muted);letter-spacing:1px;padding:12px 10px 5px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:11px 10px;min-height:44px;border-radius:11px;border:none;background:none;
+  font-family:inherit;font-size:14.5px;font-weight:550;color:var(--text);cursor:pointer;
 }
-.banner.show{display:flex}
+.nav-item:active{background:var(--olive-softer)}
+.nav-item.active{background:var(--olive-soft);color:var(--olive-deep);font-weight:650}
+.nav-item .n-ic{width:19px;height:19px;flex:0 0 19px;color:var(--muted)}
+.nav-item.active .n-ic{color:var(--olive)}
+.nav-item .n-num{font-size:12px;color:var(--muted);width:12px;flex:0 0 12px;font-weight:600}
+.nav-item .n-label{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{
+  flex:0 0 auto;min-width:26px;height:22px;padding:0 7px;border-radius:11px;
+  background:#eceee6;color:var(--muted);font-size:11.5px;font-weight:650;
+  display:flex;align-items:center;justify-content:center;
+}
+.badge.hot{background:var(--red);color:#fff}
+.badge.olive{background:var(--olive);color:#fff}
+.side-foot{margin-top:auto;padding:10px 8px 2px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:8px}
+.side-foot a{color:var(--olive);text-decoration:none;font-weight:550}
 
+/* ========== 主区 ========== */
+.main{margin-left:var(--sidebar-w);min-height:100vh;padding:0 22px 30px}
+.page-head{padding:20px 0 4px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.page-head h1{margin:0;font-size:21px;font-weight:700}
+.page-head .pd{font-size:13px;color:var(--muted)}
+.view{display:none}
+.view.active{display:block;animation:fadein .18s ease}
+@keyframes fadein{from{opacity:.4;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+/* ========== 手机底部 Tab ========== */
+.tabbar{
+  display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:#fff;border-top:1px solid var(--line);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.tabbar button{
+  flex:1;min-height:44px;border:none;background:none;font-family:inherit;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;border-radius:10px;
+  font-size:10.5px;color:var(--muted);font-weight:550;position:relative;
+}
+.tabbar button svg{width:21px;height:21px}
+.tabbar button.active{color:var(--olive-deep);font-weight:650}
+.tabbar .t-badge{
+  position:absolute;top:0;right:calc(50% - 22px);min-width:17px;height:17px;padding:0 4px;
+  border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;
+  display:none;align-items:center;justify-content:center;
+}
+.tabbar .t-badge.show{display:flex}
+
+/* ========== 通用组件 ========== */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:14px}
 .card h2{margin:0 0 4px;font-size:16px;font-weight:650;display:flex;align-items:center;gap:8px}
 .card .desc{margin:0 0 12px;font-size:13px;color:var(--muted)}
-.sec-ic{width:24px;height:24px;flex:0 0 24px}
-.ic-biz{color:var(--red)} .ic-pet{color:var(--pet)} .ic-media{color:var(--media)} .ic-todo{color:var(--navy)}
+.sec-ic{width:22px;height:22px;flex:0 0 22px}
+.ic-biz{color:var(--red)} .ic-pet{color:var(--pet)} .ic-media{color:var(--media)} .ic-todo{color:var(--olive)} .ic-home{color:var(--olive)}
+
+.banner{
+  display:none;margin:12px 0 0;background:var(--amber-soft);border:1px solid #f0dcab;
+  color:var(--amber);border-radius:12px;padding:10px 12px;font-size:13.5px;align-items:center;gap:8px
+}
+.banner.show{display:flex}
 
 .field{margin-bottom:10px}
 label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
 input[type=text],input[type=date],input[type=month],input[type=number],select,textarea{
   width:100%;font-size:16px;font-family:inherit;color:var(--text);
-  padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#fbfbfc;outline:none;
+  padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#fbfcfa;outline:none;
   -webkit-appearance:none;appearance:none
 }
-select{background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:16px;padding-right:34px}
-input:focus,select:focus,textarea:focus{border-color:var(--navy);background:#fff}
+select{background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2375796e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:16px;padding-right:34px}
+input:focus,select:focus,textarea:focus{border-color:var(--olive);background:#fff}
 .row{display:flex;gap:8px}
 .row>*{flex:1;min-width:0}
 
 button{font-family:inherit;font-size:15px;cursor:pointer;border:none;border-radius:11px;min-height:44px}
-.btn{background:var(--navy);color:#fff;font-weight:600;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
+.btn{background:var(--olive);color:#fff;font-weight:600;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
 .btn:active{opacity:.85}
 .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line)}
-.btn.soft{background:var(--navy-soft);color:var(--navy)}
-.btn.danger{background:#fff;color:var(--red);border:1px solid #f3c9ca}
+.btn.soft{background:var(--olive-soft);color:var(--olive-deep)}
+.btn.danger{background:#fff;color:var(--red);border:1px solid #eec9c9}
 .btn.sm{min-height:44px;font-size:14px;padding:0 14px;width:auto}
 .btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .btn-row .btn{width:auto;flex:1;min-width:120px}
 
 .item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
 .item:first-of-type{border-top:none}
-.chk{flex:0 0 24px;width:24px;height:24px;margin-top:2px;border:2px solid #c7cad3;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0;min-height:24px}
+.chk{flex:0 0 24px;width:24px;height:24px;margin-top:2px;border:2px solid #c6c9bd;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0;min-height:24px}
 .chk.on{background:var(--green);border-color:var(--green)}
 .chk svg{width:14px;height:14px;color:#fff;display:none}
 .chk.on svg{display:block}
 .it-main{flex:1;min-width:0}
 .it-txt{font-size:15px;word-break:break-word}
 .it-meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.item.done .it-txt{color:#9aa0ab;text-decoration:line-through}
-.tag{display:inline-block;padding:1px 8px;border-radius:6px;font-size:11.5px;background:#f1f2f5;color:var(--muted)}
+.item.done .it-txt{color:#9ba093;text-decoration:line-through}
+.tag{display:inline-block;padding:1px 8px;border-radius:6px;font-size:11.5px;background:#f0f1ea;color:var(--muted)}
 .tag.red{background:var(--red-soft);color:var(--red);font-weight:600}
 .tag.green{background:var(--green-soft);color:var(--green)}
 .tag.biz{background:var(--red-soft);color:var(--red)}
 .tag.pet{background:var(--pet-soft);color:var(--pet)}
 .tag.media{background:var(--media-soft);color:var(--media)}
-.tag.navy{background:var(--navy-soft);color:var(--navy)}
+.tag.olive{background:var(--olive-soft);color:var(--olive-deep)}
 .it-act{display:flex;gap:6px;flex:0 0 auto}
-.icon-btn{width:44px;height:44px;min-height:44px;border-radius:11px;background:#f6f7f9;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0;color:var(--muted)}
+.icon-btn{width:44px;height:44px;min-height:44px;border-radius:11px;background:#f5f6f1;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0;color:var(--muted)}
 .icon-btn svg{width:16px;height:16px}
 .money-in{color:var(--green);font-weight:600}
 .money-out{color:var(--red);font-weight:600}
 
+/* ========== 首页总览 ========== */
+.hero{margin-top:12px}
+.hero-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.hero-card{
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;
+  display:block;cursor:pointer;text-align:left;font-family:inherit;width:100%;min-width:0;
+  position:relative;overflow:hidden;
+}
+.hero-card:active{background:var(--olive-softer)}
+.hero-card .hc-top{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+.hero-card .hc-top svg{width:16px;height:16px;flex:0 0 16px}
+.hero-card .hc-num{font-size:22px;font-weight:700;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+.hero-card .hc-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.hero-card.alert{border-color:#eec3c3;background:#fdf7f7}
+.hero-card.alert .hc-num{color:var(--red)}
+.hero-card .hc-up{color:var(--green)}
+.hero-card .hc-down{color:var(--red)}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
+  border-radius:22px;padding:0 15px;min-height:44px;font-size:14px;font-weight:550;color:var(--text);
+  cursor:pointer;font-family:inherit;
+}
+.chip svg{width:16px;height:16px;color:var(--olive)}
+.chip:active{background:var(--olive-softer)}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.split .card{margin-top:14px}
+.more-link{background:none;border:none;padding:0;min-height:36px;color:var(--olive);font-size:13.5px;font-weight:600;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.more-link svg{width:14px;height:14px}
+
 .sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 2px}
-.sum-card{background:#fafbfc;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;min-width:0}
+.sum-card{background:#fafbf7;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;min-width:0}
 .sum-card .shop{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sum-card .num{font-size:16px;font-weight:650;margin-top:3px;white-space:nowrap}
 .sum-card .mini{font-size:11px;color:var(--muted);margin-top:2px}
 
-.chart-box{background:#fafbfc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:12px}
+.chart-box{background:#fafbf7;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:12px}
 .chart-box .ct{font-size:13px;color:var(--muted);margin:0 0 6px 2px}
 .chart-box svg{width:100%;height:auto;display:block}
 
-pre.prev{background:#1e2130;color:#dfe3ee;border-radius:12px;padding:12px;font-size:12px;overflow:auto;max-height:240px;margin:10px 0 0;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5}
+pre.prev{background:#24281f;color:#e3e8d8;border-radius:12px;padding:12px;font-size:12px;overflow:auto;max-height:240px;margin:10px 0 0;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5}
 .empty{color:var(--muted);font-size:14px;text-align:center;padding:16px 0}
 .hint{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.6}
 .hint b{color:var(--text)}
 hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
 .month-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .month-bar input[type=month]{flex:1}
-footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 8px}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#1b1f27;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:99;max-width:88%;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(min-width:640px){ .card{padding:18px} .sum-grid{grid-template-columns:repeat(3,1fr)} }
+footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 4px}
+
+/* ========== 响应式 ========== */
+@media(min-width:1100px){
+  .hero-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:1000px){
+  .hero-grid{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+}
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{margin-left:0;padding:0 14px calc(78px + env(safe-area-inset-bottom))}
+  .page-head{padding-top:16px}
+  .tabbar{display:flex}
+}
+@media(max-width:560px){
+  .hero-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-card .hc-num{font-size:19px}
+  .sum-grid{grid-template-columns:repeat(3,1fr)}
+  .row{flex-wrap:wrap}
+  .row .field{min-width:calc(50% - 4px)}
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap">
-    <div class="hd">
-      <div class="logo">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 20h18"/><path d="M5 16v-4h4v4"/><path d="M10 16V8h4v8"/><path d="M15 16v-6h4v6"/>
-        </svg>
-      </div>
-      <div>
-        <h1>生意驾驶舱</h1>
-        <div class="sub">来伊份 × 宠物公司 · 两家公司一个页面</div>
-      </div>
+<!-- ============ 左侧目录（桌面端） ============ -->
+<nav class="sidebar" aria-label="主导航">
+  <div class="brand">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 20h18"/><path d="M5 16v-4h4v4"/><path d="M10 16V8h4v8"/><path d="M15 16v-6h4v6"/>
+      </svg>
     </div>
-    <div class="stat-row">
-      <div class="stat" id="stat-profit"><b id="s-profit">--</b><span>本月门店利润</span></div>
-      <div class="stat" id="stat-pet"><b id="s-pet">--</b><span>本月宠物收入</span></div>
-      <div class="stat"><b id="s-fans">--</b><span>最新粉丝总数</span></div>
-      <div class="stat" id="stat-od"><b id="s-od">0</b><span>逾期待办</span></div>
+    <div>
+      <div class="bt">程建华 · 生意驾驶舱</div>
+      <div class="bs">CJH STUDIO</div>
     </div>
   </div>
-</header>
 
-<div class="wrap">
+  <div class="nav-group">经营管理</div>
+  <button class="nav-item active" data-view="home">
+    <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+    <span class="n-num">0</span><span class="n-label">首页总览</span>
+  </button>
+  <button class="nav-item" data-view="todo">
+    <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+    <span class="n-num">1</span><span class="n-label">今日待办</span>
+    <span class="badge hot" id="bd-todo">0</span>
+  </button>
+  <button class="nav-item" data-view="biz">
+    <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+    <span class="n-num">2</span><span class="n-label">门店盈利</span>
+    <span class="badge" id="bd-biz">0</span>
+  </button>
+  <button class="nav-item" data-view="pet">
+    <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
+    <span class="n-num">3</span><span class="n-label">宠物业务</span>
+    <span class="badge" id="bd-pet">0</span>
+  </button>
 
-  <div class="banner" id="banner">
-    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
-    <span id="banner-txt"></span>
+  <div class="nav-group">内容运营</div>
+  <button class="nav-item" data-view="media">
+    <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M9 21H4v-5"/><path d="M4 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
+    <span class="n-num">4</span><span class="n-label">等等你吖数据</span>
+    <span class="badge" id="bd-media">0</span>
+  </button>
+
+  <div class="nav-group">系统</div>
+  <button class="nav-item" data-view="backup">
+    <svg class="n-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/></svg>
+    <span class="n-num">5</span><span class="n-label">备份恢复</span>
+  </button>
+
+  <div class="side-foot">
+    <span>数据只存本机浏览器 · 不联网不上传</span>
+    <a href="./index.html">← 返回灵感收件箱</a>
+  </div>
+</nav>
+
+<!-- ============ 手机底部 Tab ============ -->
+<nav class="tabbar" aria-label="底部导航">
+  <button data-view="home" class="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+    首页
+  </button>
+  <button data-view="todo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+    待办
+    <span class="t-badge" id="tb-todo">0</span>
+  </button>
+  <button data-view="biz">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+    门店
+  </button>
+  <button data-view="pet">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
+    宠物
+  </button>
+  <button data-view="media">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M9 21H4v-5"/><path d="M4 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
+    数据
+  </button>
+</nav>
+
+<!-- ============ 主内容区 ============ -->
+<main class="main">
+  <div class="page-head">
+    <h1 id="pg-title">首页总览</h1>
+    <span class="pd" id="pg-desc">两家公司，一眼看完</span>
   </div>
 
-  <!-- 1. 今日要处理 -->
-  <section class="card">
-    <h2>
-      <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
-      今天要处理
-    </h2>
-    <p class="desc">两家公司的事都在这儿。标红的是欠着的账，昨天没做完的不会消失。</p>
-    <div id="todo-list"></div>
-    <hr class="sep">
-    <div class="field">
-      <label>要做什么</label>
-      <input type="text" id="td-text" placeholder="动词开头，10 分钟内能开始">
-    </div>
-    <div class="row">
-      <div class="field">
-        <label>哪家公司的事</label>
-        <select id="td-tag">
-          <option value="来伊份">来伊份</option>
-          <option value="宠物公司">宠物公司</option>
-          <option value="等等你吖">等等你吖</option>
-          <option value="通用">通用</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>哪天做</label>
-        <input type="date" id="td-date">
-      </div>
-    </div>
-    <button class="btn" id="btn-add-todo">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      加进今天要处理
-    </button>
-  </section>
-
-  <!-- 2. 门店盈利 -->
-  <section class="card">
-    <h2>
-      <svg class="sec-ic ic-biz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
-      门店盈利记录
-    </h2>
-    <p class="desc">每笔记：哪天、哪家店、收了多少、花了多少。利润自动算，红字是亏、绿字是赚。</p>
-
-    <div class="month-bar">
-      <input type="month" id="biz-month" aria-label="选择月份">
-      <button class="btn ghost sm" id="btn-add-shop" style="flex:0 0 auto">+ 加门店</button>
+  <!-- ===== 0 首页总览 ===== -->
+  <section class="view active" id="view-home">
+    <div class="banner" id="banner">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      <span id="banner-txt"></span>
     </div>
 
-    <div class="sum-grid" id="biz-sum"></div>
-    <div class="chart-box" id="biz-chart"></div>
-
-    <hr class="sep">
-    <div class="row">
-      <div class="field">
-        <label>日期</label>
-        <input type="date" id="pf-date">
-      </div>
-      <div class="field">
-        <label>门店</label>
-        <select id="pf-shop"></select>
-      </div>
-    </div>
-    <div class="row">
-      <div class="field">
-        <label>收入 ¥</label>
-        <input type="number" id="pf-rev" inputmode="decimal" placeholder="卖了多少">
-      </div>
-      <div class="field">
-        <label>成本 ¥</label>
-        <input type="number" id="pf-cost" inputmode="decimal" placeholder="货、房租、人工…">
-      </div>
-    </div>
-    <div class="field">
-      <label>备注（选填）</label>
-      <input type="text" id="pf-note" placeholder="比如：周末促销、进货 2 箱">
-    </div>
-    <button class="btn" id="btn-add-profit">记一笔</button>
-
-    <div id="profit-list"></div>
-
-    <div class="btn-row">
-      <button class="btn ghost" id="btn-export-csv">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
-        导出 CSV（给 Excel）
+    <div class="hero hero-grid" style="margin-top:14px">
+      <button class="hero-card" data-view="biz">
+        <div class="hc-top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+          本月门店利润
+        </div>
+        <div class="hc-num" id="h-profit">--</div>
+        <div class="hc-sub" id="h-profit-sub">3 家店合计 · 点进详情</div>
+      </button>
+      <button class="hero-card" data-view="pet">
+        <div class="hc-top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--pet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
+          本月宠物收入
+        </div>
+        <div class="hc-num" id="h-pet">--</div>
+        <div class="hc-sub" id="h-pet-sub">喂养 + 零食 · 点进详情</div>
+      </button>
+      <button class="hero-card" data-view="media">
+        <div class="hc-top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--media)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M9 21H4v-5"/><path d="M4 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
+          最新粉丝总数
+        </div>
+        <div class="hc-num" id="h-fans">--</div>
+        <div class="hc-sub" id="h-fans-sub">全部平台合计 · 点进详情</div>
+      </button>
+      <button class="hero-card" data-view="todo" id="h-card-od">
+        <div class="hc-top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--olive)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+          待办 · 欠着的
+        </div>
+        <div class="hc-num" id="h-od">0</div>
+        <div class="hc-sub" id="h-od-sub">点进去处理</div>
       </button>
     </div>
+
+    <div class="chip-row">
+      <button class="chip" data-view="biz">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        记一笔门店账
+      </button>
+      <button class="chip" data-view="pet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        记宠物流水
+      </button>
+      <button class="chip" data-view="media">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        记自媒体数据
+      </button>
+      <button class="chip" data-view="backup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/></svg>
+        备份数据
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>
+        <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+        今天要处理
+      </h2>
+      <p class="desc">标红的是欠着的账，昨天没做完的不会消失。</p>
+      <div id="home-todos"></div>
+      <button class="more-link" data-view="todo">查看全部待办
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <h2>
+          <svg class="sec-ic ic-biz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+          各店本月利润
+        </h2>
+        <div class="sum-grid" id="home-biz-sum"></div>
+        <div class="chart-box" id="home-biz-chart"></div>
+        <button class="more-link" data-view="biz">去门店盈利记账
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="card">
+        <h2>
+          <svg class="sec-ic ic-media" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M9 21H4v-5"/><path d="M4 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
+          等等你吖 · 涨粉曲线
+        </h2>
+        <div class="chart-box" id="home-media-chart"></div>
+        <button class="more-link" data-view="media">去记自媒体数据
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <footer class="mob-foot">单文件网页 · 数据只存本机 · 不联网不上传</footer>
   </section>
 
-  <!-- 3. 宠物业务 -->
-  <section class="card">
-    <h2>
-      <svg class="sec-ic ic-pet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
-      宠物业务流水
-    </h2>
-    <p class="desc">上门喂养的订单、宠物零食的卖出，一笔一行。月底自动算总收入。</p>
-
-    <div class="row">
+  <!-- ===== 1 今日待办 ===== -->
+  <section class="view" id="view-todo">
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+        今天要处理
+      </h2>
+      <p class="desc">两家公司的事都在这儿。标红的是欠着的账，昨天没做完的不会消失。</p>
+      <div id="todo-list"></div>
+      <hr class="sep">
       <div class="field">
-        <label>日期</label>
-        <input type="date" id="pt-date">
+        <label>要做什么</label>
+        <input type="text" id="td-text" placeholder="动词开头，10 分钟内能开始">
       </div>
-      <div class="field">
-        <label>业务类型</label>
-        <select id="pt-type">
-          <option value="上门喂养">上门喂养</option>
-          <option value="零食销售">零食销售</option>
-        </select>
+      <div class="row">
+        <div class="field">
+          <label>哪家公司的事</label>
+          <select id="td-tag">
+            <option value="来伊份">来伊份</option>
+            <option value="宠物公司">宠物公司</option>
+            <option value="等等你吖">等等你吖</option>
+            <option value="通用">通用</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>哪天做</label>
+          <input type="date" id="td-date">
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="field">
-        <label>客户 / 狗狗名字</label>
-        <input type="text" id="pt-cust" placeholder="比如：金毛豆豆家">
-      </div>
-      <div class="field">
-        <label>金额 ¥</label>
-        <input type="number" id="pt-amt" inputmode="decimal" placeholder="收了多少">
-      </div>
-    </div>
-    <button class="btn" id="btn-add-pet">记一笔</button>
-
-    <div class="sum-grid" id="pet-sum"></div>
-    <div id="pet-list"></div>
+      <button class="btn" id="btn-add-todo">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        加进今天要处理
+      </button>
+    </section>
   </section>
 
-  <!-- 4. 等等你吖 -->
-  <section class="card">
-    <h2>
-      <svg class="sec-ic ic-media" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M9 21H4v-5"/><path d="M4 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
-      等等你吖 · 数据
-    </h2>
-    <p class="desc">每次发完视频记一下：粉丝多少、播放多少。曲线会告诉你哪种内容有效。</p>
+  <!-- ===== 2 门店盈利 ===== -->
+  <section class="view" id="view-biz">
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-biz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+        门店盈利记录
+      </h2>
+      <p class="desc">每笔记：哪天、哪家店、收了多少、花了多少。利润自动算，红字是亏、绿字是赚。</p>
 
-    <div class="row">
-      <div class="field">
-        <label>曲线看哪个平台</label>
-        <select id="media-platform">
-          <option value="all">全部平台合计</option>
-          <option value="抖音">抖音</option>
-          <option value="小红书">小红书</option>
-          <option value="视频号">视频号</option>
-          <option value="B站">B站</option>
-        </select>
+      <div class="month-bar">
+        <input type="month" id="biz-month" aria-label="选择月份">
+        <button class="btn ghost sm" id="btn-add-shop" style="flex:0 0 auto">+ 加门店</button>
       </div>
-    </div>
 
-    <div class="chart-box" id="media-chart"></div>
+      <div class="sum-grid" id="biz-sum"></div>
+      <div class="chart-box" id="biz-chart"></div>
 
-    <div class="row">
-      <div class="field">
-        <label>日期</label>
-        <input type="date" id="md-date">
+      <hr class="sep">
+      <div class="row">
+        <div class="field">
+          <label>日期</label>
+          <input type="date" id="pf-date">
+        </div>
+        <div class="field">
+          <label>门店</label>
+          <select id="pf-shop"></select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>收入 ¥</label>
+          <input type="number" id="pf-rev" inputmode="decimal" placeholder="卖了多少">
+        </div>
+        <div class="field">
+          <label>成本 ¥</label>
+          <input type="number" id="pf-cost" inputmode="decimal" placeholder="货、房租、人工…">
+        </div>
       </div>
       <div class="field">
-        <label>平台</label>
-        <select id="md-platform">
-          <option value="抖音">抖音</option>
-          <option value="小红书">小红书</option>
-          <option value="视频号">视频号</option>
-          <option value="B站">B站</option>
-        </select>
+        <label>备注（选填）</label>
+        <input type="text" id="pf-note" placeholder="比如：周末促销、进货 2 箱">
       </div>
-    </div>
-    <div class="row">
-      <div class="field">
-        <label>粉丝数</label>
-        <input type="number" id="md-fans" inputmode="numeric">
-      </div>
-      <div class="field">
-        <label>播放量</label>
-        <input type="number" id="md-views" inputmode="numeric">
-      </div>
-      <div class="field">
-        <label>点赞</label>
-        <input type="number" id="md-likes" inputmode="numeric">
-      </div>
-    </div>
-    <div class="field">
-      <label>这次发了什么（选填）</label>
-      <input type="text" id="md-note" placeholder="比如：法斗洗澡第一天">
-    </div>
-    <button class="btn" id="btn-add-media">记一条数据</button>
+      <button class="btn" id="btn-add-profit">记一笔</button>
 
-    <div id="media-list"></div>
+      <div id="profit-list"></div>
+
+      <div class="btn-row">
+        <button class="btn ghost" id="btn-export-csv">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+          导出 CSV（给 Excel）
+        </button>
+      </div>
+    </section>
   </section>
 
-  <!-- 备份 -->
-  <section class="card">
-    <h2>
-      <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/></svg>
-      备份与恢复
-    </h2>
-    <p class="desc">数据存在这台设备的浏览器里。换手机、清缓存之前，先导出一份。</p>
-    <div class="btn-row">
-      <button class="btn ghost" id="btn-export-json">导出 JSON 备份</button>
-      <button class="btn ghost" id="btn-import-json">导入恢复</button>
-    </div>
-    <input type="file" id="file-input" accept=".json,application/json" style="display:none">
-    <div class="btn-row">
-      <button class="btn danger" id="btn-clear-all">清空全部数据</button>
-    </div>
-    <p class="hint" id="store-hint"></p>
+  <!-- ===== 3 宠物业务 ===== -->
+  <section class="view" id="view-pet">
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-pet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
+        宠物业务流水
+      </h2>
+      <p class="desc">上门喂养的订单、宠物零食的卖出，一笔一行。月底自动算总收入。</p>
+
+      <div class="row">
+        <div class="field">
+          <label>日期</label>
+          <input type="date" id="pt-date">
+        </div>
+        <div class="field">
+          <label>业务类型</label>
+          <select id="pt-type">
+            <option value="上门喂养">上门喂养</option>
+            <option value="零食销售">零食销售</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>客户 / 狗狗名字</label>
+          <input type="text" id="pt-cust" placeholder="比如：金毛豆豆家">
+        </div>
+        <div class="field">
+          <label>金额 ¥</label>
+          <input type="number" id="pt-amt" inputmode="decimal" placeholder="收了多少">
+        </div>
+      </div>
+      <button class="btn" id="btn-add-pet">记一笔</button>
+
+      <div class="sum-grid" id="pet-sum"></div>
+      <div id="pet-list"></div>
+    </section>
   </section>
 
-  <footer>
-    <a href="./index.html" style="color:var(--navy);text-decoration:none">返回灵感收件箱</a>
-    · 单文件网页 · 数据只存本机 · 不联网不上传
-  </footer>
-</div>
+  <!-- ===== 4 等等你吖 ===== -->
+  <section class="view" id="view-media">
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-media" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M9 21H4v-5"/><path d="M4 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
+        等等你吖 · 数据
+      </h2>
+      <p class="desc">每次发完视频记一下：粉丝多少、播放多少。曲线会告诉你哪种内容有效。</p>
+
+      <div class="row">
+        <div class="field">
+          <label>曲线看哪个平台</label>
+          <select id="media-platform">
+            <option value="all">全部平台合计</option>
+            <option value="抖音">抖音</option>
+            <option value="小红书">小红书</option>
+            <option value="视频号">视频号</option>
+            <option value="B站">B站</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="chart-box" id="media-chart"></div>
+
+      <div class="row">
+        <div class="field">
+          <label>日期</label>
+          <input type="date" id="md-date">
+        </div>
+        <div class="field">
+          <label>平台</label>
+          <select id="md-platform">
+            <option value="抖音">抖音</option>
+            <option value="小红书">小红书</option>
+            <option value="视频号">视频号</option>
+            <option value="B站">B站</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>粉丝数</label>
+          <input type="number" id="md-fans" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>播放量</label>
+          <input type="number" id="md-views" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>点赞</label>
+          <input type="number" id="md-likes" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field">
+        <label>这次发了什么（选填）</label>
+        <input type="text" id="md-note" placeholder="比如：法斗洗澡第一天">
+      </div>
+      <button class="btn" id="btn-add-media">记一条数据</button>
+
+      <div id="media-list"></div>
+    </section>
+  </section>
+
+  <!-- ===== 5 备份恢复 ===== -->
+  <section class="view" id="view-backup">
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/></svg>
+        备份与恢复
+      </h2>
+      <p class="desc">数据存在这台设备的浏览器里。换手机、清缓存之前，先导出一份。</p>
+      <div class="btn-row">
+        <button class="btn ghost" id="btn-export-json">导出 JSON 备份</button>
+        <button class="btn ghost" id="btn-import-json">导入恢复</button>
+      </div>
+      <input type="file" id="file-input" accept=".json,application/json" style="display:none">
+      <div class="btn-row">
+        <button class="btn danger" id="btn-clear-all">清空全部数据</button>
+      </div>
+      <p class="hint" id="store-hint"></p>
+    </section>
+    <footer class="mob-foot"><a href="./index.html" style="color:var(--olive);text-decoration:none;font-weight:550">← 返回灵感收件箱</a></footer>
+  </section>
+</main>
 
 <div class="toast" id="toast"></div>
 
@@ -374,12 +633,13 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 8px}
 /* ============================================================
    生意驾驶舱 — 单文件，零外部依赖
    分层：数据层 → 计算层 → 渲染层，渲染函数之间严禁互调
-   所有渲染由 refreshAll() 统一调度
+   所有渲染由 refreshAll() 统一调度；视图切换由 switchView 负责
    ============================================================ */
 
 var KEY = 'wb_biz_v1';
 var state = { demo:true, shops:[], todos:[], profits:[], pet:[], media:[] };
 var viewMonth = '';
+var currentView = 'home';
 
 /* ---------- 工具（纯函数） ---------- */
 function pad(n){ return n < 10 ? '0' + n : '' + n; }
@@ -540,19 +800,19 @@ function barChart(data){
   var slot = (W - padL * 2) / n;
   var bw = Math.min(slot * 0.5, 90);
   var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>各门店本月利润</title>';
-  svg += '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (W - padL) + '" y2="' + zeroY + '" stroke="#c7cad3" stroke-width="1"/>';
+  svg += '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (W - padL) + '" y2="' + zeroY + '" stroke="#c6c9bd" stroke-width="1"/>';
   data.forEach(function(d, i){
     var x = padL + slot * i + (slot - bw) / 2;
     var h = Math.abs(d.profit) / range * plotH;
     if (h < 2 && d.profit !== 0) h = 2;
     var y = d.profit >= 0 ? zeroY - h : zeroY;
-    var color = d.profit >= 0 ? '#12a150' : '#e5484d';
+    var color = d.profit >= 0 ? '#1e9e5a' : '#d64545';
     svg += '<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + Math.max(h, 1) + '" rx="6" fill="' + color + '"/>';
     var label = money(d.profit);
     var ly = d.profit >= 0 ? y - 8 : y + h + 18;
     svg += '<text x="' + (x + bw / 2) + '" y="' + ly + '" text-anchor="middle" font-size="13" font-weight="600" fill="' + color + '">' + label + '</text>';
     var name = d.shop.replace('来伊份', '');
-    svg += '<text x="' + (x + bw / 2) + '" y="' + (H - 12) + '" text-anchor="middle" font-size="12" fill="#6b7280">' + esc(name) + '</text>';
+    svg += '<text x="' + (x + bw / 2) + '" y="' + (H - 12) + '" text-anchor="middle" font-size="12" fill="#75796e">' + esc(name) + '</text>';
   });
   svg += '</svg>';
   return svg;
@@ -572,7 +832,7 @@ function lineChart(series){
     return { x: x, y: y, p: p };
   });
   var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>粉丝增长曲线</title>';
-  svg += '<line x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - padR) + '" y2="' + (H - padB) + '" stroke="#c7cad3" stroke-width="1"/>';
+  svg += '<line x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - padR) + '" y2="' + (H - padB) + '" stroke="#c6c9bd" stroke-width="1"/>';
   var d = '';
   pts.forEach(function(pt, i){ d += (i ? 'L' : 'M') + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ' '; });
   svg += '<path d="' + d + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
@@ -580,34 +840,102 @@ function lineChart(series){
     svg += '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="4.5" fill="#7c3aed"/>';
     svg += '<text x="' + pt.x + '" y="' + (pt.y - 12) + '" text-anchor="middle" font-size="12" fill="#7c3aed">' + pt.p.fans + '</text>';
   });
-  svg += '<text x="' + padL + '" y="' + (H - 12) + '" text-anchor="start" font-size="12" fill="#6b7280">' + esc(series[0].date.slice(5)) + '</text>';
-  svg += '<text x="' + (W - padR) + '" y="' + (H - 12) + '" text-anchor="end" font-size="12" fill="#6b7280">' + esc(series[series.length - 1].date.slice(5)) + '</text>';
+  svg += '<text x="' + padL + '" y="' + (H - 12) + '" text-anchor="start" font-size="12" fill="#75796e">' + esc(series[0].date.slice(5)) + '</text>';
+  svg += '<text x="' + (W - padR) + '" y="' + (H - 12) + '" text-anchor="end" font-size="12" fill="#75796e">' + esc(series[series.length - 1].date.slice(5)) + '</text>';
   svg += '</svg>';
   return svg;
 }
 
 /* ---------- 渲染层（互不调用，只被 refreshAll 调） ---------- */
-function renderStats(){
-  var mk = viewMonth;
+var VIEW_META = {
+  home:   { title: '首页总览',   desc: '两家公司，一眼看完' },
+  todo:   { title: '今日待办',   desc: '欠着的先处理，再干今天的' },
+  biz:    { title: '门店盈利',   desc: '来伊份 · 每店每月一本账' },
+  pet:    { title: '宠物业务',   desc: '上门喂养 + 宠物零食' },
+  media:  { title: '等等你吖数据', desc: '涨粉曲线不会骗人' },
+  backup: { title: '备份恢复',   desc: '换设备前先导出一份' }
+};
+
+function renderHeader(){
+  var meta = VIEW_META[currentView] || VIEW_META.home;
+  document.getElementById('pg-title').textContent = meta.title;
+  document.getElementById('pg-desc').textContent = meta.desc;
+}
+
+function renderNavBadges(){
+  var od = overdueTodos().length, td = todayTodos().length;
+  var todoN = od + td;
+  var mk = currentMonth();
+  var bizN = monthProfits(mk).length;
+  var petN = state.pet.filter(function(x){ return monthKeyOf(x.date) === mk; }).length;
+  var mediaN = state.media.length;
+
+  var bd = document.getElementById('bd-todo');
+  bd.textContent = todoN;
+  bd.className = 'badge' + (od > 0 ? ' hot' : (todoN > 0 ? ' olive' : ''));
+  document.getElementById('bd-biz').textContent = bizN;
+  document.getElementById('bd-biz').className = 'badge' + (bizN ? ' olive' : '');
+  document.getElementById('bd-pet').textContent = petN;
+  document.getElementById('bd-pet').className = 'badge' + (petN ? ' olive' : '');
+  document.getElementById('bd-media').textContent = mediaN;
+  document.getElementById('bd-media').className = 'badge' + (mediaN ? ' olive' : '');
+
+  var tb = document.getElementById('tb-todo');
+  tb.textContent = todoN;
+  tb.className = 't-badge' + (todoN > 0 ? ' show' : '');
+}
+
+function renderHome(){
+  var mk = currentMonth();
   var total = shopSummary(mk).reduce(function(s, x){ return s + x.profit; }, 0);
   var petS = petSummary(mk);
-  var od = overdueTodos().length;
+  var od = overdueTodos().length, td = todayTodos().length;
   var fans = latestFans('all');
-  var pe = document.getElementById('s-profit');
-  pe.textContent = money(total);
-  pe.className = total >= 0 ? 'up' : 'down';
-  document.getElementById('stat-profit').className = 'stat' + (total < 0 ? ' alert' : '');
-  document.getElementById('s-pet').textContent = money(petS.total);
-  document.getElementById('s-fans').textContent = fans > 0 ? fans.toString() : '--';
-  document.getElementById('s-od').textContent = od;
-  document.getElementById('stat-od').className = 'stat' + (od > 0 ? ' alert' : '');
+
+  var hp = document.getElementById('h-profit');
+  hp.textContent = money(total);
+  hp.className = 'hc-num ' + (total >= 0 ? 'hc-up' : 'hc-down');
+  document.getElementById('h-pet').textContent = money(petS.total);
+  var hf = document.getElementById('h-fans');
+  hf.textContent = fans > 0 ? fans.toString() : '--';
+  document.getElementById('h-od').textContent = od + td;
+  var odCard = document.getElementById('h-card-od');
+  odCard.className = 'hero-card' + (od > 0 ? ' alert' : '');
+  document.getElementById('h-od-sub').textContent =
+    od > 0 ? ('欠着 ' + od + ' 条，先处理这些') : (td > 0 ? '今天还有 ' + td + ' 条' : '暂无待办，很清爽');
+
+  document.getElementById('home-biz-sum').innerHTML = shopSummary(mk).map(function(x){
+    var cls = x.profit >= 0 ? 'money-in' : 'money-out';
+    return '<div class="sum-card">' +
+      '<div class="shop">' + esc(x.shop.replace('来伊份', '')) + '</div>' +
+      '<div class="num ' + cls + '">' + money(x.profit) + '</div>' +
+      '<div class="mini">收 ' + money(x.revenue) + ' · 本 ' + money(x.cost) + '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('home-biz-chart').innerHTML =
+    '<p class="ct">各店利润对比（' + esc(mk) + '）</p>' + barChart(shopSummary(mk));
+
+  document.getElementById('home-media-chart').innerHTML =
+    '<p class="ct">粉丝增长（全部平台）</p>' + lineChart(mediaSeries(null));
+}
+
+function renderHomeTodos(){
+  var od = overdueTodos(), td = todayTodos();
+  var picks = od.concat(td).slice(0, 6);
+  var el = document.getElementById('home-todos');
+  if (!picks.length) {
+    el.innerHTML = '<div class="empty">今天没有欠着、也没有今天要做的，去「今日待办」安排新任务</div>';
+    return;
+  }
+  el.innerHTML = picks.map(function(x){ return todoRow(x, od.indexOf(x) >= 0 ? 'od' : 'today'); }).join('');
 }
 
 function renderBanner(){
   var el = document.getElementById('banner');
   var total = state.todos.length + state.profits.length + state.pet.length + state.media.length;
   var msg = '';
-  if (state.demo) msg = '现在全是示例数据，看看结构。点「记一笔」开始记自己的，示例想清掉就用下面「清空全部数据」。';
+  if (state.demo) msg = '现在全是示例数据，看看结构。点「记一笔」开始记自己的，示例想清掉就去「备份恢复」清空。';
   else if (total >= 30) msg = '数据攒到 ' + total + ' 条了，建议导出一份 JSON 备份。';
   if (msg) {
     document.getElementById('banner-txt').textContent = msg;
@@ -726,7 +1054,6 @@ function renderPet(){
 }
 
 function renderMedia(){
-  var sel = document.getElementById('md-platform');
   var platform = document.getElementById('media-platform').value;
   var series = mediaSeries(platform === 'all' ? null : platform);
   document.getElementById('media-chart').innerHTML =
@@ -756,14 +1083,35 @@ function renderStoreHint(){
 
 /* ---------- 统一刷新入口 ---------- */
 function refreshAll(){
-  renderStats();
+  renderHeader();
+  renderNavBadges();
   renderBanner();
+  renderHome();
+  renderHomeTodos();
   renderTodos();
   renderBizSelects();
   renderBiz();
   renderPet();
   renderMedia();
   renderStoreHint();
+}
+
+/* ---------- 视图切换 ---------- */
+function switchView(name){
+  if (!document.getElementById('view-' + name)) name = 'home';
+  currentView = name;
+  var views = document.querySelectorAll('.view');
+  for (var i = 0; i < views.length; i++) {
+    views[i].className = views[i].id === 'view-' + name ? 'view active' : 'view';
+  }
+  var navs = document.querySelectorAll('.nav-item, .tabbar button');
+  for (var j = 0; j < navs.length; j++) {
+    var v = navs[j].getAttribute('data-view');
+    if (v) navs[j].className = navs[j].className.replace(/\s*active/g, '') + (v === name ? ' active' : '');
+  }
+  renderHeader();
+  if (name === 'home') { window.scrollTo(0, 0); }
+  else { window.scrollTo(0, 0); }
 }
 
 /* ---------- 交互 ---------- */
@@ -967,7 +1315,10 @@ function bindEvents(){
     fi.value = '';
   });
 
+  /* 导航点击（侧边栏 + 底部 Tab + 首页跳转卡片/按钮，统一事件委托） */
   document.addEventListener('click', function(e){
+    var nav = e.target.closest ? e.target.closest('[data-view]') : null;
+    if (nav) { switchView(nav.getAttribute('data-view')); return; }
     var btn = e.target.closest ? e.target.closest('[data-act]') : null;
     if (!btn) return;
     var act = btn.getAttribute('data-act');
