@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="程建华工作台">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#6f7f2a">
+<title>程建华 · 工作台门户</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjNmY3ZjJhIi8+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iMjQiIGZpbGw9IiNmZmZmIiBvcGFjaXR5PSIwLjkiLz48Y2lyY2xlIGN4PSIxMzAiIGN5PSI1MCIgcj0iMjQiIGZpbGw9IiNmZmZmIiBvcGFjaXR5PSIwLjYiLz48Y2lyY2xlIGN4PSI5MCIgY3k9IjEzMCIgcj0iMjQiIGZpbGw9IiNmZmRjMDAiLz48L3N2Zz4=">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjNmY3ZjJhIi8+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iMjQiIGZpbGw9IiNmZmZmIiBvcGFjaXR5PSIwLjkiLz48Y2lyY2xlIGN4PSIxMzAiIGN5PSI1MCIgcj0iMjQiIGZpbGw9IiNmZmZmIiBvcGFjaXR5PSIwLjYiLz48Y2lyY2xlIGN4PSI5MCIgY3k9IjEzMCIgcj0iMjQiIGZpbGw9IiNmZmRjMDAiLz48L3N2Zz4=">
+<style>
+:root{
+  --bg:#f5f6f4; --card:#fff; --line:#e6e8e2; --text:#232620; --muted:#75796e;
+  --olive:#6f7f2a; --olive-deep:#57641f; --olive-soft:#eef1dd;
+  --red:#d64545; --red-soft:#fbeeee;
+  --green:#1e9e5a; --pet:#0f766e; --media:#7c3aed;
+  --radius:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
+
+header{padding:calc(24px + env(safe-area-inset-top)) 0 4px}
+.hd{display:flex;align-items:center;gap:12px}
+.mark{width:46px;height:46px;flex:0 0 46px;background:var(--olive);border-radius:14px;display:flex;align-items:center;justify-content:center}
+.mark svg{width:26px;height:26px}
+.hd .bt{font-size:20px;font-weight:700;letter-spacing:.3px}
+.hd .bs{font-size:12px;color:var(--muted);letter-spacing:1.5px;margin-top:2px}
+.greet{margin-top:16px;font-size:14.5px;color:var(--muted)}
+.greet b{color:var(--text);font-size:17px}
+
+/* 全局数字条 */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.st{background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px 8px;text-align:center;min-width:0}
+.st .n{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+.st .l{font-size:11px;color:var(--muted);margin-top:2px}
+.st.alert{border-color:#eec3c3;background:var(--red-soft)}
+.st.alert .n{color:var(--red)}
+.st .up{color:var(--green)} .st .down{color:var(--red)}
+
+/* 入口卡 */
+.entry{
+  display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 16px;margin-top:14px;cursor:pointer;font-family:inherit;
+  transition:transform .12s ease;
+}
+.entry:active{transform:scale(.985)}
+.entry .e-ic{width:52px;height:52px;flex:0 0 52px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.entry .e-ic svg{width:26px;height:26px}
+.e-ic.a{background:var(--olive-soft);color:var(--olive)}
+.e-ic.b{background:#f3eefe;color:var(--media)}
+.e-ic.c{background:#e4f2f0;color:var(--pet)}
+.e-main{flex:1;min-width:0}
+.e-title{font-size:16.5px;font-weight:650;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.e-desc{font-size:13px;color:var(--muted);margin-top:3px}
+.e-nums{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.e-num{font-size:12px;color:var(--muted);white-space:nowrap}
+.e-num b{font-size:13.5px;font-weight:650}
+.e-num .hot{color:var(--red)} .e-num .good{color:var(--green)} .e-num .violet{color:var(--media)} .e-num .teal{color:var(--pet)}
+.e-arrow{flex:0 0 auto;color:var(--muted)}
+.e-arrow svg{width:20px;height:20px}
+.demo-tag{display:inline-block;padding:1px 8px;border-radius:6px;font-size:11px;background:#fff7e6;color:#a16207;font-weight:600}
+
+/* 知识库说明卡 */
+.kb-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:14px}
+.kb-card summary{cursor:pointer;display:flex;align-items:center;gap:14px;list-style:none;-webkit-tap-highlight-color:transparent}
+.kb-card summary::-webkit-details-marker{display:none}
+.kb-card h3{margin:0;font-size:16.5px;font-weight:650}
+.kb-card .kd{font-size:13px;color:var(--muted);margin-top:3px}
+.kb-body{border-top:1px solid var(--line);margin-top:12px;padding-top:12px;font-size:13.5px;color:var(--muted);line-height:1.7}
+.kb-body b{color:var(--text)}
+.kb-body ol{margin:8px 0 0;padding-left:20px}
+
+.foot{text-align:center;color:var(--muted);font-size:12px;padding:22px 0 4px;line-height:1.8}
+
+@media(max-width:420px){
+  .stat-strip{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="hd">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 20L4 12L9 12L9 7L14 7L14 12L19 12L19 17"/><circle cx="19" cy="6" r="2.4" fill="#ffd600" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="bt">程建华的工作台</div>
+        <div class="bs">CJH STUDIO · 一个入口，全部入口</div>
+      </div>
+    </div>
+    <div class="greet" id="greet"></div>
+  </header>
+
+  <div class="stat-strip" id="strip"></div>
+
+  <button class="entry" onclick="location.href='./index.html'">
+    <div class="e-ic a">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+    </div>
+    <div class="e-main">
+      <div class="e-title">灵感收件箱 <span class="demo-tag" id="ib-demo" style="display:none">示例数据</span></div>
+      <div class="e-desc">随手收：一句话、一个想法，导出后进 Obsidian 知识库</div>
+      <div class="e-nums" id="ib-nums"></div>
+    </div>
+    <div class="e-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+  </button>
+
+  <button class="entry" onclick="location.href='./biz.html'">
+    <div class="e-ic b">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+    </div>
+    <div class="e-main">
+      <div class="e-title">生意驾驶舱 <span class="demo-tag" id="bz-demo" style="display:none">示例数据</span></div>
+      <div class="e-desc">来伊份 3 店 × 宠物公司 × 等等你吖，两家公司一本账</div>
+      <div class="e-nums" id="bz-nums"></div>
+    </div>
+    <div class="e-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+  </button>
+
+  <div class="entry" style="cursor:default" aria-hidden="true">
+    <div class="e-ic c">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L4 12L9 12L9 7L14 7L14 12L19 12L19 17"/><circle cx="19" cy="6" r="2.4" fill="currentColor" stroke="none"/></svg>
+    </div>
+    <div class="e-main">
+      <div class="e-title">Obsidian 知识库</div>
+      <div class="e-desc">知识资产、生意复盘笔记的家（在电脑上打开 Obsidian 看）</div>
+      <div class="e-nums" id="kb-nums"></div>
+    </div>
+  </div>
+
+  <details class="kb-card">
+    <summary>
+      <div>
+        <h3>想在手机上看知识库？</h3>
+        <div class="kd">点开看怎么把 Obsidian 也装进手机</div>
+      </div>
+    </summary>
+    <div class="kb-body">
+      知识库是你电脑磁盘上的 Markdown 文件，浏览器打不开磁盘，所以它不在网页里。手机上要看的做法：<br>
+      <b>iPhone：</b>
+      <ol>
+        <li>App Store 装 Obsidian（免费）</li>
+        <li>电脑上把 <b>知识库</b> 文件夹移到 iCloud Drive</li>
+        <li>手机 Obsidian → 打开文件夹 → 选 iCloud 里的库</li>
+      </ol>
+      弄好之后手机电脑自动同步，收藏、复盘笔记都能看。想弄的时候跟我说一声，我帮你把库搬到 iCloud 并检查路径。
+    </div>
+  </details>
+
+  <div class="foot">
+    门户页 · 数字实时读取本机浏览器数据 · 不联网不上传<br>
+    <a href="./index.html" style="color:var(--olive);text-decoration:none">收件箱</a> ·
+    <a href="./biz.html" style="color:var(--olive);text-decoration:none">驾驶舱</a>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   工作台门户 — 同源读取两个工作台的 localStorage，只读不写
+   ============================================================ */
+var IB_KEY = 'wb_kb_inbox_v1';
+var BZ_KEY = 'wb_biz_v1';
+
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function fmt(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function todayStr(){ return fmt(new Date()); }
+function monthKeyOf(s){ return String(s || '').slice(0, 7); }
+function diffDays(a, b){
+  var d1 = new Date(a + 'T00:00:00'), d2 = new Date(b + 'T00:00:00');
+  if (isNaN(d1) || isNaN(d2)) return 0;
+  return Math.round((d2 - d1) / 86400000);
+}
+function num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function money(n){
+  var neg = n < 0;
+  var s = Math.abs(Math.round(n * 100) / 100).toString();
+  var parts = s.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg ? '-¥' : '¥') + parts.join('.');
+}
+function readKey(key){
+  try {
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+/* ---------- 计算层（纯函数） ---------- */
+function inboxStats(s){
+  if (!s) return null;
+  var t = todayStr();
+  var undone = 0, od = 0;
+  (s.todos || []).forEach(function(x){
+    if (!x.done) {
+      undone++;
+      if (x.due && diffDays(x.due, t) > 0) od++;
+    }
+  });
+  var unexported = 0;
+  (s.inbox || []).forEach(function(x){ if (!x.exported) unexported++; });
+  return { undone: undone, od: od, unexported: unexported, demo: !!s.demo };
+}
+function bizStats(s){
+  if (!s) return null;
+  var mk = monthKeyOf(todayStr());
+  var profit = 0, petTotal = 0, od = 0, today = 0;
+  (s.profits || []).forEach(function(x){
+    if (monthKeyOf(x.date) === mk) profit += num(x.revenue) - num(x.cost);
+  });
+  (s.pet || []).forEach(function(x){
+    if (monthKeyOf(x.date) === mk) petTotal += num(x.amount);
+  });
+  var t = todayStr();
+  (s.todos || []).forEach(function(x){
+    if (!x.done) {
+      if (x.due === t) today++;
+      else if (x.due && diffDays(x.due, t) > 0) od++;
+    }
+  });
+  var fans = 0, byDate = {};
+  (s.media || []).forEach(function(x){
+    if (!byDate[x.date]) byDate[x.date] = 0;
+    byDate[x.date] += num(x.fans);
+  });
+  Object.keys(byDate).sort().forEach(function(d){ fans = byDate[d]; });
+  return { profit: profit, petTotal: petTotal, od: od, today: today, fans: fans, demo: !!s.demo };
+}
+
+/* ---------- 渲染层 ---------- */
+function renderGreet(){
+  var h = new Date().getHours();
+  var w = '晚上好';
+  if (h < 5) w = '夜深了';
+  else if (h < 11) w = '早上好';
+  else if (h < 14) w = '中午好';
+  else if (h < 19) w = '下午好';
+  var week = ['日','一','二','三','四','五','六'][new Date().getDay()];
+  document.getElementById('greet').innerHTML =
+    w + '，<b>程建华</b> · ' + todayStr().replace(/-/, ' 年 ').replace(/-/, ' 月 ') + ' 日 · 周' + week;
+}
+
+function renderStrip(ib, bz){
+  var totalOd = (ib ? ib.od : 0) + (bz ? bz.od : 0);
+  var cells = [];
+  cells.push({ n: totalOd, l: '逾期未办', cls: totalOd > 0 ? 'alert' : '' });
+  var p = bz ? bz.profit : 0;
+  cells.push({ n: money(p), l: '本月门店利润', cls: p < 0 ? 'alert' : (p > 0 ? 'ok' : ''), inner: p < 0 ? 'down' : (p > 0 ? 'up' : '') });
+  cells.push({ n: money(bz ? bz.petTotal : 0), l: '本月宠物收入', cls: '' });
+  var f = bz ? bz.fans : 0;
+  cells.push({ n: f > 0 ? f : '--', l: '等等你吖粉丝', cls: '' });
+  document.getElementById('strip').innerHTML = cells.map(function(c){
+    var numCls = c.cls === 'alert' ? 'n' : ('n ' + (c.inner || ''));
+    return '<div class="st' + (c.cls === 'alert' ? ' alert' : '') + '">' +
+      '<div class="' + numCls + '">' + c.n + '</div><div class="l">' + c.l + '</div></div>';
+  }).join('');
+}
+
+function renderInboxCard(ib){
+  var demoTag = document.getElementById('ib-demo');
+  if (ib && ib.demo) demoTag.style.display = 'inline-block';
+  var el = document.getElementById('ib-nums');
+  if (!ib) {
+    el.innerHTML = '<span class="e-num">还没用过，点进去开张</span>';
+    return;
+  }
+  el.innerHTML =
+    '<span class="e-num">待办 <b>' + ib.undone + '</b>' + (ib.od > 0 ? ' <b class="hot">逾期 ' + ib.od + '</b>' : '') + '</span>' +
+    '<span class="e-num">灵感 <b>' + ib.unexported + '</b> 条待导出</span>';
+}
+
+function renderBizCard(bz){
+  var demoTag = document.getElementById('bz-demo');
+  if (bz && bz.demo) demoTag.style.display = 'inline-block';
+  var el = document.getElementById('bz-nums');
+  if (!bz) {
+    el.innerHTML = '<span class="e-num">还没用过，点进去开张</span>';
+    return;
+  }
+  el.innerHTML =
+    '<span class="e-num">门店利润 <b class="' + (bz.profit >= 0 ? 'good' : 'hot') + '">' + money(bz.profit) + '</b></span>' +
+    '<span class="e-num">宠物 <b class="teal">' + money(bz.petTotal) + '</b></span>' +
+    '<span class="e-num">粉丝 <b class="violet">' + (bz.fans > 0 ? bz.fans : '--') + '</b></span>' +
+    '<span class="e-num">待办 <b>' + (bz.od + bz.today) + '</b>' + (bz.od > 0 ? ' <b class="hot">逾期 ' + bz.od + '</b>' : '') + '</span>';
+}
+
+function renderKbCard(){
+  var el = document.getElementById('kb-nums');
+  el.innerHTML = '<span class="e-num">电脑端 Obsidian 管理 · 生意复盘笔记在这里</span>';
+}
+
+function renderAll(){
+  var ib = inboxStats(readKey(IB_KEY));
+  var bz = bizStats(readKey(BZ_KEY));
+  renderGreet();
+  renderStrip(ib, bz);
+  renderInboxCard(ib);
+  renderBizCard(bz);
+  renderKbCard();
+}
+renderAll();
+</script>
+</body>
+</html>

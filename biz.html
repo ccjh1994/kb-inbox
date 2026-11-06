@@ -1100,6 +1100,7 @@ function refreshAll(){
 function switchView(name){
   if (!document.getElementById('view-' + name)) name = 'home';
   currentView = name;
+  try { history.replaceState(null, '', '#' + name); } catch (e) {}
   var views = document.querySelectorAll('.view');
   for (var i = 0; i < views.length; i++) {
     views[i].className = views[i].id === 'view-' + name ? 'view active' : 'view';
@@ -1344,6 +1345,9 @@ function init(){
   d = document.getElementById('biz-month'); if (d) d.value = viewMonth;
   bindEvents();
   refreshAll();
+  /* 支持 #todo / #biz / #pet / #media / #backup / #home 锚点直达 */
+  var h = (location.hash || '').replace('#', '');
+  if (h) switchView(h);
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
