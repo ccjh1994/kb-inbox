@@ -199,6 +199,24 @@ pre.prev{background:#24281f;color:#e3e8d8;border-radius:12px;padding:12px;font-s
 hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
 .month-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .month-bar input[type=month]{flex:1}
+.seg{display:flex;background:#eceee4;border-radius:10px;padding:3px;flex:0 0 auto}
+.seg-btn{min-height:38px;padding:0 18px;border-radius:8px;background:none;font-size:14px;font-weight:600;color:var(--muted)}
+.seg-btn.active{background:#fff;color:var(--olive-deep);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.yr-nav{display:flex;align-items:center;gap:6px;flex:1}
+.yr-nav b{font-size:16px;font-weight:700;min-width:64px;text-align:center}
+textarea{
+  width:100%;font-size:16px;font-family:inherit;color:var(--text);
+  padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#fbfcfa;outline:none;
+  resize:vertical;line-height:1.5;
+}
+textarea:focus{border-color:var(--olive);background:#fff}
+.pv{background:var(--pet-soft);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13.5px}
+.pv-err{background:var(--red-soft)}
+.pv-row{display:flex;justify-content:space-between;gap:10px;padding:4px 0}
+.pv-row .k{color:var(--muted);flex:0 0 auto}
+.pv-row .v{font-weight:600;text-align:right;word-break:break-all}
+.pv-row .v.good{color:var(--green)}
+.pv-title{font-size:14px;font-weight:650;color:var(--pet);margin-bottom:6px}
 footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 4px}
 
 /* ========== 响应式 ========== */
@@ -505,13 +523,48 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
 
   <!-- ===== 3 宠物业务 ===== -->
   <section class="view" id="view-pet">
+
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-pet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+        快捷接单
+      </h2>
+      <p class="desc">接了单，一句话丢进来，日期、收入、行程自动拆好。<br>例如：<b>18号到26号每天喂猫 总收入585 在湖悦章府</b></p>
+      <div class="field">
+        <textarea id="qk-text" rows="2" placeholder="例如：11月18到26号每天喂猫 总收入585 在湖悦章府"></textarea>
+      </div>
+      <button class="btn" id="btn-parse-visit">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10"/><path d="M17 9l4 3-4 3"/></svg>
+        解析这单
+      </button>
+      <div id="visit-preview"></div>
+    </section>
+
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-pet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+        收入与行程
+      </h2>
+      <div class="month-bar">
+        <div class="seg">
+          <button class="seg-btn active" id="pm-month" type="button">月</button>
+          <button class="seg-btn" id="pm-year" type="button">年</button>
+        </div>
+        <input type="month" id="pt-month" aria-label="选择月份">
+        <div class="yr-nav" id="pt-year-nav" style="display:none"></div>
+      </div>
+      <div class="sum-grid" id="pet-sum"></div>
+      <div class="chart-box" id="pet-chart"></div>
+      <hr class="sep">
+      <div id="pet-trips"></div>
+    </section>
+
     <section class="card">
       <h2>
         <svg class="sec-ic ic-pet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
-        宠物业务流水
+        手动记一笔
       </h2>
-      <p class="desc">上门喂养的订单、宠物零食的卖出，一笔一行。月底自动算总收入。</p>
-
+      <p class="desc">零散的零食销售、单次上门用这个表单。整段日期的喂养单子走「快捷接单」。</p>
       <div class="row">
         <div class="field">
           <label>日期</label>
@@ -527,8 +580,8 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       </div>
       <div class="row">
         <div class="field">
-          <label>客户 / 狗狗名字</label>
-          <input type="text" id="pt-cust" placeholder="比如：金毛豆豆家">
+          <label>客户 / 宠物 / 地点</label>
+          <input type="text" id="pt-cust" placeholder="比如：金毛豆豆家 · 湖悦章府">
         </div>
         <div class="field">
           <label>金额 ¥</label>
@@ -536,8 +589,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         </div>
       </div>
       <button class="btn" id="btn-add-pet">记一笔</button>
-
-      <div class="sum-grid" id="pet-sum"></div>
       <div id="pet-list"></div>
     </section>
   </section>
@@ -640,6 +691,9 @@ var KEY = 'wb_biz_v1';
 var state = { demo:true, shops:[], todos:[], profits:[], pet:[], media:[] };
 var viewMonth = '';
 var currentView = 'home';
+var petViewMode = 'month';
+var petYear = '';
+var pendingVisit = null;
 
 /* ---------- 工具（纯函数） ---------- */
 function pad(n){ return n < 10 ? '0' + n : '' + n; }
@@ -766,6 +820,130 @@ function petSummary(mk){
     }
   });
   return { feed: feed, sell: sell, total: total };
+}
+function petYearTotal(y){
+  var t = 0;
+  state.pet.forEach(function(x){
+    if (x.date && x.date.slice(0, 4) === String(y)) t += num(x.amount);
+  });
+  return t;
+}
+function petMonthlySeries(y){
+  var arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+  state.pet.forEach(function(x){
+    if (x.date && x.date.slice(0, 4) === String(y)) {
+      var m = parseInt(x.date.slice(5, 7), 10);
+      if (m >= 1 && m <= 12) arr[m - 1] += num(x.amount);
+    }
+  });
+  return arr;
+}
+
+/* ---------- 快捷接单解析器（纯函数，不碰 state） ---------- */
+function mkDateOf(y, mm, dd){
+  var d = new Date(y, mm - 1, dd);
+  if (d.getMonth() !== mm - 1 || d.getDate() !== dd) return null;
+  return fmt(d);
+}
+function parseVisit(raw){
+  var text = String(raw || '').trim();
+  if (!text) return { ok: false, msg: '先把单子描述写进去，比如：18号到26号每天喂猫 总收入585 在湖悦章府' };
+  var t = text.replace(/现在/g, '');
+  var cur = new Date(), Y = cur.getFullYear(), M = cur.getMonth() + 1;
+  var m, start = null, end = null;
+
+  /* 日期范围：四种写法 */
+  if ((m = t.match(/(\d{1,2})月(\d{1,2})[日号]?\s*(?:到|至|~|—|-)\s*(?:(\d{1,2})月)?(\d{1,2})[日号]?/))) {
+    start = { m: parseInt(m[1], 10), d: parseInt(m[2], 10) };
+    end = { m: m[3] ? parseInt(m[3], 10) : start.m, d: parseInt(m[4], 10) };
+  } else if ((m = t.match(/(\d{4})-(\d{1,2})-(\d{1,2})\s*(?:到|至|~|—|-)\s*(\d{4})-(\d{1,2})-(\d{1,2})/))) {
+    start = { y: parseInt(m[1], 10), m: parseInt(m[2], 10), d: parseInt(m[3], 10) };
+    end = { y: parseInt(m[4], 10), m: parseInt(m[5], 10), d: parseInt(m[6], 10) };
+  } else if ((m = t.match(/(\d{1,2})[.\/\-](\d{1,2})\s*(?:到|至|~|—|-)\s*(\d{1,2})[.\/\-](\d{1,2})/))) {
+    start = { m: parseInt(m[1], 10), d: parseInt(m[2], 10) };
+    end = { m: parseInt(m[3], 10), d: parseInt(m[4], 10) };
+  } else if ((m = t.match(/(\d{1,2})[日号]\s*(?:到|至|~|—|-)\s*(\d{1,2})[日号]/))) {
+    start = { m: M, d: parseInt(m[1], 10) };
+    end = { m: M, d: parseInt(m[2], 10) };
+  } else if ((m = t.match(/(\d{1,2})\s*(?:到|至|~|—|-)\s*(\d{1,2})[日号]/))) {
+    start = { m: M, d: parseInt(m[1], 10) };
+    end = { m: M, d: parseInt(m[2], 10) };
+  }
+  if (!start) return { ok: false, msg: '没认出上门日期。试试「18号到26号」「11月18到26号」「11.18-11.26」这种写法' };
+  var y1 = start.y || Y, y2 = end.y || Y;
+  /* 跨年/跨月：结束早于开始时自动进位（12月28到1月2号 → 明年 1 月） */
+  if (!end.y && end.m < start.m) y2 = y1 + 1;
+  else if (!end.y && end.m === start.m && end.d < start.d) {
+    end.m++;
+    if (end.m > 12) { end.m = 1; y2 = y1 + 1; }
+  }
+  var s1 = mkDateOf(y1, start.m, start.d);
+  var s2 = mkDateOf(y2, end.m, end.d);
+  if (!s1 || !s2) return { ok: false, msg: '日期不对，检查一下几月几号（比如没有 2 月 30 号）' };
+  if (diffDays(s1, s2) < 0) return { ok: false, msg: '开始日期比结束日期晚，检查一下写法' };
+
+  /* 频次：每天N次 / 隔天；默认每天 1 次 */
+  var perDayCount = 1, step = 1;
+  if ((m = t.match(/(?:每天|一天|每日)\s*([一二两三2-9])\s*次/))) {
+    perDayCount = { '一': 1, '二': 2, '两': 2, '三': 3, '2': 2, '3': 3, '4': 4, '5': 5 }[m[1]] || parseInt(m[1], 10);
+  } else if (/隔天|隔日|隔一天/.test(t)) {
+    step = 2;
+  }
+
+  /* 展开日期序列 */
+  var dates = [];
+  var cursor = s1;
+  var guard = 0;
+  while (diffDays(cursor, s2) >= 0 && guard < 400) {
+    for (var j = 0; j < perDayCount; j++) dates.push(cursor);
+    cursor = shiftDays(cursor, step);
+    guard++;
+  }
+
+  /* 金额：先把日期数字从文本里摘掉，再找金额 */
+  var t2 = t
+    .replace(/(\d{1,2})月(\d{1,2})[日号]?/g, ' ')
+    .replace(/(\d{1,2})[日号]/g, ' ')
+    .replace(/(\d{1,2})[.\/](\d{1,2})/g, ' ')
+    .replace(/(\d{4})-(\d{1,2})-(\d{1,2})/g, ' ')
+    .replace(/每天\s*[一二两三2-9]\s*次/g, ' ')
+    .replace(/一天\s*[一二两三2-9]\s*次/g, ' ');
+  var total = null;
+  if ((m = t2.match(/(?:总?收入|合计|共|收|¥|￥)\s*([0-9]+(?:\.[0-9]+)?)/))) {
+    total = parseFloat(m[1]);
+  } else {
+    var nums = t2.match(/[0-9]+(?:\.[0-9]+)?/g);
+    if (nums) {
+      for (var i = 0; i < nums.length; i++) {
+        if (parseFloat(nums[i]) >= 50) { total = parseFloat(nums[i]); break; }
+      }
+      if (total === null) total = parseFloat(nums[nums.length - 1]);
+    }
+  }
+  if (!total || total <= 0) return { ok: false, msg: '没认出这单总收入，把金额写进去，比如「总收入585」' };
+
+  /* 地点：优先「地点X / 在X」，都没有则从剩余文本抓中文词组 */
+  var place = '';
+  if ((m = t2.match(/(?:地点|地址|小区)\s*[:：]?\s*[在]?\s*([\u4e00-\u9fa5A-Za-z0-9]{2,15})/))) place = m[1];
+  else if ((m = t2.match(/[在]\s*([\u4e00-\u9fa5A-Za-z0-9]{2,15})/))) place = m[1];
+  else {
+    var leftover = t2
+      .replace(/[0-9]+/g, ' ')
+      .replace(/上门|喂养|喂猫|喂狗|喂|猫|狗|每天|隔天|隔日|隔一|一天|总?收入|合计|共|次|元|业务|需要/g, ' ');
+    if ((m = leftover.match(/([\u4e00-\u9fa5]{2,15})/))) place = m[1];
+  }
+
+  /* 宠物类型 */
+  var animal = '';
+  if ((m = t.match(/(法斗|金毛|柯基|泰迪|边牧|布偶|橘猫|英短|美短|柴犬|拉布拉多|猫|狗)/))) animal = m[1];
+
+  var times = dates.length;
+  var perVisit = Math.round(total / times * 100) / 100;
+  return {
+    ok: true, place: place, animal: animal,
+    start: s1, end: s2, dates: dates,
+    times: times, total: total, perVisit: perVisit, step: step, perDayCount: perDayCount
+  };
 }
 function mediaSeries(platform){
   var byDate = {};
@@ -1028,29 +1206,115 @@ function renderBiz(){
   }).join('');
 }
 
-function renderPet(){
-  var mk = viewMonth;
-  var s = petSummary(mk);
-  document.getElementById('pet-sum').innerHTML =
-    '<div class="sum-card"><div class="shop">本月总收入</div><div class="num money-in">' + money(s.total) + '</div><div class="mini">' + esc(mk) + '</div></div>' +
-    '<div class="sum-card"><div class="shop">上门喂养</div><div class="num" style="color:var(--pet)">' + money(s.feed) + '</div><div class="mini">按次收费</div></div>' +
-    '<div class="sum-card"><div class="shop">零食销售</div><div class="num" style="color:var(--pet)">' + money(s.sell) + '</div><div class="mini">卖出去的</div></div>';
+function petYearChart(arr, y){
+  var W = 680, H = 200, padL = 10, padB = 28, padT = 18;
+  var maxV = Math.max.apply(null, arr);
+  if (!maxV) return '<div class="empty">' + y + ' 年还没有宠物收入记录</div>';
+  var plotH = H - padT - padB;
+  var slot = (W - padL * 2) / 12;
+  var bw = Math.min(slot * 0.55, 40);
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>' + y + '年每月宠物收入</title>';
+  arr.forEach(function(v, i){
+    var h = v > 0 ? Math.max(v / maxV * plotH, 4) : 1;
+    var x = padL + slot * i + (slot - bw) / 2;
+    var yy = padT + plotH - h;
+    svg += '<rect x="' + x + '" y="' + yy + '" width="' + bw + '" height="' + h + '" rx="5" fill="' + (v > 0 ? '#0f766e' : '#d3d7c9') + '"/>';
+    if (v > 0) svg += '<text x="' + (x + bw / 2) + '" y="' + (yy - 6) + '" text-anchor="middle" font-size="11" fill="#0f766e">' + Math.round(v) + '</text>';
+    svg += '<text x="' + (x + bw / 2) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#75796e">' + (i + 1) + '月</text>';
+  });
+  svg += '</svg>';
+  return svg;
+}
 
-  var list = state.pet.filter(function(x){ return monthKeyOf(x.date) === mk; }).slice().reverse();
-  var el = document.getElementById('pet-list');
+function renderPet(){
+  var sumEl = document.getElementById('pet-sum');
+  var chartEl = document.getElementById('pet-chart');
+  var monthInput = document.getElementById('pt-month');
+  var yearNav = document.getElementById('pt-year-nav');
+  var listEl = document.getElementById('pet-list');
+  var mk = viewMonth;
+  var listMk = mk;
+
+  if (petViewMode === 'month') {
+    monthInput.style.display = '';
+    yearNav.style.display = 'none';
+    var s = petSummary(mk);
+    sumEl.innerHTML =
+      '<div class="sum-card"><div class="shop">本月总收入</div><div class="num money-in">' + money(s.total) + '</div><div class="mini">' + esc(mk) + '</div></div>' +
+      '<div class="sum-card"><div class="shop">上门喂养</div><div class="num" style="color:var(--pet)">' + money(s.feed) + '</div><div class="mini">按次收费</div></div>' +
+      '<div class="sum-card"><div class="shop">零食销售</div><div class="num" style="color:var(--pet)">' + money(s.sell) + '</div><div class="mini">卖出去的</div></div>';
+    chartEl.innerHTML = '';
+  } else {
+    monthInput.style.display = 'none';
+    yearNav.style.display = 'flex';
+    var y = petYear;
+    var yt = petYearTotal(y);
+    var feed = 0, sell = 0;
+    state.pet.forEach(function(x){
+      if (x.date && x.date.slice(0, 4) === String(y)) {
+        if (x.type === '上门喂养') feed += num(x.amount); else sell += num(x.amount);
+      }
+    });
+    sumEl.innerHTML =
+      '<div class="sum-card"><div class="shop">' + y + ' 年总收入</div><div class="num money-in">' + money(yt) + '</div><div class="mini">全年合计</div></div>' +
+      '<div class="sum-card"><div class="shop">上门喂养</div><div class="num" style="color:var(--pet)">' + money(feed) + '</div><div class="mini">全年</div></div>' +
+      '<div class="sum-card"><div class="shop">零食销售</div><div class="num" style="color:var(--pet)">' + money(sell) + '</div><div class="mini">全年</div></div>';
+    chartEl.innerHTML = '<p class="ct">' + y + ' 年每月宠物收入 · 全年 ' + money(yt) + '</p>' + petYearChart(petMonthlySeries(y), y);
+    yearNav.innerHTML =
+      '<button class="icon-btn" data-act="py-prev" aria-label="上一年"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>' +
+      '<b>' + y + '</b>' +
+      '<button class="icon-btn" data-act="py-next" aria-label="下一年"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>';
+    listMk = null;
+  }
+
+  /* 流水列表：月模式显示当月，年模式显示全年 */
+  var list = state.pet.filter(function(x){
+    if (!listMk) return x.date && x.date.slice(0, 4) === String(petYear);
+    return monthKeyOf(x.date) === listMk;
+  }).slice().reverse();
   if (!list.length) {
-    el.innerHTML = '<div class="empty">' + esc(mk) + ' 还没有宠物业务记录</div>';
+    listEl.innerHTML = '<div class="empty">' + (listMk ? esc(listMk) : esc(petYear) + ' 年') + '还没有宠物业务记录</div>';
+  } else {
+    listEl.innerHTML = '<div class="tag olive" style="margin:6px 0 2px">流水明细（' + list.length + ' 笔）</div>' + list.map(function(x){
+      return '<div class="item">' +
+        '<div class="it-main"><div class="it-txt">' + esc(x.customer || '未写客户') + ' · <span class="money-in">' + money(num(x.amount)) + '</span></div>' +
+        '<div class="it-meta"><span>' + esc(x.date) + '</span><span class="tag pet">' + esc(x.type) + '</span>' +
+          (x.note ? '<span class="tag">' + esc(x.note) + '</span>' : '') +
+        '</div></div>' +
+        '<div class="it-act"><button class="icon-btn" data-act="pt-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>' +
+      '</div>';
+    }).join('');
+  }
+}
+
+function renderPetTrips(){
+  var t = todayStr();
+  var list = state.todos.filter(function(x){
+    return x.trip && !x.done && x.due && diffDays(t, x.due) >= -3;
+  }).sort(function(a, b){ return a.due < b.due ? -1 : 1; }).slice(0, 15);
+  var el = document.getElementById('pet-trips');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">近期没有上门行程。接了单在「快捷接单」里一句话录入，行程会出现在这里和每天的待办里</div>';
     return;
   }
-  el.innerHTML = list.map(function(x){
+  var od = list.filter(function(x){ return diffDays(t, x.due) < 0; }).length;
+  var html = '<div class="tag ' + (od > 0 ? 'red' : 'olive') + '" style="margin:6px 0 2px">近期的上门行程（' + list.length + '）' + (od > 0 ? ' · 逾期 ' + od : '') + '</div>';
+  html += list.map(function(x){
+    var dd = diffDays(t, x.due);
+    var when = dd === 0 ? '<span class="tag red">今天</span>'
+      : dd < 0 ? '<span class="tag red">欠了 ' + (-dd) + ' 天</span>'
+      : dd === 1 ? '<span class="tag">明天</span>'
+      : '<span class="tag">' + dd + ' 天后</span>';
     return '<div class="item">' +
-      '<div class="it-main"><div class="it-txt">' + esc(x.customer || '未写客户') + ' · <span class="money-in">' + money(num(x.amount)) + '</span></div>' +
-      '<div class="it-meta"><span>' + esc(x.date) + '</span><span class="tag pet">' + esc(x.type) + '</span>' +
-        (x.note ? '<span class="tag">' + esc(x.note) + '</span>' : '') +
-      '</div></div>' +
-      '<div class="it-act"><button class="icon-btn" data-act="pt-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>' +
+      '<button class="chk" data-act="toggle" data-id="' + x.id + '" aria-label="完成">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>' +
+      '</button>' +
+      '<div class="it-main"><div class="it-txt">' + esc(x.text) + '</div>' +
+      '<div class="it-meta"><span>' + esc(x.due) + '</span>' + when + '</div></div>' +
+      '<div class="it-act"><button class="icon-btn" data-act="td-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>' +
     '</div>';
   }).join('');
+  el.innerHTML = html;
 }
 
 function renderMedia(){
@@ -1092,6 +1356,7 @@ function refreshAll(){
   renderBizSelects();
   renderBiz();
   renderPet();
+  renderPetTrips();
   renderMedia();
   renderStoreHint();
 }
@@ -1210,6 +1475,61 @@ function delMedia(id){
   state.media = state.media.filter(function(x){ return x.id !== id; });
   saveData(); refreshAll();
 }
+
+/* ---------- 快捷接单 ---------- */
+function visitLabel(v){
+  var animal = v.animal && v.animal !== '宠物' ? v.animal : '喂养';
+  return '上门' + animal + (v.place ? ' · ' + v.place : '');
+}
+function doParseVisit(){
+  var v = parseVisit(document.getElementById('qk-text').value);
+  var el = document.getElementById('visit-preview');
+  if (!v.ok) {
+    el.innerHTML = '<div class="pv pv-err"><div class="pv-row"><span class="v" style="color:var(--red)">' + esc(v.msg) + '</span></div></div>';
+    pendingVisit = null;
+    return;
+  }
+  pendingVisit = v;
+  var rows = [
+    ['服务', '上门喂养' + (v.step === 2 ? '（隔天一次）' : (v.perDayCount > 1 ? '（每天 ' + v.perDayCount + ' 次）' : ''))],
+    ['日期', v.start + ' 到 ' + v.end],
+    ['上门次数', v.times + ' 次'],
+    ['这单总收入', money(v.total)],
+    ['每次收入', money(v.perVisit)]
+  ];
+  if (v.place) rows.splice(1, 0, ['地点', v.place]);
+  if (v.animal) rows.splice(1, 0, ['宠物', v.animal]);
+  el.innerHTML = '<div class="pv"><div class="pv-title">认出来了，确认一下</div>' +
+    rows.map(function(r){ return '<div class="pv-row"><span class="k">' + r[0] + '</span><span class="v">' + esc(String(r[1])) + '</span></div>'; }).join('') +
+    '<div class="pv-row"><span class="k">会生成</span><span class="v">' + v.times + ' 条每日待办 + ' + v.times + ' 笔按天收入</span></div>' +
+    '<div class="btn-row"><button class="btn" data-act="pv-ok">确认录入</button><button class="btn ghost" data-act="pv-cancel">重写</button></div>' +
+    '</div>';
+}
+function confirmVisit(){
+  if (!pendingVisit || !pendingVisit.ok) return;
+  var v = pendingVisit;
+  var label = visitLabel(v);
+  var cust = (v.place || '') + (v.animal && v.animal !== '宠物' ? '(' + v.animal + ')' : '') || '上门客户';
+  v.dates.forEach(function(d, i){
+    state.pet.push({
+      id: uid(), date: d, type: '上门喂养', customer: cust,
+      amount: v.perVisit,
+      note: '第' + (i + 1) + '/' + v.times + '次 ' + v.start + '~' + v.end
+    });
+    state.todos.push({ id: uid(), text: label, tag: '宠物公司', due: d, done: false, trip: true });
+  });
+  state.demo = false;
+  saveData();
+  pendingVisit = null;
+  document.getElementById('qk-text').value = '';
+  document.getElementById('visit-preview').innerHTML = '';
+  refreshAll();
+  toast('录好了：' + label + '，' + v.times + ' 次行程 · ' + money(v.total) + ' 已按天入账');
+}
+function cancelVisit(){
+  pendingVisit = null;
+  document.getElementById('visit-preview').innerHTML = '';
+}
 function addMedia(){
   var fans = document.getElementById('md-fans').value;
   if (fans === '') { toast('至少填一下粉丝数'); return; }
@@ -1305,6 +1625,27 @@ function bindEvents(){
     viewMonth = this.value || currentMonth();
     refreshAll();
   });
+  document.getElementById('btn-parse-visit').addEventListener('click', doParseVisit);
+  document.getElementById('qk-text').addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) doParseVisit();
+  });
+  document.getElementById('pm-month').addEventListener('click', function(){
+    petViewMode = 'month';
+    document.getElementById('pm-month').className = 'seg-btn active';
+    document.getElementById('pm-year').className = 'seg-btn';
+    refreshAll();
+  });
+  document.getElementById('pm-year').addEventListener('click', function(){
+    petViewMode = 'year';
+    document.getElementById('pm-month').className = 'seg-btn';
+    document.getElementById('pm-year').className = 'seg-btn active';
+    refreshAll();
+  });
+  document.getElementById('pt-month').addEventListener('change', function(){
+    viewMonth = this.value || currentMonth();
+    document.getElementById('biz-month').value = viewMonth;
+    refreshAll();
+  });
   document.getElementById('media-platform').addEventListener('change', function(){
     refreshAll();
   });
@@ -1330,6 +1671,10 @@ function bindEvents(){
     else if (act === 'pf-del') delProfit(id);
     else if (act === 'pt-del') delPet(id);
     else if (act === 'md-del') delMedia(id);
+    else if (act === 'pv-ok') confirmVisit();
+    else if (act === 'pv-cancel') cancelVisit();
+    else if (act === 'py-prev') { petYear--; refreshAll(); }
+    else if (act === 'py-next') { petYear++; refreshAll(); }
   });
 }
 
@@ -1337,12 +1682,14 @@ function bindEvents(){
 function init(){
   loadData();
   viewMonth = currentMonth();
+  petYear = todayStr().slice(0, 4);
   var d;
   d = document.getElementById('td-date'); if (d) d.value = todayStr();
   d = document.getElementById('pf-date'); if (d) d.value = todayStr();
   d = document.getElementById('pt-date'); if (d) d.value = todayStr();
   d = document.getElementById('md-date'); if (d) d.value = todayStr();
   d = document.getElementById('biz-month'); if (d) d.value = viewMonth;
+  d = document.getElementById('pt-month'); if (d) d.value = viewMonth;
   bindEvents();
   refreshAll();
   /* 支持 #todo / #biz / #pet / #media / #backup / #home 锚点直达 */
