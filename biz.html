@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="生意驾驶舱">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1e3a5f">
+<title>生意驾驶舱 · 两家公司一个页面</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzFlM2E1ZiIvPjxwYXRoIGQ9Ik0zMCAxMzBMMzAgMTAwTDcwIDEwMEw3MCA2MEwxMTAgNjBMMTEwIDMwTDE1MCAzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMzAiIHI9IjEwIiBmaWxsPSIjZmZkNjAwIi8+PC9zdmc+">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzFlM2E1ZiIvPjxwYXRoIGQ9Ik0zMCAxMzBMMzAgMTAwTDcwIDEwMEw3MCA2MEwxMTAgNjBMMTEwIDMwTDE1MCAzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMzAiIHI9IjEwIiBmaWxsPSIjZmZkNjAwIi8+PC9zdmc+">
+<style>
+:root{
+  --bg:#f4f5f7; --card:#fff; --line:#e5e7eb; --text:#1b1f27; --muted:#6b7280;
+  --navy:#1e3a5f; --navy-soft:#eaf0f6;
+  --red:#e5484d; --red-soft:#fdf0f0;
+  --green:#12a150; --green-soft:#e9f7ef;
+  --amber:#b45309; --amber-soft:#fff7e8;
+  --pet:#0f766e; --pet-soft:#e6f4f2;
+  --media:#7c3aed; --media-soft:#f3eefe;
+  --radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:16px; line-height:1.55;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px}
+
+header{
+  background:linear-gradient(135deg,#1e3a5f,#2c5282); color:#fff;
+  padding:calc(18px + env(safe-area-inset-top)) 0 20px;
+}
+.hd{display:flex;align-items:center;gap:10px}
+.hd h1{margin:0;font-size:19px;font-weight:650;letter-spacing:.3px}
+.hd .sub{font-size:12.5px;opacity:.85;margin-top:2px}
+.logo{width:36px;height:36px;flex:0 0 36px;background:rgba(255,255,255,.16);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.stat-row{display:flex;gap:8px;margin-top:14px}
+.stat{flex:1;background:rgba(255,255,255,.14);border-radius:12px;padding:9px 8px;text-align:center;min-width:0}
+.stat b{display:block;font-size:18px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat span{font-size:11px;opacity:.9}
+.stat.alert{background:rgba(255,90,90,.34)}
+.stat .up{color:#7ef0b0}
+.stat .down{color:#ff9b9e}
+
+.banner{
+  display:none;margin:12px 0 0;background:var(--amber-soft);border:1px solid #f3d9a9;
+  color:var(--amber);border-radius:12px;padding:10px 12px;font-size:13.5px;align-items:center;gap:8px
+}
+.banner.show{display:flex}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:14px}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:650;display:flex;align-items:center;gap:8px}
+.card .desc{margin:0 0 12px;font-size:13px;color:var(--muted)}
+.sec-ic{width:24px;height:24px;flex:0 0 24px}
+.ic-biz{color:var(--red)} .ic-pet{color:var(--pet)} .ic-media{color:var(--media)} .ic-todo{color:var(--navy)}
+
+.field{margin-bottom:10px}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+input[type=text],input[type=date],input[type=month],input[type=number],select,textarea{
+  width:100%;font-size:16px;font-family:inherit;color:var(--text);
+  padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#fbfbfc;outline:none;
+  -webkit-appearance:none;appearance:none
+}
+select{background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:16px;padding-right:34px}
+input:focus,select:focus,textarea:focus{border-color:var(--navy);background:#fff}
+.row{display:flex;gap:8px}
+.row>*{flex:1;min-width:0}
+
+button{font-family:inherit;font-size:15px;cursor:pointer;border:none;border-radius:11px;min-height:44px}
+.btn{background:var(--navy);color:#fff;font-weight:600;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
+.btn:active{opacity:.85}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line)}
+.btn.soft{background:var(--navy-soft);color:var(--navy)}
+.btn.danger{background:#fff;color:var(--red);border:1px solid #f3c9ca}
+.btn.sm{min-height:44px;font-size:14px;padding:0 14px;width:auto}
+.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-row .btn{width:auto;flex:1;min-width:120px}
+
+.item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:none}
+.chk{flex:0 0 24px;width:24px;height:24px;margin-top:2px;border:2px solid #c7cad3;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0;min-height:24px}
+.chk.on{background:var(--green);border-color:var(--green)}
+.chk svg{width:14px;height:14px;color:#fff;display:none}
+.chk.on svg{display:block}
+.it-main{flex:1;min-width:0}
+.it-txt{font-size:15px;word-break:break-word}
+.it-meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.item.done .it-txt{color:#9aa0ab;text-decoration:line-through}
+.tag{display:inline-block;padding:1px 8px;border-radius:6px;font-size:11.5px;background:#f1f2f5;color:var(--muted)}
+.tag.red{background:var(--red-soft);color:var(--red);font-weight:600}
+.tag.green{background:var(--green-soft);color:var(--green)}
+.tag.biz{background:var(--red-soft);color:var(--red)}
+.tag.pet{background:var(--pet-soft);color:var(--pet)}
+.tag.media{background:var(--media-soft);color:var(--media)}
+.tag.navy{background:var(--navy-soft);color:var(--navy)}
+.it-act{display:flex;gap:6px;flex:0 0 auto}
+.icon-btn{width:44px;height:44px;min-height:44px;border-radius:11px;background:#f6f7f9;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0;color:var(--muted)}
+.icon-btn svg{width:16px;height:16px}
+.money-in{color:var(--green);font-weight:600}
+.money-out{color:var(--red);font-weight:600}
+
+.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 2px}
+.sum-card{background:#fafbfc;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;min-width:0}
+.sum-card .shop{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum-card .num{font-size:16px;font-weight:650;margin-top:3px;white-space:nowrap}
+.sum-card .mini{font-size:11px;color:var(--muted);margin-top:2px}
+
+.chart-box{background:#fafbfc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:12px}
+.chart-box .ct{font-size:13px;color:var(--muted);margin:0 0 6px 2px}
+.chart-box svg{width:100%;height:auto;display:block}
+
+pre.prev{background:#1e2130;color:#dfe3ee;border-radius:12px;padding:12px;font-size:12px;overflow:auto;max-height:240px;margin:10px 0 0;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:16px 0}
+.hint{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+.hint b{color:var(--text)}
+hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
+.month-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.month-bar input[type=month]{flex:1}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 8px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#1b1f27;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:99;max-width:88%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(min-width:640px){ .card{padding:18px} .sum-grid{grid-template-columns:repeat(3,1fr)} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hd">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 20h18"/><path d="M5 16v-4h4v4"/><path d="M10 16V8h4v8"/><path d="M15 16v-6h4v6"/>
+        </svg>
+      </div>
+      <div>
+        <h1>生意驾驶舱</h1>
+        <div class="sub">来伊份 × 宠物公司 · 两家公司一个页面</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat" id="stat-profit"><b id="s-profit">--</b><span>本月门店利润</span></div>
+      <div class="stat" id="stat-pet"><b id="s-pet">--</b><span>本月宠物收入</span></div>
+      <div class="stat"><b id="s-fans">--</b><span>最新粉丝总数</span></div>
+      <div class="stat" id="stat-od"><b id="s-od">0</b><span>逾期待办</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="banner" id="banner">
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+    <span id="banner-txt"></span>
+  </div>
+
+  <!-- 1. 今日要处理 -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+      今天要处理
+    </h2>
+    <p class="desc">两家公司的事都在这儿。标红的是欠着的账，昨天没做完的不会消失。</p>
+    <div id="todo-list"></div>
+    <hr class="sep">
+    <div class="field">
+      <label>要做什么</label>
+      <input type="text" id="td-text" placeholder="动词开头，10 分钟内能开始">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>哪家公司的事</label>
+        <select id="td-tag">
+          <option value="来伊份">来伊份</option>
+          <option value="宠物公司">宠物公司</option>
+          <option value="等等你吖">等等你吖</option>
+          <option value="通用">通用</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>哪天做</label>
+        <input type="date" id="td-date">
+      </div>
+    </div>
+    <button class="btn" id="btn-add-todo">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      加进今天要处理
+    </button>
+  </section>
+
+  <!-- 2. 门店盈利 -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic ic-biz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+      门店盈利记录
+    </h2>
+    <p class="desc">每笔记：哪天、哪家店、收了多少、花了多少。利润自动算，红字是亏、绿字是赚。</p>
+
+    <div class="month-bar">
+      <input type="month" id="biz-month" aria-label="选择月份">
+      <button class="btn ghost sm" id="btn-add-shop" style="flex:0 0 auto">+ 加门店</button>
+    </div>
+
+    <div class="sum-grid" id="biz-sum"></div>
+    <div class="chart-box" id="biz-chart"></div>
+
+    <hr class="sep">
+    <div class="row">
+      <div class="field">
+        <label>日期</label>
+        <input type="date" id="pf-date">
+      </div>
+      <div class="field">
+        <label>门店</label>
+        <select id="pf-shop"></select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>收入 ¥</label>
+        <input type="number" id="pf-rev" inputmode="decimal" placeholder="卖了多少">
+      </div>
+      <div class="field">
+        <label>成本 ¥</label>
+        <input type="number" id="pf-cost" inputmode="decimal" placeholder="货、房租、人工…">
+      </div>
+    </div>
+    <div class="field">
+      <label>备注（选填）</label>
+      <input type="text" id="pf-note" placeholder="比如：周末促销、进货 2 箱">
+    </div>
+    <button class="btn" id="btn-add-profit">记一笔</button>
+
+    <div id="profit-list"></div>
+
+    <div class="btn-row">
+      <button class="btn ghost" id="btn-export-csv">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+        导出 CSV（给 Excel）
+      </button>
+    </div>
+  </section>
+
+  <!-- 3. 宠物业务 -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic ic-pet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="17" cy="8" r="2.4"/><path d="M12 11c-3.5 0-6 2.6-6 5.6 0 1.5 1.2 2.4 2.6 2.4h6.8c1.4 0 2.6-.9 2.6-2.4 0-3-2.5-5.6-6-5.6z"/></svg>
+      宠物业务流水
+    </h2>
+    <p class="desc">上门喂养的订单、宠物零食的卖出，一笔一行。月底自动算总收入。</p>
+
+    <div class="row">
+      <div class="field">
+        <label>日期</label>
+        <input type="date" id="pt-date">
+      </div>
+      <div class="field">
+        <label>业务类型</label>
+        <select id="pt-type">
+          <option value="上门喂养">上门喂养</option>
+          <option value="零食销售">零食销售</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>客户 / 狗狗名字</label>
+        <input type="text" id="pt-cust" placeholder="比如：金毛豆豆家">
+      </div>
+      <div class="field">
+        <label>金额 ¥</label>
+        <input type="number" id="pt-amt" inputmode="decimal" placeholder="收了多少">
+      </div>
+    </div>
+    <button class="btn" id="btn-add-pet">记一笔</button>
+
+    <div class="sum-grid" id="pet-sum"></div>
+    <div id="pet-list"></div>
+  </section>
+
+  <!-- 4. 等等你吖 -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic ic-media" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M9 21H4v-5"/><path d="M4 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
+      等等你吖 · 数据
+    </h2>
+    <p class="desc">每次发完视频记一下：粉丝多少、播放多少。曲线会告诉你哪种内容有效。</p>
+
+    <div class="row">
+      <div class="field">
+        <label>曲线看哪个平台</label>
+        <select id="media-platform">
+          <option value="all">全部平台合计</option>
+          <option value="抖音">抖音</option>
+          <option value="小红书">小红书</option>
+          <option value="视频号">视频号</option>
+          <option value="B站">B站</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="chart-box" id="media-chart"></div>
+
+    <div class="row">
+      <div class="field">
+        <label>日期</label>
+        <input type="date" id="md-date">
+      </div>
+      <div class="field">
+        <label>平台</label>
+        <select id="md-platform">
+          <option value="抖音">抖音</option>
+          <option value="小红书">小红书</option>
+          <option value="视频号">视频号</option>
+          <option value="B站">B站</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>粉丝数</label>
+        <input type="number" id="md-fans" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>播放量</label>
+        <input type="number" id="md-views" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>点赞</label>
+        <input type="number" id="md-likes" inputmode="numeric">
+      </div>
+    </div>
+    <div class="field">
+      <label>这次发了什么（选填）</label>
+      <input type="text" id="md-note" placeholder="比如：法斗洗澡第一天">
+    </div>
+    <button class="btn" id="btn-add-media">记一条数据</button>
+
+    <div id="media-list"></div>
+  </section>
+
+  <!-- 备份 -->
+  <section class="card">
+    <h2>
+      <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/></svg>
+      备份与恢复
+    </h2>
+    <p class="desc">数据存在这台设备的浏览器里。换手机、清缓存之前，先导出一份。</p>
+    <div class="btn-row">
+      <button class="btn ghost" id="btn-export-json">导出 JSON 备份</button>
+      <button class="btn ghost" id="btn-import-json">导入恢复</button>
+    </div>
+    <input type="file" id="file-input" accept=".json,application/json" style="display:none">
+    <div class="btn-row">
+      <button class="btn danger" id="btn-clear-all">清空全部数据</button>
+    </div>
+    <p class="hint" id="store-hint"></p>
+  </section>
+
+  <footer>
+    <a href="./index.html" style="color:var(--navy);text-decoration:none">返回灵感收件箱</a>
+    · 单文件网页 · 数据只存本机 · 不联网不上传
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   生意驾驶舱 — 单文件，零外部依赖
+   分层：数据层 → 计算层 → 渲染层，渲染函数之间严禁互调
+   所有渲染由 refreshAll() 统一调度
+   ============================================================ */
+
+var KEY = 'wb_biz_v1';
+var state = { demo:true, shops:[], todos:[], profits:[], pet:[], media:[] };
+var viewMonth = '';
+
+/* ---------- 工具（纯函数） ---------- */
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function fmt(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function todayStr(){ return fmt(new Date()); }
+function monthKeyOf(dateStr){ return String(dateStr || '').slice(0, 7); }
+function currentMonth(){ return todayStr().slice(0, 7); }
+function shiftDays(b, n){
+  var d = new Date(b + 'T00:00:00');
+  if (isNaN(d.getTime())) d = new Date();
+  d.setDate(d.getDate() + n);
+  return fmt(d);
+}
+function diffDays(a, b){
+  var d1 = new Date(a + 'T00:00:00'), d2 = new Date(b + 'T00:00:00');
+  if (isNaN(d1) || isNaN(d2)) return 0;
+  return Math.round((d2 - d1) / 86400000);
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function esc(s){
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function num(v){
+  var n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
+function money(n){
+  var neg = n < 0;
+  var s = Math.abs(Math.round(n * 100) / 100).toString();
+  var parts = s.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg ? '-¥' : '¥') + parts.join('.');
+}
+
+/* ---------- 数据层 ---------- */
+function seed(){
+  var t = todayStr();
+  var m = currentMonth();
+  state = {
+    demo: true,
+    shops: ['来伊份网商店', '来伊份庆春东路店', '来伊份乐堤港店'],
+    todos: [
+      { id: uid(), text: '把庆春东路店上个月的账对一遍', tag: '来伊份', due: shiftDays(t, -2), done: false },
+      { id: uid(), text: '回复上门喂养的 3 个咨询客户', tag: '宠物公司', due: t, done: false },
+      { id: uid(), text: '给等等拍一条喂零食的视频', tag: '等等你吖', due: t, done: false },
+      { id: uid(), text: '检查乐堤港店的货还够不够', tag: '来伊份', due: shiftDays(t, 3), done: false },
+      { id: uid(), text: '示例待办：看完就删掉我', tag: '通用', due: shiftDays(t, -1), done: true }
+    ],
+    profits: [
+      { id: uid(), date: shiftDays(t, -1), shop: '来伊份庆春东路店', revenue: 3200, cost: 2100, note: '示例：周末客流不错' },
+      { id: uid(), date: shiftDays(t, -1), shop: '来伊份乐堤港店', revenue: 1850, cost: 1900, note: '示例：略亏，房租压力大' },
+      { id: uid(), date: t, shop: '来伊份网商店', revenue: 960, cost: 520, note: '示例：线上订单' }
+    ],
+    pet: [
+      { id: uid(), date: shiftDays(t, -1), type: '上门喂养', customer: '金毛豆豆家', amount: 88, note: '示例：早晚各一次' },
+      { id: uid(), date: t, type: '零食销售', customer: '微信老客', amount: 156, note: '示例：鸡肉干 2 包' }
+    ],
+    media: [
+      { id: uid(), date: shiftDays(t, -6), platform: '抖音', fans: 326, views: 2100, likes: 45, note: '示例：法斗到家第一天' },
+      { id: uid(), date: shiftDays(t, -3), platform: '抖音', fans: 512, views: 8600, likes: 210, note: '示例：法斗洗澡翻车' },
+      { id: uid(), date: t, platform: '抖音', fans: 688, views: 12000, likes: 380, note: '示例：喂零食翻车现场' }
+    ]
+  };
+  saveData();
+}
+function loadData(){
+  var raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { raw = null; }
+  if (!raw) { seed(); return; }
+  try {
+    var o = JSON.parse(raw);
+    state = {
+      demo: !!o.demo,
+      shops: Array.isArray(o.shops) && o.shops.length ? o.shops : ['来伊份网商店', '来伊份庆春东路店', '来伊份乐堤港店'],
+      todos: Array.isArray(o.todos) ? o.todos : [],
+      profits: Array.isArray(o.profits) ? o.profits : [],
+      pet: Array.isArray(o.pet) ? o.pet : [],
+      media: Array.isArray(o.media) ? o.media : []
+    };
+  } catch (e) { seed(); }
+}
+function saveData(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+/* ---------- 计算层 ---------- */
+function overdueTodos(){
+  var t = todayStr();
+  return state.todos.filter(function(x){ return !x.done && x.due && diffDays(x.due, t) > 0; })
+    .sort(function(a, b){ return diffDays(b.due, t) - diffDays(a.due, t); });
+}
+function todayTodos(){
+  var t = todayStr();
+  return state.todos.filter(function(x){ return !x.done && x.due === t; });
+}
+function soonTodos(){
+  var t = todayStr();
+  return state.todos.filter(function(x){ return !x.done && x.due && diffDays(t, x.due) > 0 && diffDays(t, x.due) <= 7; })
+    .sort(function(a, b){ return diffDays(t, a.due) - diffDays(t, b.due); });
+}
+function doneTodos(){
+  return state.todos.filter(function(x){ return x.done; }).slice(-5).reverse();
+}
+function monthProfits(mk){
+  return state.profits.filter(function(x){ return monthKeyOf(x.date) === mk; });
+}
+function shopSummary(mk){
+  var list = monthProfits(mk);
+  return state.shops.map(function(name){
+    var rev = 0, cost = 0;
+    list.forEach(function(x){
+      if (x.shop === name) { rev += num(x.revenue); cost += num(x.cost); }
+    });
+    return { shop: name, revenue: rev, cost: cost, profit: rev - cost };
+  });
+}
+function petSummary(mk){
+  var feed = 0, sell = 0, total = 0;
+  state.pet.forEach(function(x){
+    if (monthKeyOf(x.date) === mk) {
+      var a = num(x.amount);
+      total += a;
+      if (x.type === '上门喂养') feed += a; else sell += a;
+    }
+  });
+  return { feed: feed, sell: sell, total: total };
+}
+function mediaSeries(platform){
+  var byDate = {};
+  state.media.forEach(function(x){
+    if (platform && platform !== 'all' && x.platform !== platform) return;
+    var d = x.date;
+    if (!byDate[d]) byDate[d] = 0;
+    byDate[d] += num(x.fans);
+  });
+  var keys = Object.keys(byDate).sort();
+  return keys.map(function(d){ return { date: d, fans: byDate[d] }; });
+}
+function latestFans(platform){
+  var s = mediaSeries(platform);
+  return s.length ? s[s.length - 1].fans : 0;
+}
+
+/* ---------- 图表（纯函数，返回 SVG 字符串） ---------- */
+function barChart(data){
+  var W = 680, H = 220, padL = 20, padB = 46, padT = 24;
+  var n = data.length;
+  if (!n) return '<div class="empty">这个月还没有记录</div>';
+  var maxV = 0, minV = 0;
+  data.forEach(function(d){
+    if (d.profit > maxV) maxV = d.profit;
+    if (d.profit < minV) minV = d.profit;
+  });
+  if (maxV === 0 && minV === 0) { maxV = 100; }
+  var range = maxV - minV || 1;
+  var zeroY = padT + (maxV / range) * (H - padT - padB);
+  var plotH = H - padT - padB;
+  var slot = (W - padL * 2) / n;
+  var bw = Math.min(slot * 0.5, 90);
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>各门店本月利润</title>';
+  svg += '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (W - padL) + '" y2="' + zeroY + '" stroke="#c7cad3" stroke-width="1"/>';
+  data.forEach(function(d, i){
+    var x = padL + slot * i + (slot - bw) / 2;
+    var h = Math.abs(d.profit) / range * plotH;
+    if (h < 2 && d.profit !== 0) h = 2;
+    var y = d.profit >= 0 ? zeroY - h : zeroY;
+    var color = d.profit >= 0 ? '#12a150' : '#e5484d';
+    svg += '<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + Math.max(h, 1) + '" rx="6" fill="' + color + '"/>';
+    var label = money(d.profit);
+    var ly = d.profit >= 0 ? y - 8 : y + h + 18;
+    svg += '<text x="' + (x + bw / 2) + '" y="' + ly + '" text-anchor="middle" font-size="13" font-weight="600" fill="' + color + '">' + label + '</text>';
+    var name = d.shop.replace('来伊份', '');
+    svg += '<text x="' + (x + bw / 2) + '" y="' + (H - 12) + '" text-anchor="middle" font-size="12" fill="#6b7280">' + esc(name) + '</text>';
+  });
+  svg += '</svg>';
+  return svg;
+}
+function lineChart(series){
+  var W = 680, H = 220, padL = 54, padR = 60, padT = 24, padB = 40;
+  if (series.length < 2) {
+    return '<div class="empty">记满 2 天就会画出增长曲线</div>';
+  }
+  var vals = series.map(function(p){ return p.fans; });
+  var maxV = Math.max.apply(null, vals), minV = Math.min.apply(null, vals);
+  if (maxV === minV) { maxV = minV + 1; }
+  var plotW = W - padL - padR, plotH = H - padT - padB;
+  var pts = series.map(function(p, i){
+    var x = padL + (i / (series.length - 1)) * plotW;
+    var y = padT + (1 - (p.fans - minV) / (maxV - minV)) * plotH;
+    return { x: x, y: y, p: p };
+  });
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>粉丝增长曲线</title>';
+  svg += '<line x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - padR) + '" y2="' + (H - padB) + '" stroke="#c7cad3" stroke-width="1"/>';
+  var d = '';
+  pts.forEach(function(pt, i){ d += (i ? 'L' : 'M') + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ' '; });
+  svg += '<path d="' + d + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  pts.forEach(function(pt){
+    svg += '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="4.5" fill="#7c3aed"/>';
+    svg += '<text x="' + pt.x + '" y="' + (pt.y - 12) + '" text-anchor="middle" font-size="12" fill="#7c3aed">' + pt.p.fans + '</text>';
+  });
+  svg += '<text x="' + padL + '" y="' + (H - 12) + '" text-anchor="start" font-size="12" fill="#6b7280">' + esc(series[0].date.slice(5)) + '</text>';
+  svg += '<text x="' + (W - padR) + '" y="' + (H - 12) + '" text-anchor="end" font-size="12" fill="#6b7280">' + esc(series[series.length - 1].date.slice(5)) + '</text>';
+  svg += '</svg>';
+  return svg;
+}
+
+/* ---------- 渲染层（互不调用，只被 refreshAll 调） ---------- */
+function renderStats(){
+  var mk = viewMonth;
+  var total = shopSummary(mk).reduce(function(s, x){ return s + x.profit; }, 0);
+  var petS = petSummary(mk);
+  var od = overdueTodos().length;
+  var fans = latestFans('all');
+  var pe = document.getElementById('s-profit');
+  pe.textContent = money(total);
+  pe.className = total >= 0 ? 'up' : 'down';
+  document.getElementById('stat-profit').className = 'stat' + (total < 0 ? ' alert' : '');
+  document.getElementById('s-pet').textContent = money(petS.total);
+  document.getElementById('s-fans').textContent = fans > 0 ? fans.toString() : '--';
+  document.getElementById('s-od').textContent = od;
+  document.getElementById('stat-od').className = 'stat' + (od > 0 ? ' alert' : '');
+}
+
+function renderBanner(){
+  var el = document.getElementById('banner');
+  var total = state.todos.length + state.profits.length + state.pet.length + state.media.length;
+  var msg = '';
+  if (state.demo) msg = '现在全是示例数据，看看结构。点「记一笔」开始记自己的，示例想清掉就用下面「清空全部数据」。';
+  else if (total >= 30) msg = '数据攒到 ' + total + ' 条了，建议导出一份 JSON 备份。';
+  if (msg) {
+    document.getElementById('banner-txt').textContent = msg;
+    el.className = 'banner show';
+  } else {
+    el.className = 'banner';
+  }
+}
+
+function todoRow(x, kind){
+  var t = todayStr();
+  var meta = '';
+  if (kind === 'od') meta = '<span class="tag red">逾期 ' + diffDays(x.due, t) + ' 天</span>';
+  else if (kind === 'today') meta = '<span class="tag">今天</span>';
+  else if (kind === 'soon') meta = '<span class="tag">' + diffDays(t, x.due) + ' 天后</span>';
+  else meta = '<span class="tag green">已完成</span>';
+  if (x.tag && x.tag !== '通用') {
+    var cls = x.tag === '来伊份' ? 'biz' : (x.tag === '宠物公司' ? 'pet' : 'media');
+    meta += '<span class="tag ' + cls + '">' + esc(x.tag) + '</span>';
+  }
+  return '<div class="item' + (x.done ? ' done' : '') + '">' +
+    '<button class="chk' + (x.done ? ' on' : '') + '" data-act="toggle" data-id="' + x.id + '" aria-label="完成">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>' +
+    '</button>' +
+    '<div class="it-main"><div class="it-txt">' + esc(x.text) + '</div><div class="it-meta">' + meta + '</div></div>' +
+    '<div class="it-act">' +
+      (x.done ? '' : '<button class="icon-btn" data-act="td-tomorrow" data-id="' + x.id + '" aria-label="推到明天"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>') +
+      '<button class="icon-btn" data-act="td-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>' +
+    '</div></div>';
+}
+
+function renderTodos(){
+  var od = overdueTodos(), td = todayTodos(), soon = soonTodos(), done = doneTodos();
+  var html = '';
+  if (!od.length && !td.length && !soon.length && !done.length) {
+    html = '<div class="empty">还没有要做的事</div>';
+  } else {
+    if (od.length) html += '<div class="tag red" style="margin:6px 0 2px">欠着的（' + od.length + '）</div>' + od.map(function(x){ return todoRow(x, 'od'); }).join('');
+    if (td.length) html += '<div class="tag" style="margin:14px 0 2px">今天（' + td.length + '）</div>' + td.map(function(x){ return todoRow(x, 'today'); }).join('');
+    if (soon.length) html += '<div class="tag" style="margin:14px 0 2px">这周之内（' + soon.length + '）</div>' + soon.map(function(x){ return todoRow(x, 'soon'); }).join('');
+    if (done.length) html += '<div class="tag green" style="margin:14px 0 2px">刚做完（' + done.length + '）</div>' + done.map(function(x){ return todoRow(x, 'done'); }).join('');
+  }
+  document.getElementById('todo-list').innerHTML = html;
+}
+
+function renderBizSelects(){
+  var sel = document.getElementById('pf-shop');
+  var cur = sel.value;
+  sel.innerHTML = state.shops.map(function(s){ return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join('');
+  if (state.shops.indexOf(cur) >= 0) sel.value = cur;
+}
+
+function renderBiz(){
+  var mk = viewMonth;
+  var sums = shopSummary(mk);
+  var totalRev = sums.reduce(function(s, x){ return s + x.revenue; }, 0);
+  var totalCost = sums.reduce(function(s, x){ return s + x.cost; }, 0);
+  var html = sums.map(function(x){
+    var cls = x.profit >= 0 ? 'money-in' : 'money-out';
+    return '<div class="sum-card">' +
+      '<div class="shop">' + esc(x.shop.replace('来伊份', '')) + '</div>' +
+      '<div class="num ' + cls + '">' + money(x.profit) + '</div>' +
+      '<div class="mini">收 ' + money(x.revenue) + ' · 本 ' + money(x.cost) + '</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('biz-sum').innerHTML = html;
+
+  document.getElementById('biz-chart').innerHTML =
+    '<p class="ct">各店本月利润（' + esc(mk) + '）· 全部合计 ' + money(totalRev - totalCost) + '</p>' +
+    barChart(sums);
+
+  var list = monthProfits(mk).slice().reverse();
+  var el = document.getElementById('profit-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">' + esc(mk) + ' 还没有记账</div>';
+    return;
+  }
+  el.innerHTML = list.map(function(x){
+    var p = num(x.revenue) - num(x.cost);
+    var cls = p >= 0 ? 'money-in' : 'money-out';
+    return '<div class="item">' +
+      '<div class="it-main"><div class="it-txt">' + esc(x.shop) + ' · <span class="' + cls + '">' + money(p) + '</span></div>' +
+      '<div class="it-meta"><span>' + esc(x.date) + '</span>' +
+        '<span class="money-in">收 ' + money(num(x.revenue)) + '</span>' +
+        '<span class="money-out">本 ' + money(num(x.cost)) + '</span>' +
+        (x.note ? '<span class="tag">' + esc(x.note) + '</span>' : '') +
+      '</div></div>' +
+      '<div class="it-act"><button class="icon-btn" data-act="pf-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderPet(){
+  var mk = viewMonth;
+  var s = petSummary(mk);
+  document.getElementById('pet-sum').innerHTML =
+    '<div class="sum-card"><div class="shop">本月总收入</div><div class="num money-in">' + money(s.total) + '</div><div class="mini">' + esc(mk) + '</div></div>' +
+    '<div class="sum-card"><div class="shop">上门喂养</div><div class="num" style="color:var(--pet)">' + money(s.feed) + '</div><div class="mini">按次收费</div></div>' +
+    '<div class="sum-card"><div class="shop">零食销售</div><div class="num" style="color:var(--pet)">' + money(s.sell) + '</div><div class="mini">卖出去的</div></div>';
+
+  var list = state.pet.filter(function(x){ return monthKeyOf(x.date) === mk; }).slice().reverse();
+  var el = document.getElementById('pet-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">' + esc(mk) + ' 还没有宠物业务记录</div>';
+    return;
+  }
+  el.innerHTML = list.map(function(x){
+    return '<div class="item">' +
+      '<div class="it-main"><div class="it-txt">' + esc(x.customer || '未写客户') + ' · <span class="money-in">' + money(num(x.amount)) + '</span></div>' +
+      '<div class="it-meta"><span>' + esc(x.date) + '</span><span class="tag pet">' + esc(x.type) + '</span>' +
+        (x.note ? '<span class="tag">' + esc(x.note) + '</span>' : '') +
+      '</div></div>' +
+      '<div class="it-act"><button class="icon-btn" data-act="pt-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderMedia(){
+  var sel = document.getElementById('md-platform');
+  var platform = document.getElementById('media-platform').value;
+  var series = mediaSeries(platform === 'all' ? null : platform);
+  document.getElementById('media-chart').innerHTML =
+    '<p class="ct">粉丝增长曲线（' + (platform === 'all' ? '全部平台合计' : esc(platform)) + '）</p>' +
+    lineChart(series);
+
+  var list = state.media.slice().sort(function(a, b){ return a.date < b.date ? 1 : -1; }).slice(0, 8);
+  document.getElementById('media-list').innerHTML = list.map(function(x){
+    return '<div class="item">' +
+      '<div class="it-main"><div class="it-txt">' + esc(x.platform) + ' 粉丝 <b>' + num(x.fans) + '</b></div>' +
+      '<div class="it-meta"><span>' + esc(x.date) + '</span>' +
+        '<span>播放 ' + num(x.views) + '</span><span>赞 ' + num(x.likes) + '</span>' +
+        (x.note ? '<span class="tag">' + esc(x.note) + '</span>' : '') +
+      '</div></div>' +
+      '<div class="it-act"><button class="icon-btn" data-act="md-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderStoreHint(){
+  var ok = true;
+  try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); } catch (e) { ok = false; }
+  document.getElementById('store-hint').textContent = ok
+    ? '当前设备存储正常，数据保存在本机浏览器里。'
+    : '浏览器禁用了本地存储（可能开了无痕模式），这次的数据刷新后会丢，记得先导出备份。';
+}
+
+/* ---------- 统一刷新入口 ---------- */
+function refreshAll(){
+  renderStats();
+  renderBanner();
+  renderTodos();
+  renderBizSelects();
+  renderBiz();
+  renderPet();
+  renderMedia();
+  renderStoreHint();
+}
+
+/* ---------- 交互 ---------- */
+var toastTimer = null;
+function toast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show';
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.className = 'toast'; }, 2200);
+}
+
+function addTodo(){
+  var txt = document.getElementById('td-text').value.trim();
+  if (!txt) { toast('先写点什么'); return; }
+  state.todos.push({
+    id: uid(), text: txt,
+    tag: document.getElementById('td-tag').value,
+    due: document.getElementById('td-date').value || todayStr(),
+    done: false
+  });
+  state.demo = false;
+  saveData();
+  document.getElementById('td-text').value = '';
+  refreshAll();
+  toast('加好了');
+}
+function toggleTodo(id){
+  state.todos.forEach(function(x){ if (x.id === id) x.done = !x.done; });
+  saveData(); refreshAll();
+}
+function todoTomorrow(id){
+  state.todos.forEach(function(x){ if (x.id === id) x.due = shiftDays(todayStr(), 1); });
+  saveData(); refreshAll(); toast('推到明天了');
+}
+function delTodo(id){
+  state.todos = state.todos.filter(function(x){ return x.id !== id; });
+  saveData(); refreshAll();
+}
+function addProfit(){
+  var rev = document.getElementById('pf-rev').value;
+  var cost = document.getElementById('pf-cost').value;
+  if (rev === '' && cost === '') { toast('收入和成本至少填一个'); return; }
+  state.profits.push({
+    id: uid(),
+    date: document.getElementById('pf-date').value || todayStr(),
+    shop: document.getElementById('pf-shop').value || state.shops[0],
+    revenue: num(rev), cost: num(cost),
+    note: document.getElementById('pf-note').value.trim()
+  });
+  state.demo = false;
+  saveData();
+  document.getElementById('pf-rev').value = '';
+  document.getElementById('pf-cost').value = '';
+  document.getElementById('pf-note').value = '';
+  refreshAll();
+  toast('记好了，利润自动算');
+}
+function delProfit(id){
+  state.profits = state.profits.filter(function(x){ return x.id !== id; });
+  saveData(); refreshAll();
+}
+function addShop(){
+  var name = prompt('新门店的名字：');
+  if (!name) return;
+  name = name.trim();
+  if (!name) return;
+  if (state.shops.indexOf(name) >= 0) { toast('这家店已经有了'); return; }
+  state.shops.push(name);
+  saveData(); refreshAll(); toast('门店加好了');
+}
+function delPet(id){
+  state.pet = state.pet.filter(function(x){ return x.id !== id; });
+  saveData(); refreshAll();
+}
+function addPet(){
+  var amt = document.getElementById('pt-amt').value;
+  if (amt === '') { toast('填一下金额'); return; }
+  state.pet.push({
+    id: uid(),
+    date: document.getElementById('pt-date').value || todayStr(),
+    type: document.getElementById('pt-type').value,
+    customer: document.getElementById('pt-cust').value.trim(),
+    amount: num(amt),
+    note: ''
+  });
+  state.demo = false;
+  saveData();
+  document.getElementById('pt-cust').value = '';
+  document.getElementById('pt-amt').value = '';
+  refreshAll();
+  toast('记好了');
+}
+function delMedia(id){
+  state.media = state.media.filter(function(x){ return x.id !== id; });
+  saveData(); refreshAll();
+}
+function addMedia(){
+  var fans = document.getElementById('md-fans').value;
+  if (fans === '') { toast('至少填一下粉丝数'); return; }
+  state.media.push({
+    id: uid(),
+    date: document.getElementById('md-date').value || todayStr(),
+    platform: document.getElementById('md-platform').value,
+    fans: num(fans),
+    views: num(document.getElementById('md-views').value),
+    likes: num(document.getElementById('md-likes').value),
+    note: document.getElementById('md-note').value.trim()
+  });
+  state.demo = false;
+  saveData();
+  document.getElementById('md-fans').value = '';
+  document.getElementById('md-views').value = '';
+  document.getElementById('md-likes').value = '';
+  document.getElementById('md-note').value = '';
+  refreshAll();
+  toast('记好了');
+}
+function exportCsv(){
+  var rows = [['日期', '门店', '收入', '成本', '利润', '备注']];
+  state.profits.slice().sort(function(a, b){ return a.date < b.date ? -1 : 1; }).forEach(function(x){
+    rows.push([x.date, x.shop, num(x.revenue), num(x.cost), num(x.revenue) - num(x.cost), x.note || '']);
+  });
+  var csv = '\uFEFF' + rows.map(function(r){
+    return r.map(function(c){ return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+  }).join('\r\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '门店盈利-' + currentMonth() + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  toast('CSV 下载好了，Excel 直接打开');
+}
+function exportJson(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '生意驾驶舱备份-' + todayStr() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  toast('备份下载好了');
+}
+function importJson(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    try {
+      var o = JSON.parse(reader.result);
+      if (!o || !Array.isArray(o.shops)) throw new Error('bad');
+      var n = (o.todos || []).length + (o.profits || []).length + (o.pet || []).length + (o.media || []).length;
+      if (!confirm('确认导入 ' + n + ' 条数据？当前数据会被覆盖。')) return;
+      state = {
+        demo: !!o.demo,
+        shops: Array.isArray(o.shops) && o.shops.length ? o.shops : state.shops,
+        todos: Array.isArray(o.todos) ? o.todos : [],
+        profits: Array.isArray(o.profits) ? o.profits : [],
+        pet: Array.isArray(o.pet) ? o.pet : [],
+        media: Array.isArray(o.media) ? o.media : []
+      };
+      saveData(); refreshAll(); toast('导入了 ' + n + ' 条');
+    } catch (e) { toast('文件读不出来，确认是本页导出的 JSON'); }
+  };
+  reader.readAsText(file);
+}
+function clearAll(){
+  if (!confirm('清空全部数据（待办+盈利+宠物+自媒体）？\n不能撤销，建议先导出备份。')) return;
+  if (!confirm('再确认一次：真的要清空吗？')) return;
+  state = { demo:false, shops: state.shops, todos: [], profits: [], pet: [], media: [] };
+  saveData(); refreshAll(); toast('清空了，门店名单保留着');
+}
+
+/* ---------- 事件绑定 ---------- */
+function bindEvents(){
+  document.getElementById('btn-add-todo').addEventListener('click', addTodo);
+  document.getElementById('td-text').addEventListener('keydown', function(e){ if (e.key === 'Enter') addTodo(); });
+  document.getElementById('btn-add-profit').addEventListener('click', addProfit);
+  document.getElementById('btn-add-shop').addEventListener('click', addShop);
+  document.getElementById('btn-add-pet').addEventListener('click', addPet);
+  document.getElementById('btn-add-media').addEventListener('click', addMedia);
+  document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
+  document.getElementById('btn-export-json').addEventListener('click', exportJson);
+  document.getElementById('btn-clear-all').addEventListener('click', clearAll);
+  document.getElementById('biz-month').addEventListener('change', function(){
+    viewMonth = this.value || currentMonth();
+    refreshAll();
+  });
+  document.getElementById('media-platform').addEventListener('change', function(){
+    refreshAll();
+  });
+
+  var fi = document.getElementById('file-input');
+  document.getElementById('btn-import-json').addEventListener('click', function(){ fi.click(); });
+  fi.addEventListener('change', function(){
+    if (fi.files && fi.files[0]) importJson(fi.files[0]);
+    fi.value = '';
+  });
+
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!btn) return;
+    var act = btn.getAttribute('data-act');
+    var id = btn.getAttribute('data-id');
+    if (act === 'toggle') toggleTodo(id);
+    else if (act === 'td-tomorrow') todoTomorrow(id);
+    else if (act === 'td-del') delTodo(id);
+    else if (act === 'pf-del') delProfit(id);
+    else if (act === 'pt-del') delPet(id);
+    else if (act === 'md-del') delMedia(id);
+  });
+}
+
+/* ---------- 初始化 ---------- */
+function init(){
+  loadData();
+  viewMonth = currentMonth();
+  var d;
+  d = document.getElementById('td-date'); if (d) d.value = todayStr();
+  d = document.getElementById('pf-date'); if (d) d.value = todayStr();
+  d = document.getElementById('pt-date'); if (d) d.value = todayStr();
+  d = document.getElementById('md-date'); if (d) d.value = todayStr();
+  d = document.getElementById('biz-month'); if (d) d.value = viewMonth;
+  bindEvents();
+  refreshAll();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
