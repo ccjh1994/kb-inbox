@@ -691,7 +691,10 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         </div>
       </div>
       <div class="field">
-        <textarea id="fr-sales-text" rows="3" placeholder="苹果 25斤 150元&#10;蜜橘 40斤 96元"></textarea>
+        <textarea id="fr-sales-text" rows="3" placeholder="一行一个品，写法都行：
+苹果 120元（只有金额也行）
+苹果 25斤 150元（有斤数能算毛利）
+苹果 150元 售价6元一斤（自动反推斤数）"></textarea>
       </div>
       <button class="btn" id="btn-fr-sales">解析报数</button>
       <div id="fr-sales-preview"></div>
@@ -1179,33 +1182,76 @@ function parseFruitBuy(raw){
   return { ok: true, data: { date: date, item: item, store: store, qty: qty, unit: unit, unitPrice: unitPrice, total: total } };
 }
 
-function parseFruitSalesLine(line){
-  var s = String(line || '').trim().replace(/，/g, ' ');
-  if (!s) return null;
-  var w = s.replace(/卖了|卖出|售出|收入|收了|营业额|销售额|总共/g, '');
-  var m = w.match(/^[\u4e00-\u9fa5]{1,8}/);
-  if (!m) return { err: '没认出品类：' + line };
-  var item = m[0];
-  var rest = w.slice(m[0].length);
-  var q = rest.match(new RegExp('(\\d+(?:\\.\\d+)?)\\s*' + FRUIT_UNIT_RE));
-  if (!q) return { err: '没认出数量（多少斤）：' + line };
-  var qty = parseFloat(q[1]), unit = normUnit(q[2]);
-  var after = rest.slice(q.index + q[0].length);
-  var r = after.match(/(\d+(?:\.\d+)?)/);
-  if (!r) return { err: '没认出卖了多少钱：' + line };
-  return { item: item, qty: qty, unit: unit, revenue: parseFloat(r[1]) };
+function fruitKnownItems(){
+  var set = {};
+  state.fruitPurchases.forEach(function(p){ if (p.item) set[p.item] = 1; });
+  state.fruitSales.forEach(function(s){ if (s.item) set[s.item] = 1; });
+  return Object.keys(set);
 }
 
-function parseFruitSalesReport(raw){
+function fruitMatchItem(w, known){
+  /* 先整名匹配（如 陕西苹果），再匹配去产地的尾缀（陕西苹果→苹果） */
+  var i, name;
+  for (i = 0; i < known.length; i++) {
+    if (known[i] && w.indexOf(known[i]) > -1) return known[i];
+  }
+  for (i = 0; i < known.length; i++) {
+    name = known[i];
+    if (name.length >= 4) {
+      var tail = name.slice(2);
+      if (tail && w.indexOf(tail) > -1) return name;
+    }
+  }
+  return null;
+}
+
+function parseFruitSalesLine(line, known){
+  var s = String(line || '').trim().replace(/，|、|，/g, ' ').replace(/\s+/g, ' ');
+  if (!s) return null;
+  var w = s.replace(/卖了|卖出|售出|收入|收了|营业额|销售额|总共|一共|大概|左右|今天|今日/g, ' ');
+  /* 1. 品类：优先匹配进过货的品名，否则取第一段中文 */
+  var item = fruitMatchItem(w, known || []);
+  var rest = w;
+  if (item) {
+    rest = w.replace(item, ' ');
+  } else {
+    var m = w.match(/[\u4e00-\u9fa5]{1,8}/);
+    if (m) { item = m[0]; rest = w.slice(m.index + m[0].length); }
+  }
+  /* 2. 售价（X元一斤 / 售价X）先摘掉，避免被当成金额 */
+  var sellPrice = 0;
+  var pm = rest.match(/(\d+(?:\.\d+)?)\s*元\s*[一每\/]\s*(斤|公斤|kg|KG)/) || rest.match(/(?:售价|卖价)\s*[:：]?\s*(\d+(?:\.\d+)?)/);
+  if (pm) { sellPrice = parseFloat(pm[1]); rest = rest.slice(0, pm.index) + ' ' + rest.slice(pm.index + pm[0].length); }
+  /* 3. 数量（可选） */
+  var qty = 0, unit = '';
+  var q = rest.match(new RegExp('(\\d+(?:\\.\\d+)?)\\s*' + FRUIT_UNIT_RE));
+  if (q) { qty = parseFloat(q[1]); unit = normUnit(q[2]); rest = rest.slice(0, q.index) + ' ' + rest.slice(q.index + q[0].length); }
+  /* 4. 金额：剩下的最后一个数字（写在前面的售价已被摘掉） */
+  var nums = rest.match(/\d+(?:\.\d+)?/g);
+  if (!nums || !nums.length) return { err: '这行没认出金额：' + line };
+  var revenue = parseFloat(nums[nums.length - 1]);
+  if (!item) item = '未分品';
+  /* 5. 没写斤数但给了售价 → 反推斤数 */
+  var derived = false;
+  if (!qty && sellPrice > 0 && revenue > 0) {
+    qty = Math.round(revenue / sellPrice * 10) / 10;
+    unit = /公斤|kg|KG/i.test(String(pm ? pm[0] : '')) ? '公斤' : '斤';
+    derived = true;
+  }
+  return { item: item, qty: qty, unit: unit, revenue: revenue, sellPrice: sellPrice, derived: derived };
+}
+
+function parseFruitSalesReport(raw, known){
   var lines = String(raw || '').split(/\n|；|;/);
   var rows = [], errs = [];
   lines.forEach(function(l){
     if (!l.trim()) return;
-    var r = parseFruitSalesLine(l);
-    if (r && r.err) errs.push(r.err);
-    else if (r) rows.push(r);
+    var r = parseFruitSalesLine(l, known);
+    if (!r) return;
+    if (r.err) errs.push(r.err);
+    else rows.push(r);
   });
-  if (!rows.length && !errs.length) return { ok: false, msg: '先把店员报的数据贴进来，一行一个品：苹果 25斤 150元' };
+  if (!rows.length && !errs.length) return { ok: false, msg: '把店员报的数据贴进来，一行一个品。有斤数写斤数，只有金额也行：苹果 120元' };
   if (!rows.length) return { ok: false, msg: errs.join('；') };
   return { ok: true, rows: rows, errs: errs };
 }
@@ -1233,8 +1279,8 @@ function fruitPerf(mk){
     b.revenue += num(s.revenue);
     b.count++;
     var bk = basis[s.item + '|' + s.unit];
-    if (bk && bk.qty > 0) b.cost += num(s.qty) * (bk.cost / bk.qty);
-    else b.costKnown = false;
+    if (bk && bk.qty > 0 && num(s.qty) > 0) b.cost += num(s.qty) * (bk.cost / bk.qty);
+    else b.costKnown = false; /* 没斤数或没进货价的记录，毛利算不准 */
   });
   return Object.keys(byItem).map(function(k){ return byItem[k]; })
     .sort(function(a, b){ return b.revenue - a.revenue; });
@@ -1319,18 +1365,22 @@ function doParseFruitSales(){
   var date = document.getElementById('fr-date').value || todayStr();
   var store = document.getElementById('fr-store').value;
   var weather = document.getElementById('fr-weather').value;
-  var r = parseFruitSalesReport(document.getElementById('fr-sales-text').value);
+  var r = parseFruitSalesReport(document.getElementById('fr-sales-text').value, fruitKnownItems());
   if (!r.ok) {
     pendingFruitSales = null;
     box.innerHTML = '<p class="hint">' + esc(r.msg) + '</p>';
     return;
   }
   pendingFruitSales = { date: date, store: store, weather: weather, rows: r.rows };
+  var revSum = 0;
   var html = r.rows.map(function(x){
-    return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(x.item) + ' · ' + x.qty + esc(x.unit) + ' · <span class="money-in">' + money(x.revenue) + '</span></div></div></div>';
+    revSum += num(x.revenue);
+    var qtyTxt = num(x.qty) > 0 ? x.qty + esc(x.unit) : '金额口径';
+    var tag = x.derived ? '<span class="tag">按售价' + money(x.sellPrice) + '/斤反推' + x.qty + '斤</span>' : '';
+    return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(x.item) + ' · ' + qtyTxt + ' · <span class="money-in">' + money(x.revenue) + '</span>' + tag + '</div></div></div>';
   }).join('');
-  if (r.errs.length) html += '<p class="hint">' + esc(r.errs.length + ' 行没认出来：' + r.errs.join('；')) + '</p>';
-  html += '<div class="btn-row"><button class="btn" data-act="fr-sales-ok">确认录入 ' + r.rows.length + ' 条</button><button class="btn ghost" data-act="fr-sales-cancel">重写</button></div>';
+  if (r.errs.length) html += '<p class="hint" style="color:#c0392b">以下 ' + r.errs.length + ' 行没认出来（其他行照常入库）：<br>' + esc(r.errs.join('；')) + '</p>';
+  html += '<div class="btn-row"><button class="btn" data-act="fr-sales-ok">确认录入 ' + r.rows.length + ' 条 · 共' + money(revSum) + '</button><button class="btn ghost" data-act="fr-sales-cancel">重写</button></div>';
   box.innerHTML = html;
 }
 
@@ -1396,7 +1446,7 @@ function renderFruit(){
         : '<span style="color:var(--amber)">毛利待算（没进货价）</span>');
       return '<div class="fr-row"><div class="fr-name">' + esc(b.item) + '</div>' +
         '<div class="fr-bar-wrap"><div class="fr-bar" style="width:' + w + '%"></div></div>' +
-        '<div class="fr-val">' + b.qty + esc(b.unit) + '<br>' + val + '</div></div>';
+        '<div class="fr-val">' + (num(b.qty) > 0 ? b.qty + esc(b.unit) : '只记金额') + '<br>' + val + '</div></div>';
     }).join('');
   }
 
@@ -1419,7 +1469,7 @@ function renderFruit(){
   var slist = state.fruitSales.slice().reverse().slice(0, 8);
   document.getElementById('fr-sales-list').innerHTML = slist.length
     ? '<p style="font-size:12.5px;color:var(--muted);margin:12px 0 2px">最近销量</p>' + slist.map(function(x){
-        return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(x.item) + ' ' + num(x.qty) + esc(x.unit) + ' · <span class="money-in">' + money(num(x.revenue)) + '</span>' +
+        return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(x.item) + (num(x.qty) > 0 ? ' ' + num(x.qty) + esc(x.unit) : '') + ' · <span class="money-in">' + money(num(x.revenue)) + '</span>' +
           '<div class="it-meta"><span>' + esc(x.date) + '</span><span class="tag">' + esc(x.store.replace('来伊份', '')) + '</span>' + (x.weather ? '<span class="tag">' + esc(x.weather) + '</span>' : '') + '</div></div></div>' +
           '<div class="it-act"><button class="icon-btn" data-act="fs-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div></div>';
       }).join('')
