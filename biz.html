@@ -653,9 +653,11 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         快捷进货
       </h2>
-      <p class="desc">一句话记一笔进货，例如：<b>苹果 60斤 3.5元一斤 庆春东路店</b> 或 <b>11-04 蜜橘 100斤 共280元 网上店</b></p>
+      <p class="desc">一句话记一笔进货，<b>一行一条，可一次贴多行</b>。例如：<b>苹果 60斤 3.5元一斤 庆春东路店</b> 或 <b>11-04 蜜橘 100斤 共280元 网上店</b></p>
       <div class="field">
-        <textarea id="fr-buy-text" rows="2" placeholder="苹果 60斤 3.5元一斤 庆春东路店"></textarea>
+        <textarea id="fr-buy-text" rows="4" placeholder="一行一条，可贴多行：
+陕西苹果 31斤 共112元 庆春东路店
+涌泉蜜桔 85斤 共221元 庆春东路店"></textarea>
       </div>
       <button class="btn" id="btn-fr-buy">解析进货</button>
       <div id="fr-buy-preview"></div>
@@ -1261,33 +1263,50 @@ var pendingFruitBuy = null;
 var pendingFruitSales = null;
 
 function doParseFruitBuy(){
-  var r = parseFruitBuy(document.getElementById('fr-buy-text').value);
   var box = document.getElementById('fr-buy-preview');
-  if (!r.ok) {
+  var lines = String(document.getElementById('fr-buy-text').value || '').split(/\n+/)
+    .map(function(s){ return s.trim(); }).filter(Boolean);
+  if (!lines.length) {
     pendingFruitBuy = null;
-    box.innerHTML = '<p class="hint">' + esc(r.msg) + '</p>';
+    box.innerHTML = '<p class="hint">先写进货信息，一行一条，可一次贴多行。比如：苹果 60斤 3.5元一斤 庆春东路店</p>';
     return;
   }
-  pendingFruitBuy = r.data;
-  var d = r.data;
-  box.innerHTML =
-    '<div class="item"><div class="it-main"><div class="it-txt">' + esc(d.item) + ' · ' + d.qty + esc(d.unit) + ' · <span class="money-in">' + money(d.total) + '</span>' +
-    '<div class="it-meta"><span>' + esc(d.date) + '</span><span class="tag">' + esc(d.store || '没认出门店，默认庆春东路店') + '</span><span class="tag">单价 ' + money(d.unitPrice) + '/' + esc(d.unit) + '</span></div></div></div></div>' +
-    '<div class="btn-row"><button class="btn" data-act="fr-buy-ok">确认入库</button><button class="btn ghost" data-act="fr-buy-cancel">重写</button></div>';
+  var oks = [], errs = [];
+  lines.forEach(function(line){
+    var r = parseFruitBuy(line);
+    if (r.ok) oks.push(r.data); else errs.push(line + '：' + r.msg);
+  });
+  if (!oks.length) {
+    pendingFruitBuy = null;
+    box.innerHTML = '<p class="hint">' + errs.map(esc).join('<br>') + '</p>';
+    return;
+  }
+  pendingFruitBuy = oks;
+  var tot = oks.reduce(function(s, d){ return s + num(d.total); }, 0);
+  var html = oks.map(function(d){
+    return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(d.item) + ' · ' + d.qty + esc(d.unit) + ' · <span class="money-in">' + money(d.total) + '</span>' +
+      '<div class="it-meta"><span>' + esc(d.date) + '</span><span class="tag">' + esc(d.store || '没认出门店，默认庆春东路店') + '</span><span class="tag">单价 ' + money(d.unitPrice) + '/' + esc(d.unit) + '</span></div></div></div></div>';
+  }).join('');
+  if (errs.length) html += '<p class="hint" style="color:#c0392b">以下几行没认出来，请检查后单独重贴：<br>' + errs.map(esc).join('<br>') + '</p>';
+  html += '<div class="btn-row"><button class="btn" data-act="fr-buy-ok">确认入库（' + oks.length + '笔 · 共' + money(tot) + '）</button><button class="btn ghost" data-act="fr-buy-cancel">重写</button></div>';
+  box.innerHTML = html;
 }
 
 function confirmFruitBuy(){
-  if (!pendingFruitBuy) return;
-  var d = pendingFruitBuy;
-  if (!d.store) d.store = '来伊份庆春东路店';
-  state.fruitPurchases.push({ id: uid(), date: d.date, item: d.item, store: d.store, qty: d.qty, unit: d.unit, unitPrice: d.unitPrice, total: d.total, note: '' });
+  if (!pendingFruitBuy || !pendingFruitBuy.length) return;
+  var n = 0, tot = 0;
+  pendingFruitBuy.forEach(function(d){
+    if (!d.store) d.store = '来伊份庆春东路店';
+    state.fruitPurchases.push({ id: uid(), date: d.date, item: d.item, store: d.store, qty: d.qty, unit: d.unit, unitPrice: d.unitPrice, total: d.total, note: '' });
+    n++; tot += num(d.total);
+  });
   state.demo = false;
   pendingFruitBuy = null;
   document.getElementById('fr-buy-text').value = '';
   document.getElementById('fr-buy-preview').innerHTML = '';
   saveData();
   refreshAll();
-  toast('进货已记录：' + d.item + ' ' + money(d.total));
+  toast('已入库 ' + n + ' 笔进货，共 ' + money(tot));
 }
 
 function cancelFruitBuy(){
