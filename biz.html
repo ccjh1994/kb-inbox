@@ -245,10 +245,24 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
   .split{grid-template-columns:1fr}
 }
 @media(max-width:900px){
-  .sidebar{display:none}
-  .main{margin-left:0;padding:0 14px calc(78px + env(safe-area-inset-bottom))}
-  .page-head{padding-top:16px}
-  .tabbar{display:flex}
+  :root{--sidebar-w:142px}
+  .sidebar{display:flex;padding:10px 6px 8px}
+  .brand{padding:2px 6px 10px;gap:7px}
+  .brand .mark{width:30px;height:30px;flex:0 0 30px;border-radius:9px}
+  .brand .mark svg{width:17px;height:17px}
+  .brand .bt{font-size:12px;line-height:1.3}
+  .brand .bs{display:none}
+  .nav-group{padding:8px 8px 4px;font-size:9.5px}
+  .nav-item{padding:10px 7px;min-height:44px;font-size:12.5px;gap:7px}
+  .nav-item .n-ic{width:16px;height:16px;flex:0 0 16px}
+  .nav-item .n-num{display:none}
+  .nav-item .n-label{white-space:normal;line-height:1.25}
+  .badge{min-width:22px;height:19px;font-size:10px;padding:0 5px}
+  .side-foot{font-size:10.5px;padding:8px 6px 2px}
+  .main{padding:0 12px 24px}
+  .page-head{padding-top:14px}
+  .page-head h1{font-size:19px}
+  .tabbar{display:none}
 }
 @media(max-width:560px){
   .hero-grid{grid-template-columns:repeat(2,1fr)}
@@ -622,42 +636,13 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
   <section class="view" id="view-fruit">
     <section class="card">
       <h2>
-        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M10 10.5c.5-3 2-5.5 5-7.5"/><path d="M15 3c1.5.5 3 .5 4.5 0-.5 1.8-1.5 3-3 3.5"/></svg>
-        水果大盘 · 杭州参考
-      </h2>
-      <p class="desc">勾庄果品批发市场行情 + 品种产地参考。更新于 2026-11-06。跟我说「更新水果大盘」，我查最新行情后直接推上来。</p>
-
-      <p style="font-size:13.5px;font-weight:650;margin:10px 0 0">当季走量王（11月杭州）</p>
-      <ul class="market-list">
-        <li><b>蜜橘</b> — 秋季绝对主力，勾庄日均交易 200+ 吨，湖南货批发 2.5-4 元/公斤（约 1.3-2 元/斤），大众走量首选；本地涌泉/黄岩精品 7 元/斤上下，做高客单</li>
-        <li><b>苹果</b> — 10 月下旬-11 月是晚熟红富士+阿克苏冰糖心集中上市的黄金期，甜度全年最高，正是进货好窗口</li>
-        <li><b>柚子 / 猕猴桃 / 柿子 / 石榴 / 冬枣</b> — 秋冬当季，耐放损耗低，适合门店常备</li>
-        <li><b>粑粑柑 / 沃柑</b> — 12 月初陆续上市（今年粑粑柑提前、价格比去年便宜），可以提前留意</li>
-        <li><b>葡萄 / 瓜类</b> — 尾季转淡，少进或不进；<b>草莓</b> 12 月起量，先别急</li>
-      </ul>
-
-      <p style="font-size:13.5px;font-weight:650;margin:14px 0 0">苹果产地梯队（怎么卖）</p>
-      <ul class="market-list">
-        <li><b>洛川红富士（陕西）</b> — 酸甜平衡、耐放，日常走量口粮，批发 5.5-9 元/公斤，<b>进货首选</b></li>
-        <li><b>阿克苏冰糖心（新疆）</b> — 纯甜无酸、有糖心话题感，送礼/尝鲜款，产地 3.2-3.5 元/斤；认准霜降后采摘的货，10 月底前的「早上市冰糖心」多半不正宗</li>
-        <li><b>烟台红富士（山东）</b> — 皮薄香气浓，苹果味最正，适合懂客回头客</li>
-        <li><b>花牛（甘肃天水）</b> — 粉糯绵密，老人小孩爱，刚到货脆、放几天粉，可分「脆卖」和「粉卖」两个话术</li>
-        <li><b>昭通红富士（云南）</b> — 便宜爆汁、其貌不扬，做促销引流款</li>
-        <li><b>卖点话术</b>：想纯甜选阿克苏、要平衡选洛川、爱香气挑烟台、老人孩子吃花牛、图实惠找昭通</li>
-      </ul>
-      <p class="mkt-src">行情来源：杭州果品批发市场（勾庄）公开报道与行情月报（2026 年 2 月、10 月），非实时数据，进货价请以当日市场为准。</p>
-    </section>
-
-    <section class="card">
-      <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         快捷进货
       </h2>
-      <p class="desc">一句话记一笔进货，<b>一行一条，可一次贴多行</b>。例如：<b>苹果 60斤 3.5元一斤 庆春东路店</b> 或 <b>11-04 蜜橘 100斤 共280元 网上店</b></p>
+      <p class="desc">一行一条，可贴多行。例：<b>苹果 60斤 3.5元一斤 庆春东路店</b></p>
       <div class="field">
-        <textarea id="fr-buy-text" rows="4" placeholder="一行一条，可贴多行：
-陕西苹果 31斤 共112元 庆春东路店
-涌泉蜜桔 85斤 共221元 庆春东路店"></textarea>
+        <textarea id="fr-buy-text" rows="4" placeholder="一行一条：
+陕西苹果 31斤 共112元 庆春东路店"></textarea>
       </div>
       <button class="btn" id="btn-fr-buy">解析进货</button>
       <div id="fr-buy-preview"></div>
@@ -668,7 +653,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20V10l5-5 5 5v10"/><path d="M10 14h4"/></svg>
         每日报数（店员报销量）
       </h2>
-      <p class="desc">把店员报的数据原样贴进来，一行一个品，例如：<b>苹果 25斤 150元</b>、<b>蜜橘 40斤 96元</b>。可一次贴多行。</p>
+      <p class="desc">店员报的数原样贴进来，一行一个品，<b>只有金额也行</b>，可贴多行。</p>
       <div class="row">
         <div class="field">
           <label>日期</label>
@@ -691,10 +676,9 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         </div>
       </div>
       <div class="field">
-        <textarea id="fr-sales-text" rows="3" placeholder="一行一个品，写法都行：
+        <textarea id="fr-sales-text" rows="3" placeholder="一行一个品：
 苹果 120元（只有金额也行）
-苹果 25斤 150元（有斤数能算毛利）
-苹果 150元 售价6元一斤（自动反推斤数）"></textarea>
+苹果 150元 售价6元一斤（反推斤数算毛利）"></textarea>
       </div>
       <button class="btn" id="btn-fr-sales">解析报数</button>
       <div id="fr-sales-preview"></div>
@@ -721,6 +705,39 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <p class="desc">最近 8 条进货、8 条销量。毛利按同品类进货的加权平均价计算。</p>
       <div id="fr-purchase-list"></div>
       <div id="fr-sales-list"></div>
+    </section>
+
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M10 10.5c.5-3 2-5.5 5-7.5"/><path d="M15 3c1.5.5 3 .5 4.5 0-.5 1.8-1.5 3-3 3.5"/></svg>
+        水果大盘 · 杭州参考
+      </h2>
+      <p class="desc">勾庄行情 + 多源批发价交叉整理。更新于 2026-11-07。跟我说「更新水果大盘」，我查最新行情后推上来。</p>
+
+      <p style="font-size:13.5px;font-weight:650;margin:10px 0 0">11月走量前20参考（批发价约 元/斤）</p>
+      <ol class="market-list">
+        <li><b>蜜橘</b>（湖南/临海涌泉）— 勾庄日销200+吨的绝对主力；湖南货约1.3-2元/斤，涌泉精品5-7元/斤。10月底外地货逐步下市、本地精品接棒，价格易涨难跌</li>
+        <li><b>红富士苹果</b>（陕西洛川/山东烟台）— 晚熟富士集中上市期，市场价约3.5-4.9元/斤；你这个价进的陕西货有空间</li>
+        <li><b>阿克苏冰糖心</b>（新疆）— 霜降后正宗货上市，产地约3.2-3.5元/斤，做尝鲜款</li>
+        <li><b>蜜柚</b>（广西/福建）— 约1.4-2.6元/斤，大件耐放走量</li>
+        <li><b>香蕉</b> — 全国均价约2.3元/斤；佳农品牌货按箱拿的要留意零售定价</li>
+        <li><b>皇冠梨 / 秋月梨</b>（河北）— 皇冠约3-3.9元/斤、秋月3.9-7.5元/斤</li>
+        <li><b>砂糖橘</b>（广西/云南）— 刚上市量少价高约2.3-4.5元/斤，11月中下旬放量降价，先少量试</li>
+        <li><b>猕猴桃</b>（浙江/陕西/四川）— 约3.2-6.5元/斤</li>
+        <li><b>柿子</b>（云南/广西/湖北）— 约2-4.5元/斤，耐放损耗低</li>
+        <li><b>冬枣</b>（陕西/甘肃）— 约4-7.8元/斤</li>
+        <li><b>脐橙</b>（江西）— 11月新果上市，约2.3-3.5元/斤，可以关注</li>
+        <li><b>果冻橙·爱媛</b>（江西/福建）— 约2-3.1元/斤，网红款零售溢价好</li>
+        <li><b>石榴</b>（四川/贵州）— 约3.5-4.8元/斤</li>
+        <li><b>哈密瓜</b>（新疆/海南）— 约2.4-6.3元/斤，尾季少进</li>
+        <li><b>西瓜</b> — 全国均价约2元/斤，尾季收尾货，不建议再压</li>
+        <li><b>火龙果</b>（广西/海南）— 约2.1-4.5元/斤</li>
+        <li><b>阳光玫瑰 / 巨峰葡萄</b> — 约6.3-12 / 4.5-6元/斤，尾季转淡少进</li>
+        <li><b>芒果</b>（海南/广西）— 约4.5-6元/斤</li>
+        <li><b>圣女果</b>（山东/广西）— 约2.3-7.8元/斤</li>
+        <li><b>草莓</b>（建德/云南）— 刚上市量少价高（批发13-18元/斤），杭州本地今年减产明显，12月起量再进不迟</li>
+      </ol>
+      <p class="mkt-src">行情来源：勾庄蜜橘行情报道（日均200+吨、湖南货2.5-4元/公斤）+ 全国批发市场均价（2026-11-02）+ 海峡果品批发市场产地价（2026-11-02）综合整理。勾庄无公开的每日销量榜，前20为多源交叉参考的走量梯队；进货价请以当日市场为准。</p>
     </section>
   </section>
 
