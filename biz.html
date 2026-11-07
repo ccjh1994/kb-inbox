@@ -63,6 +63,11 @@ body{
 .badge.olive{background:var(--olive);color:#fff}
 .side-foot{margin-top:auto;padding:10px 8px 2px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:8px}
 .side-foot a{color:var(--olive);text-decoration:none;font-weight:550}
+.sync-line{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.sync-line i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:0 0 8px;display:inline-block}
+.sync-line i.ok{background:var(--green)}
+.sync-line i.mid{background:var(--amber)}
+.sync-line i.bad{background:var(--red)}
 
 /* ========== 主区 ========== */
 .main{margin-left:var(--sidebar-w);min-height:100vh;padding:0 22px 30px}
@@ -324,7 +329,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
   </button>
 
   <div class="side-foot">
-    <span>数据只存本机浏览器 · 不联网不上传</span>
+    <span class="sync-line" id="sync-line"><i></i><span id="sync-line-txt">同步未配置 · 数据只存本机</span></span>
     <a href="./index.html">← 返回灵感收件箱</a>
   </div>
 </nav>
@@ -822,6 +827,24 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       </div>
       <p class="hint" id="store-hint"></p>
     </section>
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H7a4 4 0 01-.9-7.9 5.5 5.5 0 0110.7-1.6A4 4 0 0117.5 19z"/></svg>
+        云同步 · 电脑手机实时同步
+      </h2>
+      <p class="desc">数据同步到你的 GitHub 私密 Gist（只有持 token 的人能读）。改动约 1-2 秒自动上传，每 45 秒和切回页面时自动拉取，断网存本机、恢复后补传。</p>
+      <div class="field">
+        <label>GitHub Token（只需 gist 权限）</label>
+        <input type="password" id="sync-token" placeholder="ghp_ 开头的一串，粘贴进来">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btn-sync-create">配置并创建云端</button>
+        <button class="btn ghost" id="btn-sync-connect">连接已有云端</button>
+        <button class="btn danger" id="btn-sync-off">断开同步</button>
+      </div>
+      <p class="hint" id="sync-state"></p>
+      <p class="hint">Token 获取（一次性，两台设备用同一个）：打开 <a href="https://github.com/settings/tokens/new?scopes=gist&description=biz-sync" target="_blank" rel="noopener" style="color:var(--olive);font-weight:550">github.com/settings/tokens/new</a>（已预选 gist 权限，其他不用勾）→ 点 Generate token → 复制 ghp_ 开头字符串粘到上面。Token 只存在本设备浏览器里，不进代码不上传。第二台设备选「连接已有云端」即可找到同一份数据。</p>
+    </section>
     <footer class="mob-foot"><a href="./index.html" style="color:var(--olive);text-decoration:none;font-weight:550">← 返回灵感收件箱</a></footer>
   </section>
 </main>
@@ -939,6 +962,191 @@ function loadData(){
 }
 function saveData(){
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  lastLocalSavedAt = new Date().toISOString();
+  try { localStorage.setItem(KEY + '_stamp', lastLocalSavedAt); } catch (e) {}
+  scheduleSyncPush();
+}
+
+/* ---------- 云同步（GitHub 私密 Gist） ---------- */
+var SYNC_KEY = 'wb_biz_sync';
+var syncCfg = { token: '', gistId: '' };
+var syncing = false;
+var pushDebounce = null;
+var lastRemoteSavedAt = '';
+var lastLocalSavedAt = '';
+var syncLoopStarted = false;
+
+function loadSyncCfg(){
+  try {
+    var o = JSON.parse(localStorage.getItem(SYNC_KEY) || '{}');
+    syncCfg.token = o.token || '';
+    syncCfg.gistId = o.gistId || '';
+  } catch (e) {}
+  try { lastLocalSavedAt = localStorage.getItem(KEY + '_stamp') || ''; } catch (e) {}
+}
+function saveSyncCfg(){
+  try { localStorage.setItem(SYNC_KEY, JSON.stringify(syncCfg)); } catch (e) {}
+}
+function renderSyncStatus(st){
+  var dot = '', txt = '';
+  if (!syncCfg.token || !syncCfg.gistId) { dot = ''; txt = '同步未配置 · 数据只存本机'; }
+  else if (st === 'syncing') { dot = 'mid'; txt = '同步中…'; }
+  else if (st === 'offline') { dot = 'bad'; txt = '离线 · 改动已存本机，恢复后自动同步'; }
+  else { dot = 'ok'; txt = '已同步 · ' + (lastLocalSavedAt ? lastLocalSavedAt.replace('T', ' ').slice(0, 16) : '刚刚'); }
+  var t = document.getElementById('sync-line-txt');
+  var i = document.querySelector('#sync-line i');
+  var box = document.getElementById('sync-state');
+  if (t) t.textContent = txt;
+  if (i) i.className = dot;
+  if (box) box.textContent = txt;
+}
+function gh(method, url, body){
+  return fetch(url, {
+    method: method,
+    headers: {
+      'Authorization': 'Bearer ' + syncCfg.token,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+}
+function snapshot(){
+  return JSON.stringify({ savedAt: new Date().toISOString(), state: state });
+}
+function syncPush(cb){
+  if (syncing || !syncCfg.token || !syncCfg.gistId) { if (cb) cb(false); return; }
+  syncing = true;
+  renderSyncStatus('syncing');
+  var snap = snapshot();
+  var savedAt = JSON.parse(snap).savedAt;
+  gh('PATCH', 'https://api.github.com/gists/' + syncCfg.gistId, { files: { 'wb_biz_sync.json': { content: snap } } })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); })
+    .then(function(){
+      lastRemoteSavedAt = savedAt;
+      lastLocalSavedAt = savedAt;
+      try { localStorage.setItem(KEY + '_stamp', savedAt); } catch (e) {}
+      renderSyncStatus('ok');
+      if (cb) cb(true);
+    })
+    .catch(function(){ renderSyncStatus('offline'); if (cb) cb(false); })
+    .then(function(){ syncing = false; });
+}
+function scheduleSyncPush(){
+  if (!syncCfg.token || !syncCfg.gistId) return;
+  if (pushDebounce) clearTimeout(pushDebounce);
+  pushDebounce = setTimeout(function(){ syncPush(); }, 1500);
+}
+function applyRemote(snap){
+  try {
+    var o = JSON.parse(snap);
+    if (!o || !o.state) return false;
+    state = {
+      demo: !!o.state.demo,
+      shops: Array.isArray(o.state.shops) && o.state.shops.length ? o.state.shops : ['来伊份网商店', '来伊份庆春东路店', '来伊份乐堤港店'],
+      todos: Array.isArray(o.state.todos) ? o.state.todos : [],
+      profits: Array.isArray(o.state.profits) ? o.state.profits : [],
+      pet: Array.isArray(o.state.pet) ? o.state.pet : [],
+      media: Array.isArray(o.state.media) ? o.state.media : [],
+      fruitPurchases: Array.isArray(o.state.fruitPurchases) ? o.state.fruitPurchases : [],
+      fruitSales: Array.isArray(o.state.fruitSales) ? o.state.fruitSales : []
+    };
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    lastRemoteSavedAt = o.savedAt;
+    lastLocalSavedAt = o.savedAt;
+    try { localStorage.setItem(KEY + '_stamp', o.savedAt); } catch (e) {}
+    refreshAll();
+    return true;
+  } catch (e) { return false; }
+}
+function syncPull(cb){
+  if (syncing || !syncCfg.token || !syncCfg.gistId) { if (cb) cb(false); return; }
+  gh('GET', 'https://api.github.com/gists/' + syncCfg.gistId)
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(g){
+      var f = g && g.files && g.files['wb_biz_sync.json'];
+      if (!f || !f.content) { renderSyncStatus('ok'); if (cb) cb(false); return; }
+      var remote = JSON.parse(f.content);
+      if (remote.savedAt === lastRemoteSavedAt) { renderSyncStatus('ok'); if (cb) cb(false); return; }
+      if (Date.parse(remote.savedAt || '') > Date.parse(lastLocalSavedAt || 0)) {
+        applyRemote(f.content);
+        renderSyncStatus('ok');
+        if (cb) cb(true);
+      } else {
+        renderSyncStatus('ok');
+        scheduleSyncPush(); /* 本机更新 → 推上去 */
+        if (cb) cb(false);
+      }
+    })
+    .catch(function(){ renderSyncStatus('offline'); if (cb) cb(false); });
+}
+function syncCreate(btn){
+  var tk = document.getElementById('sync-token').value.trim();
+  if (!tk) { toast('先把 token 粘到上面的输入框'); return; }
+  syncCfg.token = tk;
+  btn.disabled = true; btn.textContent = '创建中…';
+  gh('POST', 'https://api.github.com/gists', {
+    description: '生意驾驶舱数据同步（勿删）',
+    public: false,
+    files: { 'wb_biz_sync.json': { content: snapshot() } }
+  }).then(function(r){ return r.json().then(function(g){ return { ok: r.ok, g: g }; }); })
+    .then(function(res){
+      btn.disabled = false; btn.textContent = '配置并创建云端';
+      if (res.ok && res.g && res.g.id) {
+        syncCfg.gistId = res.g.id;
+        saveSyncCfg();
+        lastRemoteSavedAt = JSON.parse(snapshot()).savedAt;
+        renderSyncStatus('ok');
+        startSyncLoop();
+        toast('云端已创建，这台设备同步开启');
+      } else {
+        toast('创建失败：' + ((res.g && res.g.message) || '检查 token 是否有 gist 权限'));
+      }
+    })
+    .catch(function(){
+      btn.disabled = false; btn.textContent = '配置并创建云端';
+      renderSyncStatus('offline');
+      toast('网络不通，稍后再试');
+    });
+}
+function syncConnect(btn){
+  var tk = document.getElementById('sync-token').value.trim();
+  if (!tk) { toast('把同一串 token 粘进来（两台设备用同一个）'); return; }
+  syncCfg.token = tk;
+  btn.disabled = true; btn.textContent = '查找云端…';
+  gh('GET', 'https://api.github.com/gists?per_page=100')
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(list){
+      btn.disabled = false; btn.textContent = '连接已有云端';
+      var g = null;
+      (list || []).forEach(function(x){ if (!g && x.files && x.files['wb_biz_sync.json']) g = x; });
+      if (g) {
+        syncCfg.gistId = g.id;
+        saveSyncCfg();
+        startSyncLoop();
+        syncPull();
+        toast('已连上云端，正在拉取最新数据');
+      } else {
+        toast('这个 token 下没找到云端数据，先用「配置并创建云端」');
+      }
+    })
+    .catch(function(){
+      btn.disabled = false; btn.textContent = '连接已有云端';
+      toast('token 不对或网络不通');
+    });
+}
+function syncOff(){
+  if (!confirm('断开同步？本机数据保留，之后改动不再上传云端。')) return;
+  syncCfg = { token: '', gistId: '' };
+  saveSyncCfg();
+  renderSyncStatus();
+  toast('已断开同步');
+}
+function startSyncLoop(){
+  if (syncLoopStarted) return;
+  syncLoopStarted = true;
+  setInterval(function(){ syncPull(); }, 45000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) syncPull(); });
 }
 
 /* ---------- 计算层 ---------- */
@@ -2187,6 +2395,9 @@ function bindEvents(){
   document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
   document.getElementById('btn-export-json').addEventListener('click', exportJson);
   document.getElementById('btn-clear-all').addEventListener('click', clearAll);
+  document.getElementById('btn-sync-create').addEventListener('click', function(){ syncCreate(this); });
+  document.getElementById('btn-sync-connect').addEventListener('click', function(){ syncConnect(this); });
+  document.getElementById('btn-sync-off').addEventListener('click', syncOff);
   document.getElementById('biz-month').addEventListener('change', function(){
     viewMonth = this.value || currentMonth();
     refreshAll();
@@ -2255,6 +2466,7 @@ function bindEvents(){
 /* ---------- 初始化 ---------- */
 function init(){
   loadData();
+  loadSyncCfg();
   viewMonth = currentMonth();
   petYear = todayStr().slice(0, 4);
   var d;
@@ -2268,6 +2480,8 @@ function init(){
   d = document.getElementById('fr-month'); if (d) d.value = viewMonth;
   bindEvents();
   refreshAll();
+  renderSyncStatus();
+  if (syncCfg.token && syncCfg.gistId) { startSyncLoop(); syncPull(); }
   /* 支持 #todo / #biz / #pet / #fruit / #media / #backup / #home 锚点直达（#fruit 直达门店的水果面板） */
   var h = (location.hash || '').replace('#', '');
   if (h) switchView(h);
