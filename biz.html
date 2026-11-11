@@ -838,6 +838,17 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
     </section>
     <section class="card">
       <h2>
+        <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+        本机自动备份 · 防丢保险
+      </h2>
+      <p class="desc">每次改动满 5 分钟自动在本机存一份快照（最多 12 份）。数据被同步覆盖、误删、清错时，在这里一键找回——恢复是按条合并，不会覆盖现有数据。</p>
+      <div class="btn-row">
+        <button class="btn ghost" id="btn-auto-bk">查看本机备份</button>
+      </div>
+      <div id="auto-bk-list"></div>
+    </section>
+    <section class="card">
+      <h2>
         <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H7a4 4 0 01-.9-7.9 5.5 5.5 0 0110.7-1.6A4 4 0 0117.5 19z"/></svg>
         云同步 · 电脑手机实时同步
       </h2>
@@ -977,6 +988,7 @@ function saveData(){
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   lastLocalSavedAt = new Date().toISOString();
   try { localStorage.setItem(KEY + '_stamp', lastLocalSavedAt); } catch (e) {}
+  pushAutoBackup();
   scheduleSyncPush();
 }
 
@@ -1081,6 +1093,7 @@ function applyRemote(snap){
     lastLocalSavedAt = o.savedAt;
     try { localStorage.setItem(KEY + '_stamp', o.savedAt); } catch (e) {}
     refreshAll();
+    pushAutoBackup(true);
     return true;
   } catch (e) { return false; }
 }
@@ -1214,6 +1227,56 @@ function restoreRevision(sha){
       }
     })
     .catch(function(){ toast('恢复失败，稍后再试'); });
+}
+
+/* ---------- 本机自动备份（防丢保险：每满5分钟存一份快照，保留12份） ---------- */
+var AUTO_BK_KEY = KEY + '_auto_bk';
+var lastAutoBkAt = 0;
+function pushAutoBackup(force){
+  var now = Date.now();
+  if (!force && now - lastAutoBkAt < 5 * 60 * 1000) return;
+  try {
+    var raw = localStorage.getItem(AUTO_BK_KEY);
+    var arr = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(arr)) arr = [];
+    var cur = JSON.stringify(state);
+    var last = arr.length ? arr[arr.length - 1] : null;
+    if (last && last.data === cur) { lastAutoBkAt = now; return; }
+    arr.push({ at: new Date().toISOString(), data: cur });
+    if (arr.length > 12) arr = arr.slice(-12);
+    localStorage.setItem(AUTO_BK_KEY, JSON.stringify(arr));
+    lastAutoBkAt = now;
+  } catch (e) {}
+}
+function renderAutoBackups(btn){
+  var box = document.getElementById('auto-bk-list');
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(AUTO_BK_KEY) || '[]'); } catch (e) { arr = []; }
+  if (!Array.isArray(arr) || !arr.length) {
+    box.innerHTML = '<p class="hint">这台设备还没有自动备份。开始记录后，每满 5 分钟自动存一份（最多 12 份）。</p>';
+    return;
+  }
+  box.innerHTML = '<p class="hint">本机自动备份 <b>' + arr.length + '</b> 份（新在上）。恢复 = 与当前数据按条合并，不会覆盖现有条目，恢复后自动同步到云端。</p>' +
+    arr.slice().reverse().map(function(b, idx){
+      var o = {};
+      try { o = JSON.parse(b.data); } catch (e) {}
+      var t = b.at ? b.at.replace('T', ' ').slice(5, 16).replace(':', '点') : '';
+      return '<div class="item" style="padding:9px 0;border-bottom:1px solid var(--line)"><div class="it-main"><div class="it-txt">' + esc(t) +
+        '<div class="it-meta"><span class="tag">进货 ' + (o.fruitPurchases || []).length + '</span><span class="tag">销量 ' + (o.fruitSales || []).length + '</span><span class="tag">待办 ' + (o.todos || []).length + '</span><span class="tag">宠物 ' + (o.pet || []).length + '</span><span class="tag">门店 ' + (o.profits || []).length + '</span><span class="tag">自媒体 ' + (o.media || []).length + '</span></div></div>' +
+        '<button class="btn ghost" data-bk="' + (arr.length - 1 - idx) + '" style="min-height:38px;padding:0 12px;font-size:12.5px">恢复</button></div></div>';
+    }).join('');
+  Array.prototype.forEach.call(box.querySelectorAll('button[data-bk]'), function(b){
+    b.addEventListener('click', function(){
+      var i = parseInt(b.getAttribute('data-bk'), 10);
+      var arr2 = [];
+      try { arr2 = JSON.parse(localStorage.getItem(AUTO_BK_KEY) || '[]'); } catch (e) {}
+      var snap = arr2[i] && arr2[i].data;
+      if (!snap) { toast('这份备份读不出来了'); return; }
+      if (!confirm('恢复这份本机备份？\n与当前数据按条合并（两边都有的只留一份，任何一边独有的都保留），不会丢现有条目。')) return;
+      if (applyRemote(snap)) { scheduleSyncPush(); toast('已恢复并合并，正在同步到云端'); }
+      else toast('这份备份的数据无法解析');
+    });
+  });
 }
 function startSyncLoop(){
   if (syncLoopStarted) return;
@@ -2538,6 +2601,7 @@ function bindEvents(){
   document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
   document.getElementById('btn-export-json').addEventListener('click', exportJson);
   document.getElementById('btn-clear-all').addEventListener('click', clearAll);
+  document.getElementById('btn-auto-bk').addEventListener('click', function(){ renderAutoBackups(this); });
   document.getElementById('btn-sync-create').addEventListener('click', function(){ syncCreate(this); });
   document.getElementById('btn-sync-connect').addEventListener('click', function(){ syncConnect(this); });
   document.getElementById('btn-sync-off').addEventListener('click', syncOff);
