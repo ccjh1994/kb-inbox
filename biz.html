@@ -1286,7 +1286,7 @@ function startSyncLoop(){
 }
 
 /* ---------- 快捷进货语音输入（浏览器语音识别，识别结果追加进货框） ---------- */
-var micRec = null, micOn = false, micBase = '', micFinal = '';
+var micRec = null, micOn = false, micBase = '', micFinal = '', micErrStreak = 0;
 function setupBuyMic(){
   var btn = document.getElementById('btn-fr-buy-mic');
   if (!btn) return;
@@ -1301,11 +1301,13 @@ function setupBuyMic(){
   micRec.interimResults = true;
   micRec.onstart = function(){
     micOn = true;
+    micErrStreak = 0;
     btn.classList.add('mic-on');
     label.textContent = '停止录音';
     st.textContent = '正在听…说慢一点，比如：陕西苹果 31斤 共112元 庆春东路店';
   };
   micRec.onresult = function(e){
+    micErrStreak = 0;
     var seg = '';
     for (var i = e.resultIndex; i < e.results.length; i++) seg += e.results[i][0].transcript;
     micFinal += micUnitFix(seg);
@@ -1315,20 +1317,27 @@ function setupBuyMic(){
   };
   micRec.onerror = function(e){
     var msgs = {
-      'not-allowed': '麦克风权限被拒绝：请在浏览器设置里允许此页面使用麦克风',
-      'network': '语音识别服务连不上，检查网络后重试',
-      'no-speech': '没听到声音，再点一次试试',
-      'audio-capture': '没找到麦克风设备'
+      'not-allowed': '麦克风权限被拒绝：手机请在 设置→Safari(或Chrome)→麦克风 里允许，电脑请点地址栏锁图标重新允许',
+      'service-not-allowed': '浏览器拒绝了语音服务：检查系统麦克风权限；iPhone 还可在 设置→屏幕使用时间→内容访问限制 里看是否禁了Siri听写；或换 Chrome 试试',
+      'language-not-supported': '这个浏览器不支持中文语音识别：换 Chrome 浏览器打开试试',
+      'network': '语音识别服务连不上：检查手机网络（识别需要联网），关掉代理/VPN 再试',
+      'no-speech': '没听到声音：靠近一点、大声一点，再点一次「语音进货」',
+      'audio-capture': '没找到麦克风设备',
+      'aborted': '识别被中断了：再点一次「语音进货」接着说'
     };
-    st.textContent = msgs[e.error] || ('识别出错：' + e.error);
-    if (e.error === 'not-allowed' || e.error === 'audio-capture') stopMic();
+    st.textContent = msgs[e.error] || ('识别出错（代码 ' + e.error + '）：把这段话发给我，我帮你排查');
+    micErrStreak++;
+    if (micErrStreak >= 3) { micErrStreak = 0; stopMic(); return; }
+    if (e.error === 'not-allowed' || e.error === 'audio-capture' || e.error === 'service-not-allowed' || e.error === 'language-not-supported') stopMic();
   };
   micRec.onend = function(){
-    if (micOn) { /* 浏览器自动断开时续录，保持连续听写 */
+    if (micOn && micErrStreak < 3) { /* 浏览器自动断开时续录，保持连续听写；连续报错就停 */
       try { micRec.start(); return; } catch (err) {}
     }
     btn.classList.remove('mic-on');
     label.textContent = '语音进货';
+    if (micOn) st.textContent = '连续识别失败，已停止。检查网络和麦克风权限后再试';
+    micOn = false;
     if (st.textContent.indexOf('正在听') === 0) st.textContent = '已停止，检查文字后点「解析进货」';
   };
   btn.addEventListener('click', function(){
