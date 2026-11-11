@@ -1245,7 +1245,7 @@ function setupBuyMic(){
   micRec.onresult = function(e){
     var seg = '';
     for (var i = e.resultIndex; i < e.results.length; i++) seg += e.results[i][0].transcript;
-    micFinal += seg;
+    micFinal += micUnitFix(seg);
     var joiner = (micBase && !/\n\s*$/.test(micBase)) ? '\n' : '';
     ta.value = micBase + joiner + micFinal;
     st.textContent = '正在听…' + (seg.length > 18 ? seg.slice(-18) : seg);
@@ -1463,10 +1463,22 @@ function latestFans(platform){
 }
 
 /* ---------- 水果板块：解析器（纯函数，不碰 state） ---------- */
-var FRUIT_UNIT_RE = '(斤|公斤|kg|KG|个|箱|筐|件)';
+var FRUIT_UNIT_RE = '(斤|公斤|kg|KG|个|箱|盒|筐|件)';
 
 function normUnit(u){
   return /公斤|kg|KG/i.test(u) ? '公斤' : u;
+}
+
+/* 语音输入热词纠偏：识别错别字 → 斤/箱/盒/元，中文数字 → 阿拉伯数字 */
+function micUnitFix(s){
+  var CN = { '一':'1', '二':'2', '两':'2', '三':'3', '四':'4', '五':'5', '六':'6', '七':'7', '八':'8', '九':'9', '十':'10' };
+  s = s.replace(/([一二两三四五六七八九十])\s*(?=斤|公斤|箱|盒|个|筐|件|kg|公)/g, function(m, c){ return CN[c] || m; });
+  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:紧|仅|今|金|斤)(?!公斤)/g, function(m, d){ return d + '斤'; });
+  s = s.replace(/(\d+(?:\.\d+)?)\s*公(?:金|紧|斤)/g, function(m, d){ return d + '公斤'; });
+  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:想|香|乡|箱)/g, function(m, d){ return d + '箱'; });
+  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:合|河|荷|盒)/g, function(m, d){ return d + '盒'; });
+  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:块|圆|元)/g, function(m, d){ return d + '元'; });
+  return s;
 }
 
 function fruitStoreOf(t){
