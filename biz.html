@@ -144,6 +144,8 @@ button{font-family:inherit;font-size:15px;cursor:pointer;border:none;border-radi
 .btn{background:var(--olive);color:#fff;font-weight:600;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
 .btn:active{opacity:.85}
 .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line)}
+#btn-fr-buy-mic.mic-on{background:#c0392b;color:#fff;border-color:#c0392b;animation:micPulse 1.2s ease-in-out infinite}
+@keyframes micPulse{0%,100%{opacity:1}50%{opacity:.65}}
 .btn.soft{background:var(--olive-soft);color:var(--olive-deep)}
 .btn.danger{background:#fff;color:var(--red);border:1px solid #eec9c9}
 .btn.sm{min-height:44px;font-size:14px;padding:0 14px;width:auto}
@@ -648,6 +650,13 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div class="field">
         <textarea id="fr-buy-text" rows="4" placeholder="一行一条：
 陕西苹果 31斤 共112元 庆春东路店"></textarea>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px">
+        <button class="btn ghost" id="btn-fr-buy-mic" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:5px"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10v1a7 7 0 01-14 0v-1"/><path d="M12 18v4"/></svg>
+          <span class="mic-label">语音进货</span>
+        </button>
+        <span class="hint" id="fr-mic-state"></span>
       </div>
       <button class="btn" id="btn-fr-buy">解析进货</button>
       <div id="fr-buy-preview"></div>
@@ -1211,6 +1220,64 @@ function startSyncLoop(){
   syncLoopStarted = true;
   setInterval(function(){ syncPull(); }, 45000);
   document.addEventListener('visibilitychange', function(){ if (!document.hidden) syncPull(); });
+}
+
+/* ---------- 快捷进货语音输入（浏览器语音识别，识别结果追加进货框） ---------- */
+var micRec = null, micOn = false, micBase = '', micFinal = '';
+function setupBuyMic(){
+  var btn = document.getElementById('btn-fr-buy-mic');
+  if (!btn) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { btn.style.display = 'none'; return; } /* 不支持的环境直接隐藏 */
+  var ta = document.getElementById('fr-buy-text');
+  var st = document.getElementById('fr-mic-state');
+  var label = btn.querySelector('.mic-label');
+  micRec = new SR();
+  micRec.lang = 'zh-CN';
+  micRec.continuous = true;
+  micRec.interimResults = true;
+  micRec.onstart = function(){
+    micOn = true;
+    btn.classList.add('mic-on');
+    label.textContent = '停止录音';
+    st.textContent = '正在听…说慢一点，比如：陕西苹果 31斤 共112元 庆春东路店';
+  };
+  micRec.onresult = function(e){
+    var seg = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) seg += e.results[i][0].transcript;
+    micFinal += seg;
+    var joiner = (micBase && !/\n\s*$/.test(micBase)) ? '\n' : '';
+    ta.value = micBase + joiner + micFinal;
+    st.textContent = '正在听…' + (seg.length > 18 ? seg.slice(-18) : seg);
+  };
+  micRec.onerror = function(e){
+    var msgs = {
+      'not-allowed': '麦克风权限被拒绝：请在浏览器设置里允许此页面使用麦克风',
+      'network': '语音识别服务连不上，检查网络后重试',
+      'no-speech': '没听到声音，再点一次试试',
+      'audio-capture': '没找到麦克风设备'
+    };
+    st.textContent = msgs[e.error] || ('识别出错：' + e.error);
+    if (e.error === 'not-allowed' || e.error === 'audio-capture') stopMic();
+  };
+  micRec.onend = function(){
+    if (micOn) { /* 浏览器自动断开时续录，保持连续听写 */
+      try { micRec.start(); return; } catch (err) {}
+    }
+    btn.classList.remove('mic-on');
+    label.textContent = '语音进货';
+    if (st.textContent.indexOf('正在听') === 0) st.textContent = '已停止，检查文字后点「解析进货」';
+  };
+  btn.addEventListener('click', function(){
+    if (micOn) { stopMic(); return; }
+    micBase = ta.value || '';
+    micFinal = '';
+    try { micRec.start(); } catch (err) { st.textContent = '启动失败，刷新页面再试'; }
+  });
+}
+function stopMic(){
+  micOn = false;
+  if (micRec) { try { micRec.stop(); } catch (e) {} }
 }
 
 /* ---------- 计算层 ---------- */
@@ -2544,6 +2611,7 @@ function init(){
   d = document.getElementById('pt-month'); if (d) d.value = viewMonth;
   d = document.getElementById('fr-month'); if (d) d.value = viewMonth;
   bindEvents();
+  setupBuyMic();
   refreshAll();
   renderSyncStatus();
   if (syncCfg.token && syncCfg.gistId) { startSyncLoop(); syncPull(); }
