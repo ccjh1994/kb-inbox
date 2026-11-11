@@ -843,6 +843,10 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <button class="btn danger" id="btn-sync-off">断开同步</button>
       </div>
       <p class="hint" id="sync-state"></p>
+      <div class="btn-row" style="margin-top:6px">
+        <button class="btn ghost" id="btn-sync-history">云端历史恢复</button>
+      </div>
+      <div id="sync-history-list"></div>
       <p class="hint">Token 获取（一次性，两台设备用同一个）：打开 <a href="https://github.com/settings/tokens/new?scopes=gist&description=biz-sync" target="_blank" rel="noopener" style="color:var(--olive);font-weight:550">github.com/settings/tokens/new</a>（已预选 gist 权限，其他不用勾）→ 点 Generate token → 复制 ghp_ 开头字符串粘到上面。Token 只存在本设备浏览器里，不进代码不上传。第二台设备选「连接已有云端」即可找到同一份数据。</p>
     </section>
     <footer class="mob-foot"><a href="./index.html" style="color:var(--olive);text-decoration:none;font-weight:550">← 返回灵感收件箱</a></footer>
@@ -1037,19 +1041,31 @@ function scheduleSyncPush(){
   if (pushDebounce) clearTimeout(pushDebounce);
   pushDebounce = setTimeout(function(){ syncPush(); }, 1500);
 }
+function mergeArr(remote, local){
+  /* 按条合并：两台设备各自新增的条目都保留，id 相同算同一条只留一份 */
+  var seen = {}, out = [];
+  function key(x){ return (x && x.id != null) ? 'i' + x.id : 'r' + JSON.stringify(x); }
+  (remote || []).concat(local || []).forEach(function(x){
+    if (!x) return;
+    var k = key(x);
+    if (!seen[k]) { seen[k] = 1; out.push(x); }
+  });
+  return out;
+}
 function applyRemote(snap){
   try {
     var o = JSON.parse(snap);
     if (!o || !o.state) return false;
+    var cur = state;
     state = {
       demo: !!o.state.demo,
-      shops: Array.isArray(o.state.shops) && o.state.shops.length ? o.state.shops : ['来伊份网商店', '来伊份庆春东路店', '来伊份乐堤港店'],
-      todos: Array.isArray(o.state.todos) ? o.state.todos : [],
-      profits: Array.isArray(o.state.profits) ? o.state.profits : [],
-      pet: Array.isArray(o.state.pet) ? o.state.pet : [],
-      media: Array.isArray(o.state.media) ? o.state.media : [],
-      fruitPurchases: Array.isArray(o.state.fruitPurchases) ? o.state.fruitPurchases : [],
-      fruitSales: Array.isArray(o.state.fruitSales) ? o.state.fruitSales : []
+      shops: Array.isArray(o.state.shops) && o.state.shops.length ? o.state.shops : (cur.shops || []),
+      todos: mergeArr(o.state.todos, cur.todos),
+      profits: mergeArr(o.state.profits, cur.profits),
+      pet: mergeArr(o.state.pet, cur.pet),
+      media: mergeArr(o.state.media, cur.media),
+      fruitPurchases: mergeArr(o.state.fruitPurchases, cur.fruitPurchases),
+      fruitSales: mergeArr(o.state.fruitSales, cur.fruitSales)
     };
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
     lastRemoteSavedAt = o.savedAt;
@@ -1141,6 +1157,54 @@ function syncOff(){
   saveSyncCfg();
   renderSyncStatus();
   toast('已断开同步');
+}
+function showSyncHistory(btn){
+  var box = document.getElementById('sync-history-list');
+  if (!syncCfg.token || !syncCfg.gistId) { toast('先连接云端，才能查历史版本'); return; }
+  btn.disabled = true; btn.textContent = '加载中…';
+  gh('GET', 'https://api.github.com/gists/' + syncCfg.gistId)
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(g){
+      btn.disabled = false; btn.textContent = '云端历史恢复';
+      var hist = (g && g.history) || [];
+      if (!hist.length) { box.innerHTML = '<p class="hint">云端还没有历史版本</p>'; return; }
+      box.innerHTML = '<p class="hint">云端保留了 <b>' + hist.length + '</b> 个历史版本（最新在上）。点「预览/恢复」查看该版本有多少条数据，确认后与当前数据<b>按条合并</b>恢复，不会丢现在已有的条目。</p>' +
+        hist.map(function(h){
+          var t = h.committed_at ? h.committed_at.replace('T', ' ').slice(0, 16) + ' UTC' : '未知时间';
+          var cur = (h.version === (g.history[0] && g.history[0].version)) ? ' <span class="tag">当前版本</span>' : '';
+          return '<div class="item" style="padding:9px 0;border-bottom:1px solid var(--line)"><div class="it-main"><div class="it-txt">' + esc(t) + cur +
+            '<div class="it-meta"><span class="tag">' + esc(String(h.version).slice(0, 7)) + '</span></div></div>' +
+            '<button class="btn ghost" data-sha="' + esc(h.version) + '" style="min-height:38px;padding:0 12px;font-size:12.5px">预览/恢复</button></div></div>';
+        }).join('');
+      Array.prototype.forEach.call(box.querySelectorAll('button[data-sha]'), function(b){
+        b.addEventListener('click', function(){ restoreRevision(b.getAttribute('data-sha')); });
+      });
+    })
+    .catch(function(){
+      btn.disabled = false; btn.textContent = '云端历史恢复';
+      box.innerHTML = '<p class="hint">加载失败，检查网络后重试</p>';
+    });
+}
+function restoreRevision(sha){
+  gh('GET', 'https://api.github.com/gists/' + syncCfg.gistId + '/' + sha)
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(g){
+      var f = g && g.files && g.files['wb_biz_sync.json'];
+      if (!f || !f.content) { toast('该版本里没有数据文件'); return; }
+      var o; try { o = JSON.parse(f.content); } catch (e) { o = null; }
+      var s = (o && o.state) || {};
+      var msg = '恢复 ' + ((o && o.savedAt) || '').replace('T', ' ').slice(0, 16) + ' UTC 的云端版本？\n\n' +
+        '该版本包含：\n· 进货 ' + (s.fruitPurchases || []).length + ' 条\n· 销量 ' + (s.fruitSales || []).length + ' 条\n· 待办 ' + (s.todos || []).length + ' 条 · 门店账 ' + (s.profits || []).length + ' 条\n\n' +
+        '确认后与当前数据按条合并（两边都有的条目只留一份，任何一边独有的条目都保留）。';
+      if (!confirm(msg)) return;
+      if (applyRemote(f.content)) {
+        scheduleSyncPush();
+        toast('已恢复并合并，正在同步到云端');
+      } else {
+        toast('该版本数据无法解析');
+      }
+    })
+    .catch(function(){ toast('恢复失败，稍后再试'); });
 }
 function startSyncLoop(){
   if (syncLoopStarted) return;
@@ -2398,6 +2462,7 @@ function bindEvents(){
   document.getElementById('btn-sync-create').addEventListener('click', function(){ syncCreate(this); });
   document.getElementById('btn-sync-connect').addEventListener('click', function(){ syncConnect(this); });
   document.getElementById('btn-sync-off').addEventListener('click', syncOff);
+  document.getElementById('btn-sync-history').addEventListener('click', function(){ showSyncHistory(this); });
   document.getElementById('biz-month').addEventListener('change', function(){
     viewMonth = this.value || currentMonth();
     refreshAll();
