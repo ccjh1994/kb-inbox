@@ -1687,7 +1687,7 @@ function doParseFruitBuy(){
     .map(function(s){ return s.trim(); }).filter(Boolean);
   if (!lines.length) {
     pendingFruitBuy = null;
-    box.innerHTML = '<p class="hint">先写进货信息，一行一条，可一次贴多行。比如：苹果 60斤 3.5元一斤 庆春东路店</p>';
+    box.innerHTML = '';
     return;
   }
   var oks = [], errs = [];
@@ -1697,7 +1697,8 @@ function doParseFruitBuy(){
   });
   if (!oks.length) {
     pendingFruitBuy = null;
-    box.innerHTML = '<p class="hint">' + errs.map(esc).join('<br>') + '</p>';
+    box.innerHTML = '<p class="hint" style="color:#c0392b">' + errs.map(esc).join('<br>') + '</p>' +
+      '<p class="hint">写法示例（一行一条）：<b>苹果 60斤 3.5元一斤 庆春东路店</b> 或 <b>11-04 蜜橘 100斤 共280元 网上店</b></p>';
     return;
   }
   pendingFruitBuy = oks;
@@ -2540,6 +2541,12 @@ function bindEvents(){
   document.getElementById('btn-add-pet').addEventListener('click', addPet);
   document.getElementById('btn-add-media').addEventListener('click', addMedia);
   document.getElementById('btn-fr-buy').addEventListener('click', doParseFruitBuy);
+  /* 贴完/打完自动解析：预览和「确认入库」直接出现，不用再点解析按钮 */
+  var frBuyTimer = null;
+  document.getElementById('fr-buy-text').addEventListener('input', function(){
+    if (frBuyTimer) clearTimeout(frBuyTimer);
+    frBuyTimer = setTimeout(doParseFruitBuy, 400);
+  });
   document.getElementById('btn-fr-sales').addEventListener('click', doParseFruitSales);
   document.getElementById('fr-month').addEventListener('change', function(){
     viewMonth = this.value || currentMonth();
