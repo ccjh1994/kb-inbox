@@ -656,10 +656,11 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         快捷进货
       </h2>
-      <p class="desc">一行一条，可贴多行。例：<b>苹果 60斤 3.5元一斤 庆春东路店</b></p>
+      <p class="desc">一行一条，可贴多行。例：<b>苹果 60斤 3.5元一斤 庆春东路店</b>；不写斤数也行，报<b>总价+单价</b>自动算</p>
       <div class="field">
         <textarea id="fr-buy-text" rows="4" placeholder="一行一条：
-陕西苹果 31斤 共112元 庆春东路店"></textarea>
+陕西苹果 31斤 共112元 庆春东路店
+苹果 共112元 单价3.6 庆春东路店（自动算斤数）"></textarea>
       </div>
       <button class="btn" id="btn-fr-buy">解析进货</button>
       <div id="fr-buy-preview"></div>
@@ -1496,32 +1497,39 @@ function parseFruitBuy(raw){
   var text = String(raw || '').trim();
   if (!text) return { ok: false, msg: '先把进货信息写进去，比如：苹果 60斤 3.5元一斤 庆春东路店' };
 
-  /* 1. 数量（最先抓，避免日期误吞数字） */
+  /* 1. 数量（可选：不写斤数时，给「总价+单价」自动反推） */
   var m = text.match(new RegExp('(\\d+(?:\\.\\d+)?)\\s*' + FRUIT_UNIT_RE));
-  if (!m) return { ok: false, msg: '没认出数量。写法参考：60斤、30公斤、5箱' };
-  var qty = parseFloat(m[1]), unit = normUnit(m[2]);
-  var work = (text.slice(0, m.index) + ' ' + text.slice(m.index + m[0].length));
+  var qty = 0, unit = '', work;
+  if (m) {
+    qty = parseFloat(m[1]); unit = normUnit(m[2]);
+    work = (text.slice(0, m.index) + ' ' + text.slice(m.index + m[0].length));
+  } else {
+    work = text;
+  }
 
-  /* 2. 价格：单价（X元一斤 / 单价X / 每斤X / X元/斤）→ 总价（共X元 / X元）→ 裸数字 */
-  var unitPrice = 0, total = 0, priceRaw = '';
-  m = work.match(/(\d+(?:\.\d+)?)\s*元\s*[一每\/]\s*(斤|公斤|kg|KG)/);
+  /* 2. 价格：单价（X元一斤 / 单价X / 每斤X / X元/斤）→ 总价（共X元 / X元）→ 裸小数 */
+  var unitPrice = 0, total = 0, priceRaw = '', priceUnit = '';
+  m = work.match(/(\d+(?:\.\d+)?)\s*元?\s*[一每\/]\s*(斤|公斤|kg|KG|箱|盒|个|筐|件)/);
   if (!m) m = work.match(/(?:单价|每\s*斤)\s*[:：]?\s*(\d+(?:\.\d+)?)/);
   if (m) {
     unitPrice = parseFloat(m[1]); priceRaw = m[0];
+    if (m[2]) priceUnit = normUnit(m[2]);
     work = work.slice(0, m.index) + ' ' + work.slice(m.index + m[0].length);
   }
-  if (!unitPrice) {
+  /* 总价：没抓到单价时必抓；抓到单价但缺斤数时也要抓（用于反推斤数） */
+  if (!unitPrice || !qty) {
     m = work.match(/(?:共|总价|花了)\s*(\d+(?:\.\d+)?)\s*元?/) || work.match(/(\d+(?:\.\d+)?)\s*元/);
     if (m) {
       total = parseFloat(m[1]); priceRaw = m[0];
       work = work.slice(0, m.index) + ' ' + work.slice(m.index + m[0].length);
     }
   }
-  if (!unitPrice && !total) {
+  /* 还缺斤数或总价时，裸小数按单价处理（如「112元 3.5」） */
+  if (!unitPrice && (!total || !qty)) {
     m = work.match(/(\d+(?:\.\d+)?)/);
     if (m && m[1].indexOf('.') > -1) { unitPrice = parseFloat(m[1]); priceRaw = m[0]; work = work.slice(0, m.index) + ' ' + work.slice(m.index + m[0].length); }
   }
-  if (!unitPrice && !total) return { ok: false, msg: '没认出价格。写法参考：3.5元一斤、共280元、单价3.5' };
+  if (!unitPrice && !total) return { ok: false, msg: '没认出价格。写法参考：3.5元一斤、共280元、单价3.5，或「总价+单价」一起给' };
 
   /* 3. 日期（价格摘掉后再找，避免 3.5 被当成 3月5日；找到后同样摘掉，避免污染品类识别） */
   var date = todayStr();
@@ -1549,10 +1557,17 @@ function parseFruitBuy(raw){
   if (!m) return { ok: false, msg: '没认出水果名字。写在最前面，比如：苹果 60斤 …' };
   var item = m[0];
 
-  if (unitPrice && !total) total = Math.round(qty * unitPrice * 100) / 100;
-  if (total && !unitPrice) unitPrice = Math.round(total / qty * 100) / 100;
+  var derivedQty = false;
+  if (unitPrice && !total && qty) total = Math.round(qty * unitPrice * 100) / 100;
+  if (total && !unitPrice && qty) unitPrice = Math.round(total / qty * 100) / 100;
+  if (!qty && total && unitPrice) {
+    qty = Math.round(total / unitPrice * 10) / 10;
+    unit = priceUnit || unit || '斤';
+    derivedQty = true;
+  }
+  if (!qty) return { ok: false, msg: '缺斤数：直接写（如 60斤），或「总价+单价」一起给我（如 共112元 单价3.6），我自动算斤数' };
 
-  return { ok: true, data: { date: date, item: item, store: store, qty: qty, unit: unit, unitPrice: unitPrice, total: total } };
+  return { ok: true, data: { date: date, item: item, store: store, qty: qty, unit: unit, unitPrice: unitPrice, total: total, derivedQty: derivedQty } };
 }
 
 function fruitKnownItems(){
@@ -1705,7 +1720,7 @@ function doParseFruitBuy(){
   var tot = oks.reduce(function(s, d){ return s + num(d.total); }, 0);
   var html = oks.map(function(d){
     return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(d.item) + ' · ' + d.qty + esc(d.unit) + ' · <span class="money-in">' + money(d.total) + '</span>' +
-      '<div class="it-meta"><span>' + esc(d.date) + '</span><span class="tag">' + esc(d.store || '没认出门店，默认庆春东路店') + '</span><span class="tag">单价 ' + money(d.unitPrice) + '/' + esc(d.unit) + '</span></div></div></div></div>';
+      '<div class="it-meta"><span>' + esc(d.date) + '</span><span class="tag">' + esc(d.store || '没认出门店，默认庆春东路店') + '</span><span class="tag">单价 ' + money(d.unitPrice) + '/' + esc(d.unit) + '</span>' + (d.derivedQty ? '<span class="tag" style="background:#fff7e6;color:#b26a00">斤数按单价反推</span>' : '') + '</div></div></div></div>';
   }).join('');
   if (errs.length) html += '<p class="hint" style="color:#c0392b">以下几行没认出来，请检查后单独重贴：<br>' + errs.map(esc).join('<br>') + '</p>';
   html += '<div class="btn-row"><button class="btn" data-act="fr-buy-ok">确认入库（' + oks.length + '笔 · 共' + money(tot) + '）</button><button class="btn ghost" data-act="fr-buy-cancel">重写</button></div>';
