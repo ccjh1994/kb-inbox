@@ -144,8 +144,6 @@ button{font-family:inherit;font-size:15px;cursor:pointer;border:none;border-radi
 .btn{background:var(--olive);color:#fff;font-weight:600;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
 .btn:active{opacity:.85}
 .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line)}
-#btn-fr-buy-mic.mic-on{background:#c0392b;color:#fff;border-color:#c0392b;animation:micPulse 1.2s ease-in-out infinite}
-@keyframes micPulse{0%,100%{opacity:1}50%{opacity:.65}}
 .btn.soft{background:var(--olive-soft);color:var(--olive-deep)}
 .btn.danger{background:#fff;color:var(--red);border:1px solid #eec9c9}
 .btn.sm{min-height:44px;font-size:14px;padding:0 14px;width:auto}
@@ -650,13 +648,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div class="field">
         <textarea id="fr-buy-text" rows="4" placeholder="一行一条：
 陕西苹果 31斤 共112元 庆春东路店"></textarea>
-      </div>
-      <div class="btn-row" style="margin-bottom:8px">
-        <button class="btn ghost" id="btn-fr-buy-mic" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:5px"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10v1a7 7 0 01-14 0v-1"/><path d="M12 18v4"/></svg>
-          <span class="mic-label">语音进货</span>
-        </button>
-        <span class="hint" id="fr-mic-state"></span>
       </div>
       <button class="btn" id="btn-fr-buy">解析进货</button>
       <div id="fr-buy-preview"></div>
@@ -1285,73 +1276,6 @@ function startSyncLoop(){
   document.addEventListener('visibilitychange', function(){ if (!document.hidden) syncPull(); });
 }
 
-/* ---------- 快捷进货语音输入（浏览器语音识别，识别结果追加进货框） ---------- */
-var micRec = null, micOn = false, micBase = '', micFinal = '', micErrStreak = 0;
-function setupBuyMic(){
-  var btn = document.getElementById('btn-fr-buy-mic');
-  if (!btn) return;
-  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { btn.style.display = 'none'; return; } /* 不支持的环境直接隐藏 */
-  var ta = document.getElementById('fr-buy-text');
-  var st = document.getElementById('fr-mic-state');
-  var label = btn.querySelector('.mic-label');
-  micRec = new SR();
-  micRec.lang = 'zh-CN';
-  micRec.continuous = true;
-  micRec.interimResults = true;
-  micRec.onstart = function(){
-    micOn = true;
-    micErrStreak = 0;
-    btn.classList.add('mic-on');
-    label.textContent = '停止录音';
-    st.textContent = '正在听…说慢一点，比如：陕西苹果 31斤 共112元 庆春东路店';
-  };
-  micRec.onresult = function(e){
-    micErrStreak = 0;
-    var seg = '';
-    for (var i = e.resultIndex; i < e.results.length; i++) seg += e.results[i][0].transcript;
-    micFinal += micUnitFix(seg);
-    var joiner = (micBase && !/\n\s*$/.test(micBase)) ? '\n' : '';
-    ta.value = micBase + joiner + micFinal;
-    st.textContent = '正在听…' + (seg.length > 18 ? seg.slice(-18) : seg);
-  };
-  micRec.onerror = function(e){
-    var msgs = {
-      'not-allowed': '麦克风权限被拒绝：手机请在 设置→Safari(或Chrome)→麦克风 里允许，电脑请点地址栏锁图标重新允许',
-      'service-not-allowed': '浏览器拒绝了语音服务：检查系统麦克风权限；iPhone 还可在 设置→屏幕使用时间→内容访问限制 里看是否禁了Siri听写；或换 Chrome 试试',
-      'language-not-supported': '这个浏览器不支持中文语音识别：换 Chrome 浏览器打开试试',
-      'network': '语音识别服务连不上：检查手机网络（识别需要联网），关掉代理/VPN 再试',
-      'no-speech': '没听到声音：靠近一点、大声一点，再点一次「语音进货」',
-      'audio-capture': '没找到麦克风设备',
-      'aborted': '识别被中断了：再点一次「语音进货」接着说'
-    };
-    st.textContent = msgs[e.error] || ('识别出错（代码 ' + e.error + '）：把这段话发给我，我帮你排查');
-    micErrStreak++;
-    if (micErrStreak >= 3) { micErrStreak = 0; stopMic(); return; }
-    if (e.error === 'not-allowed' || e.error === 'audio-capture' || e.error === 'service-not-allowed' || e.error === 'language-not-supported') stopMic();
-  };
-  micRec.onend = function(){
-    if (micOn && micErrStreak < 3) { /* 浏览器自动断开时续录，保持连续听写；连续报错就停 */
-      try { micRec.start(); return; } catch (err) {}
-    }
-    btn.classList.remove('mic-on');
-    label.textContent = '语音进货';
-    if (micOn) st.textContent = '连续识别失败，已停止。检查网络和麦克风权限后再试';
-    micOn = false;
-    if (st.textContent.indexOf('正在听') === 0) st.textContent = '已停止，检查文字后点「解析进货」';
-  };
-  btn.addEventListener('click', function(){
-    if (micOn) { stopMic(); return; }
-    micBase = ta.value || '';
-    micFinal = '';
-    try { micRec.start(); } catch (err) { st.textContent = '启动失败，刷新页面再试'; }
-  });
-}
-function stopMic(){
-  micOn = false;
-  if (micRec) { try { micRec.stop(); } catch (e) {} }
-}
-
 /* ---------- 计算层 ---------- */
 function overdueTodos(){
   var t = todayStr();
@@ -1539,18 +1463,6 @@ var FRUIT_UNIT_RE = '(斤|公斤|kg|KG|个|箱|盒|筐|件)';
 
 function normUnit(u){
   return /公斤|kg|KG/i.test(u) ? '公斤' : u;
-}
-
-/* 语音输入热词纠偏：识别错别字 → 斤/箱/盒/元，中文数字 → 阿拉伯数字 */
-function micUnitFix(s){
-  var CN = { '一':'1', '二':'2', '两':'2', '三':'3', '四':'4', '五':'5', '六':'6', '七':'7', '八':'8', '九':'9', '十':'10' };
-  s = s.replace(/([一二两三四五六七八九十])\s*(?=斤|公斤|箱|盒|个|筐|件|kg|公)/g, function(m, c){ return CN[c] || m; });
-  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:紧|仅|今|金|斤)(?!公斤)/g, function(m, d){ return d + '斤'; });
-  s = s.replace(/(\d+(?:\.\d+)?)\s*公(?:金|紧|斤)/g, function(m, d){ return d + '公斤'; });
-  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:想|香|乡|箱)/g, function(m, d){ return d + '箱'; });
-  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:合|河|荷|盒)/g, function(m, d){ return d + '盒'; });
-  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:块|圆|元)/g, function(m, d){ return d + '元'; });
-  return s;
 }
 
 function fruitStoreOf(t){
@@ -2696,7 +2608,6 @@ function init(){
   d = document.getElementById('pt-month'); if (d) d.value = viewMonth;
   d = document.getElementById('fr-month'); if (d) d.value = viewMonth;
   bindEvents();
-  setupBuyMic();
   refreshAll();
   renderSyncStatus();
   if (syncCfg.token && syncCfg.gistId) { startSyncLoop(); syncPull(); }
