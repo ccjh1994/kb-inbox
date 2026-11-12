@@ -122,6 +122,23 @@ body{
 .fr-daily-row .fd-sell{color:var(--green)}
 .fr-daily-total{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:13px;font-weight:700;padding:8px 0 0;font-variant-numeric:tabular-nums}
 .fr-daily-total span:nth-child(2),.fr-daily-total span:nth-child(3){text-align:right}
+/* 品类chip滑动选择 */
+.fr-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fr-chips::-webkit-scrollbar{display:none}
+.fr-chip{flex:0 0 auto;padding:9px 14px;border-radius:18px;border:1px solid var(--line);background:#fff;font-size:13.5px;color:var(--text);min-height:38px;cursor:pointer;white-space:nowrap}
+.fr-chip.on{background:var(--olive);border-color:var(--olive);color:#fff;font-weight:600}
+.fr-q-calc{font-size:15px;font-weight:700;color:var(--olive);min-height:22px;margin:4px 0}
+.fr-q-last{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+.fr-price-cat{color:var(--olive)}
+.fr-price-sum{font-size:13px;margin:8px 0 0;line-height:1.5}
+.fr-price-sum .up{color:var(--red);font-weight:650}
+.fr-price-sum .down{color:var(--green);font-weight:650}
+.fr-stock-store{font-size:12.5px;font-weight:650;color:var(--muted);margin:10px 0 2px}
+.fr-stock-line{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13.5px;align-items:baseline}
+.fr-stock-line:last-child{border-bottom:none}
+.fr-stock-line .st-item{font-weight:550}
+.fr-stock-line .st-val{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;white-space:nowrap}
+.fr-stock-line .st-neg{color:var(--red);font-weight:650}
 .market-list{margin:4px 0 0;padding:0;list-style:none}
 .market-list li{padding:5px 0 5px 15px;position:relative;font-size:13.5px;line-height:1.6}
 .market-list li::before{content:'';position:absolute;left:3px;top:13px;width:6px;height:6px;border-radius:50%;background:var(--olive);opacity:.5}
@@ -665,6 +682,52 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
     <section class="card">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
+        点选进货 · 自动算重量
+      </h2>
+      <p class="desc">左右滑动点选品类 → 填<b>总价</b>和<b>单价</b> → 重量自动算好，一键入库。</p>
+      <div class="fr-chips" id="fr-chips"></div>
+      <div class="row">
+        <div class="field">
+          <label>日期</label>
+          <input type="date" id="fr-q-date">
+        </div>
+        <div class="field">
+          <label>门店</label>
+          <select id="fr-q-store">
+            <option value="来伊份庆春东路店">庆春东路店</option>
+            <option value="来伊份网商店">网上店</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>单位</label>
+          <select id="fr-q-unit">
+            <option value="斤">斤</option>
+            <option value="公斤">公斤</option>
+            <option value="箱">箱</option>
+            <option value="盒">盒</option>
+            <option value="筐">筐</option>
+            <option value="个">个</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>总价（元）</label>
+          <input type="number" inputmode="decimal" id="fr-q-total" placeholder="如 255">
+        </div>
+        <div class="field">
+          <label>单价（元 / 每单位）</label>
+          <input type="number" inputmode="decimal" id="fr-q-price" placeholder="如 3">
+        </div>
+      </div>
+      <p class="fr-q-last" id="fr-q-lastprice"></p>
+      <div class="fr-q-calc" id="fr-q-calc"></div>
+      <button class="btn" id="btn-fr-q-buy">入库这笔进货</button>
+    </section>
+
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         快捷进货
       </h2>
       <p class="desc">一行一条，可贴多行。例：<b>苹果 60斤 3.5元一斤 庆春东路店</b>；不写斤数也行，报<b>总价+单价</b>自动算</p>
@@ -734,6 +797,24 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <p class="desc">跟上面的月份选择联动，按天对齐：进货花了多少、卖了多少，一目了然。</p>
       <div class="fr-daily-head"><span>日期</span><span>进货支出</span><span>销售额</span></div>
       <div id="fr-daily"></div>
+    </section>
+
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 2 5-6"/></svg>
+        进货价格曲线
+      </h2>
+      <p class="desc">当前品类：<b class="fr-price-cat" id="fr-price-cat">未选择（在上面点选品类）</b>。每个品每次进货价的走势，涨跌一眼看出。</p>
+      <div id="fr-price"></div>
+    </section>
+
+    <section class="card">
+      <h2>
+        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"/><path d="M3 8l2-4h14l2 4"/><path d="M9 12h6"/></svg>
+        当前库存 · 每店每品类剩余
+      </h2>
+      <p class="desc">累计进货减去销量（按单位分开算）。红色负数 = 漏记进货，或销量和进货的品类名对不上。</p>
+      <div id="fr-stock"></div>
     </section>
 
     <section class="card">
@@ -1814,6 +1895,186 @@ function delFruitSale(id){
   saveData(); refreshAll();
 }
 
+/* ---------- 品类快速进货 / 价格曲线 / 库存 ---------- */
+var FRUIT_CATS = ['洛川富士', '花牛苹果', '东江湖蜜桔', '库尔勒香梨', '爱媛果冻橙', '阳光玫瑰', '冬枣', '人参果', '赣州脐橙', '涌泉蜜桔', '奶油草莓', '云南蓝莓', '猕猴桃'];
+var frSelCat = '';
+var frQuickReady = null;
+
+function frShortStore(s){ return String(s || '').replace(/来伊份/g, ''); }
+
+/* 渲染层：品类chips */
+function renderFruitChips(){
+  var el = document.getElementById('fr-chips');
+  if (!el) return;
+  el.innerHTML = FRUIT_CATS.map(function(c){
+    return '<button type="button" class="fr-chip' + (c === frSelCat ? ' on' : '') + '" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
+  }).join('');
+}
+
+/* 计算层：某品类的进货记录（按日期升序）与带单价的价格点 */
+function fruitCatRecs(item){
+  return state.fruitPurchases.filter(function(p){ return p.item === item; })
+    .sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+}
+function fruitPricePoints(item){
+  return fruitCatRecs(item).filter(function(p){ return num(p.unitPrice) > 0; });
+}
+
+/* 渲染层：点选进货卡的上次进价提示 */
+function renderQuickBuyMeta(){
+  var el = document.getElementById('fr-q-lastprice');
+  if (!el) return;
+  if (!frSelCat) { el.innerHTML = '还没选品类：先在上面点一个。'; return; }
+  var pts = fruitPricePoints(frSelCat);
+  if (!pts.length) { el.innerHTML = '「' + esc(frSelCat) + '」还没有带单价的进货记录，这次填完就有第一笔了。'; return; }
+  var last = pts[pts.length - 1];
+  var html = '上次进价 <b>¥' + last.unitPrice + '/' + esc(last.unit || '斤') + '</b>（' + esc(last.date.slice(5)) + ' · ' + esc(frShortStore(last.store)) + '）';
+  if (pts.length > 1) {
+    var prev = pts[pts.length - 2];
+    var d = Math.round((num(last.unitPrice) - num(prev.unitPrice)) * 100) / 100;
+    if (d > 0) html += '，比再上次 <span class="up">涨 ¥' + d + '</span>';
+    else if (d < 0) html += '，比再上次 <span class="down">降 ¥' + (-d) + '</span>';
+    else html += '，和再上次持平';
+  }
+  el.innerHTML = html;
+}
+
+/* 计算层：总价÷单价 → 重量（点选进货的实时预览） */
+function quickBuyCalc(){
+  var el = document.getElementById('fr-q-calc');
+  if (!el) return;
+  var total = num(document.getElementById('fr-q-total').value);
+  var price = num(document.getElementById('fr-q-price').value);
+  var unit = document.getElementById('fr-q-unit').value;
+  if (!frSelCat) { el.textContent = ''; frQuickReady = null; return; }
+  if (total > 0 && price > 0) {
+    var qty = Math.round(total / price * 10) / 10;
+    el.textContent = '≈ ' + qty + unit + '（' + money(total) + ' ÷ ' + money(price) + '/' + unit + '）';
+    frQuickReady = { qty: qty, unit: unit, unitPrice: price, total: total };
+  } else {
+    el.textContent = total > 0 || price > 0 ? '总价和单价都填上才能算重量' : '';
+    frQuickReady = null;
+  }
+}
+
+/* 动作层：点选进货入库 */
+function quickFruitBuy(){
+  if (!frSelCat) { toast('先点选一个品类'); return; }
+  if (!frQuickReady) { toast('总价和单价都填好才能入库'); return; }
+  var d = frQuickReady;
+  var date = document.getElementById('fr-q-date').value || todayStr();
+  var store = document.getElementById('fr-q-store').value;
+  state.fruitPurchases.push({ id: uid(), date: date, item: frSelCat, store: store, qty: d.qty, unit: d.unit, unitPrice: d.unitPrice, total: d.total, note: '' });
+  state.demo = false;
+  frQuickReady = null;
+  document.getElementById('fr-q-total').value = '';
+  document.getElementById('fr-q-price').value = '';
+  document.getElementById('fr-q-calc').textContent = '';
+  saveData();
+  refreshAll();
+  toast('已入库：' + frSelCat + ' ' + d.qty + d.unit + ' ' + money(d.total));
+}
+
+/* 渲染层：进货价格曲线（内联SVG） */
+function renderFruitPrice(){
+  var el = document.getElementById('fr-price');
+  if (!el) return;
+  var catEl = document.getElementById('fr-price-cat');
+  if (catEl) catEl.textContent = frSelCat || '未选择（在上面点选品类）';
+  if (!frSelCat) { el.innerHTML = '<p class="hint">点选品类后，这里显示这个品每次进货价的折线和涨跌。</p>'; return; }
+  var pts = fruitPricePoints(frSelCat);
+  if (!pts.length) { el.innerHTML = '<p class="hint">「' + esc(frSelCat) + '」还没有带单价的进货记录。</p>'; return; }
+  /* 曲线只画最近一次记录的单位（斤/箱混画会把曲线打爆），其他单位的记录文字说明 */
+  var mainUnit = pts[pts.length - 1].unit || '斤';
+  var curve = pts.filter(function(p){ return (p.unit || '斤') === mainUnit; });
+  var others = pts.length - curve.length;
+  if (curve.length === 1) {
+    var p0 = curve[0];
+    el.innerHTML = '<p class="hint">「' + esc(frSelCat) + '」目前只有一次 ' + esc(mainUnit) + ' 价记录：¥' + p0.unitPrice + '/' + esc(mainUnit) + '（' + esc(p0.date) + ' · ' + esc(frShortStore(p0.store)) + '）' + (others ? '；另有 ' + others + ' 笔其他单位的记录没画进曲线。' : '。再进一次就能画曲线。') + '</p>';
+    return;
+  }
+  pts = curve;
+  var W = 640, H = 200, padL = 46, padR = 18, padT = 22, padB = 30;
+  var vals = pts.map(function(p){ return num(p.unitPrice); });
+  var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  var span = (max - min) || (min * 0.2) || 1;
+  min = min - span * 0.15; max = max + span * 0.15; span = max - min;
+  function X(i){ return padL + (W - padL - padR) * i / (pts.length - 1); }
+  function Y(v){ return padT + (H - padT - padB) * (1 - (v - min) / span); }
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" role="img" aria-label="进货价格曲线">';
+  svg += '<line x1="' + padL + '" y1="' + Y(min + span * 0.5) + '" x2="' + (W - padR) + '" y2="' + Y(min + span * 0.5) + '" stroke="#e4e2d8" stroke-dasharray="4 4"/>';
+  var pl = pts.map(function(p, i){ return X(i).toFixed(1) + ',' + Y(num(p.unitPrice)).toFixed(1); }).join(' ');
+  svg += '<polyline points="' + pl + '" fill="none" stroke="#6f7f2a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  pts.forEach(function(p, i){
+    var v = num(p.unitPrice);
+    var isLast = i === pts.length - 1;
+    svg += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="' + (isLast ? 5 : 3.5) + '" fill="' + (isLast ? '#6f7f2a' : '#fff') + '" stroke="#6f7f2a" stroke-width="2"><title>' + esc(p.date + ' ' + frShortStore(p.store) + ' ¥' + v + '/' + (p.unit || '斤')) + '</title></circle>';
+    svg += '<text x="' + X(i).toFixed(1) + '" y="' + (Y(v) - 10).toFixed(1) + '" font-size="12" text-anchor="middle" fill="' + (isLast ? '#6f7f2a' : '#8a8778') + '" font-weight="' + (isLast ? '700' : '500') + '">¥' + v + '</text>';
+    if (i === 0 || i === pts.length - 1) svg += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" font-size="11" text-anchor="' + (i === 0 ? 'start' : 'end') + '" fill="#8a8778">' + esc(p.date.slice(5)) + '</text>';
+  });
+  svg += '</svg>';
+  var last = pts[pts.length - 1], prev = pts[pts.length - 2];
+  var d = Math.round((num(last.unitPrice) - num(prev.unitPrice)) * 100) / 100;
+  var trend = d > 0 ? '<span class="up">↑ 涨了 ¥' + d + '/' + esc(last.unit || '斤') + '</span>' : d < 0 ? '<span class="down">↓ 降了 ¥' + (-d) + '/' + esc(last.unit || '斤') + '</span>' : '持平';
+  svg += '<p class="fr-price-sum">最新 <b>¥' + last.unitPrice + '/' + esc(last.unit || '斤') + '</b>（' + esc(last.date.slice(5)) + ' · ' + esc(frShortStore(last.store)) + '），上次 ¥' + prev.unitPrice + '（' + esc(prev.date.slice(5)) + '）— ' + trend + '，共 ' + pts.length + ' 次进货记录。</p>';
+  el.innerHTML = svg;
+}
+
+/* 计算层：库存 = 累计进货 − 累计销量（按 店×品类×单位） */
+function fruitStockData(){
+  var bought = {};
+  state.fruitPurchases.forEach(function(p){
+    if (!p.item) return;
+    var k = (p.store || '未分店') + '|' + p.item;
+    if (!bought[k]) bought[k] = {};
+    var u = p.unit || '斤';
+    bought[k][u] = (bought[k][u] || 0) + num(p.qty);
+  });
+  var orphan = {};
+  state.fruitSales.forEach(function(s){
+    if (!s.item || !num(s.qty)) return;
+    var k = (s.store || '未分店') + '|' + s.item;
+    var u = s.unit || '斤';
+    if (bought[k] && bought[k][u] != null) bought[k][u] -= num(s.qty);
+    else if (!orphan[k]) orphan[k] = { item: s.item, unit: u };
+  });
+  return { bought: bought, orphan: orphan };
+}
+
+/* 渲染层：库存卡 */
+function renderFruitStock(){
+  var el = document.getElementById('fr-stock');
+  if (!el) return;
+  var d = fruitStockData();
+  var byStore = {};
+  Object.keys(d.bought).forEach(function(k){
+    var i = k.indexOf('|');
+    var st = k.slice(0, i), it = k.slice(i + 1);
+    if (!byStore[st]) byStore[st] = [];
+    byStore[st].push({ item: it, units: d.bought[k] });
+  });
+  var stores = Object.keys(byStore).sort();
+  if (!stores.length) { el.innerHTML = '<p class="hint">还没有进货记录，入库后这里自动算库存。</p>'; return; }
+  var html = '';
+  stores.forEach(function(st){
+    html += '<div class="fr-stock-store">' + esc(frShortStore(st)) + '</div>';
+    byStore[st].forEach(function(row){
+      var parts = Object.keys(row.units).map(function(u){
+        var v = Math.round(row.units[u] * 10) / 10;
+        return '<span class="' + (v < 0 ? 'st-neg' : '') + '">' + v + esc(u) + '</span>';
+      }).join(' · ');
+      var neg = Object.keys(row.units).some(function(u){ return row.units[u] < 0; });
+      html += '<div class="fr-stock-line"><span class="st-item">' + esc(row.item) + (neg ? ' ⚠' : '') + '</span><span class="st-val">剩 ' + parts + '</span></div>';
+    });
+  });
+  var orph = Object.keys(d.orphan);
+  if (orph.length) {
+    html += '<p class="hint" style="color:#b26a00;margin-top:8px">⚠ 以下销量没有对应的进货记录（品类名对不上或漏记进货，库存算不准）：' +
+      orph.map(function(k){ var i = k.indexOf('|'); return esc(frShortStore(k.slice(0, i)) + ' · ' + d.orphan[k].item); }).join('；') + '</p>';
+  }
+  el.innerHTML = html;
+}
+
 function renderFruit(){
   var mk = viewMonth;
   var purchases = state.fruitPurchases.filter(function(x){ return monthKeyOf(x.date) === mk; });
@@ -2302,6 +2563,11 @@ function refreshAll(){
   renderPet();
   renderPetTrips();
   renderFruit();
+  renderFruitChips();
+  renderQuickBuyMeta();
+  quickBuyCalc();
+  renderFruitPrice();
+  renderFruitStock();
   renderMedia();
   renderStoreHint();
 }
@@ -2567,6 +2833,22 @@ function bindEvents(){
   document.getElementById('btn-add-pet').addEventListener('click', addPet);
   document.getElementById('btn-add-media').addEventListener('click', addMedia);
   document.getElementById('btn-fr-buy').addEventListener('click', doParseFruitBuy);
+  /* 品类点选：更新选中态 + 上次进价提示 + 价格曲线 */
+  document.getElementById('fr-chips').addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('.fr-chip') : null;
+    if (!b) return;
+    frSelCat = b.getAttribute('data-cat') || '';
+    renderFruitChips();
+    renderQuickBuyMeta();
+    renderFruitPrice();
+    quickBuyCalc();
+  });
+  /* 点选进货：总价/单价/单位变化实时算重量 */
+  ['fr-q-total', 'fr-q-price'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', quickBuyCalc);
+  });
+  document.getElementById('fr-q-unit').addEventListener('change', quickBuyCalc);
+  document.getElementById('btn-fr-q-buy').addEventListener('click', quickFruitBuy);
   /* 贴完/打完自动解析：预览和「确认入库」直接出现，不用再点解析按钮 */
   var frBuyTimer = null;
   document.getElementById('fr-buy-text').addEventListener('input', function(){
@@ -2661,6 +2943,7 @@ function init(){
   d = document.getElementById('pf-date'); if (d) d.value = todayStr();
   d = document.getElementById('pt-date'); if (d) d.value = todayStr();
   d = document.getElementById('fr-date'); if (d) d.value = todayStr();
+  d = document.getElementById('fr-q-date'); if (d && !d.value) d.value = todayStr();
   d = document.getElementById('md-date'); if (d) d.value = todayStr();
   d = document.getElementById('biz-month'); if (d) d.value = viewMonth;
   d = document.getElementById('pt-month'); if (d) d.value = viewMonth;
