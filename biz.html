@@ -281,9 +281,20 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
 @media(max-width:560px){
   .hero-grid{grid-template-columns:repeat(2,1fr)}
   .hero-card .hc-num{font-size:19px}
-  .sum-grid{grid-template-columns:repeat(3,1fr)}
+  .sum-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .sum-card{padding:8px 4px}
+  .sum-card .shop{font-size:11px}
+  .sum-card .num{font-size:14px;letter-spacing:-.2px}
   .row{flex-wrap:wrap}
   .row .field{min-width:calc(50% - 4px)}
+  /* 水果板块窄屏防挤压 */
+  .fr-row{font-size:12.5px;gap:6px}
+  .fr-name{flex:0 0 70px}
+  .fr-bar-wrap{min-width:18px}
+  .fr-val{font-size:11px;max-width:42vw}
+  .fr-daily-head,.fr-daily-row,.fr-daily-total{gap:6px}
+  .fr-daily-head{font-size:11px}
+  .fr-daily-row{font-size:12px}
 }
 </style>
 </head>
@@ -1853,7 +1864,7 @@ function renderFruit(){
       var margin = b.costKnown && b.revenue > 0 ? Math.round((b.revenue - b.cost) / b.revenue * 1000) / 10 : null;
       var val = '收 ' + money(b.revenue) + '<br>' + (b.costKnown
         ? '<span style="color:' + (b.revenue - b.cost >= 0 ? 'var(--green)' : 'var(--red)') + '">毛利 ' + money(b.revenue - b.cost) + (margin !== null ? ' · ' + margin + '%' : '') + '</span>'
-        : '<span style="color:var(--amber)">毛利待算（没进货价）</span>');
+        : '<span style="color:var(--amber)">毛利待算</span>');
       return '<div class="fr-row"><div class="fr-name">' + esc(b.item) + '</div>' +
         '<div class="fr-bar-wrap"><div class="fr-bar" style="width:' + w + '%"></div></div>' +
         '<div class="fr-val">' + (num(b.qty) > 0 ? b.qty + esc(b.unit) : '只记金额') + '<br>' + val + '</div></div>';
