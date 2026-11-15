@@ -147,6 +147,24 @@ body{
 .fr-stock-line .st-item{font-weight:550}
 .fr-stock-line .st-val{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;white-space:nowrap}
 .fr-stock-line .st-neg{color:var(--red);font-weight:650}
+/* 总库存 & 补货预估 */
+.rst-head{display:none}
+.rst-row{padding:9px 2px;border-bottom:1px dashed var(--line)}
+.rst-row:last-of-type{border-bottom:none}
+.rst-row.lv-now{background:#fdf0ef;border-radius:10px;padding-left:8px;padding-right:8px;margin:4px -2px}
+.rst-row.lv-soon{background:#fdf6ec;border-radius:10px;padding-left:8px;padding-right:8px;margin:4px -2px}
+.rst-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.rst-item{font-weight:600;font-size:14px}
+.rst-badge{color:#fff;font-size:11px;font-weight:650;padding:3px 9px;border-radius:10px;white-space:nowrap;flex:0 0 auto}
+.rst-nums{display:grid;grid-template-columns:1.3fr 1fr 1fr;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.rst-nums b{color:var(--text);font-weight:650}
+.rst-nums .st-neg{color:var(--red)}
+/* 品类编辑 */
+.cat-edit-row{display:flex;gap:8px;margin-bottom:6px}
+.cat-edit-row input{flex:1;min-height:40px}
+.cat-del{flex:0 0 auto;width:40px;min-height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--red);font-size:13px;cursor:pointer}
+.cat-add-row{display:flex;gap:8px;margin-top:8px}
+.cat-add-row input{flex:1;min-height:40px}
 .market-list{margin:4px 0 0;padding:0;list-style:none}
 .market-list li{padding:5px 0 5px 15px;position:relative;font-size:13.5px;line-height:1.6}
 .market-list li::before{content:'';position:absolute;left:3px;top:13px;width:6px;height:6px;border-radius:50%;background:var(--olive);opacity:.5}
@@ -685,19 +703,18 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         点选进货 · 自动算重量
       </h2>
-      <p class="desc">左右滑动点选品类 → 填<b>总价</b>和<b>单价</b> → 重量自动算好，一键入库。</p>
+      <p class="desc">左右滑动点选品类 → 填<b>总价</b>和<b>单价</b> → 重量自动算好，一键入库。<b>进货记总量（总仓），不区分门店。</b></p>
       <div class="fr-chips" id="fr-chips"></div>
+      <div style="margin:2px 0 8px"><button class="btn" id="btn-fr-cats-edit" style="min-height:36px;padding:6px 14px;font-size:13px">编辑品类（改名 / 增删）</button></div>
+      <div id="fr-cats-edit" style="display:none"></div>
       <div class="row">
         <div class="field">
           <label>日期</label>
           <input type="date" id="fr-q-date">
         </div>
         <div class="field">
-          <label>门店</label>
-          <select id="fr-q-store">
-            <option value="来伊份庆春东路店">庆春东路店</option>
-            <option value="来伊份网商店">网上店</option>
-          </select>
+          <label>进货地（可选备注）</label>
+          <input type="text" id="fr-q-note" placeholder="如：勾庄">
         </div>
       </div>
       <div class="field" style="margin-top:8px">
@@ -731,11 +748,11 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         快捷进货
       </h2>
-      <p class="desc">一行一条，可贴多行。例：<b>苹果 60斤 3.5元一斤 庆春东路店</b>；不写斤数也行，报<b>总价+单价</b>自动算</p>
+      <p class="desc">一行一条，可贴多行。例：<b>苹果 60斤 3.5元一斤</b>；不写斤数也行，报<b>总价+单价</b>自动算。进货记总量（总仓），报数才分门店。</p>
       <div class="field">
         <textarea id="fr-buy-text" rows="4" placeholder="一行一条：
-陕西苹果 31斤 共112元 庆春东路店
-苹果 共112元 单价3.6 庆春东路店（自动算斤数）"></textarea>
+陕西苹果 31斤 共112元
+苹果 共112元 单价3.6（自动算斤数）"></textarea>
       </div>
       <button class="btn" id="btn-fr-buy">解析进货</button>
       <div id="fr-buy-preview"></div>
@@ -812,9 +829,9 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
     <section class="card">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"/><path d="M3 8l2-4h14l2 4"/><path d="M9 12h6"/></svg>
-        当前库存 · 每店每品类剩余
+        当前总库存 & 明日进货预估
       </h2>
-      <p class="desc">累计进货减去销量（按单位分开算）。红色负数 = 漏记进货，或销量和进货的品类名对不上。</p>
+      <p class="desc">总库存 = 累计进货 − 累计销量（不分门店）。结合最近 7 天日均销量，自动算每个品类还能卖几天、明天该不该进货。红色负数 = 销量超过进货，检查漏记。</p>
       <div id="fr-stock"></div>
     </section>
 
@@ -1058,17 +1075,10 @@ function seed(){
       { id: uid(), date: shiftDays(t, -3), platform: '抖音', fans: 512, views: 8600, likes: 210, note: '示例：法斗洗澡翻车' },
       { id: uid(), date: t, platform: '抖音', fans: 688, views: 12000, likes: 380, note: '示例：喂零食翻车现场' }
     ],
-    fruitPurchases: [
-      { id: uid(), date: shiftDays(t, -3), item: '洛川苹果', store: '来伊份庆春东路店', qty: 60, unit: '斤', unitPrice: 3.5, total: 210, note: '示例：陕西洛川红富士' },
-      { id: uid(), date: shiftDays(t, -3), item: '蜜橘', store: '来伊份庆春东路店', qty: 100, unit: '斤', unitPrice: 1.4, total: 140, note: '示例：湖南蜜橘' },
-      { id: uid(), date: shiftDays(t, -1), item: '洛川苹果', store: '来伊份网商店', qty: 30, unit: '斤', unitPrice: 3.8, total: 114, note: '示例：线上补货' }
-    ],
-    fruitSales: [
-      { id: uid(), date: shiftDays(t, -1), store: '来伊份庆春东路店', weather: '晴', item: '洛川苹果', qty: 25, unit: '斤', revenue: 150, note: '示例' },
-      { id: uid(), date: shiftDays(t, -1), store: '来伊份庆春东路店', weather: '晴', item: '蜜橘', qty: 40, unit: '斤', revenue: 96, note: '示例' },
-      { id: uid(), date: t, store: '来伊份庆春东路店', weather: '雨', item: '洛川苹果', qty: 14, unit: '斤', revenue: 84, note: '示例：下雨客流少' },
-      { id: uid(), date: t, store: '来伊份网商店', weather: '', item: '蜜橘', qty: 20, unit: '斤', revenue: 58, note: '示例：线上单' }
-    ]
+    fruitPurchases: [],
+    fruitSales: [],
+    fruitCats: null,
+    fruitResetVer: 2
   };
   saveData();
 }
@@ -1086,9 +1096,22 @@ function loadData(){
       pet: Array.isArray(o.pet) ? o.pet : [],
       media: Array.isArray(o.media) ? o.media : [],
       fruitPurchases: Array.isArray(o.fruitPurchases) ? o.fruitPurchases : [],
-      fruitSales: Array.isArray(o.fruitSales) ? o.fruitSales : []
+      fruitSales: Array.isArray(o.fruitSales) ? o.fruitSales : [],
+      fruitCats: Array.isArray(o.fruitCats) && o.fruitCats.length ? o.fruitCats : null,
+      fruitResetVer: num(o.fruitResetVer)
     };
   } catch (e) { seed(); }
+  fruitResetIfNeeded();
+}
+/* 水果数据重置：版本号一变，所有设备加载页面时自动清空水果进出数据（品类名单保留） */
+var FRUIT_RESET_VER = 2;
+function fruitResetIfNeeded(){
+  if (state.fruitResetVer !== FRUIT_RESET_VER) {
+    state.fruitPurchases = [];
+    state.fruitSales = [];
+    state.fruitResetVer = FRUIT_RESET_VER;
+    saveData();
+  }
 }
 function saveData(){
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
@@ -1189,6 +1212,17 @@ function applyRemote(snap){
     var o = JSON.parse(snap);
     if (!o || !o.state) return false;
     var cur = state;
+    var rv = num(o.state.fruitResetVer) || cur.fruitResetVer || 0;
+    /* 水果重置版本以下的旧条目一律丢弃（防旧设备把已清空的数据推回来） */
+    function mergeFruit(remote, local, rv){
+      var seen = {}, out = [];
+      (remote || []).concat(local || []).forEach(function(x){
+        if (!x || x.resetVer !== rv) return;
+        var k = x.id != null ? 'i' + x.id : 'r' + JSON.stringify(x);
+        if (!seen[k]) { seen[k] = 1; out.push(x); }
+      });
+      return out;
+    }
     state = {
       demo: !!o.state.demo,
       shops: Array.isArray(o.state.shops) && o.state.shops.length ? o.state.shops : (cur.shops || []),
@@ -1196,8 +1230,10 @@ function applyRemote(snap){
       profits: mergeArr(o.state.profits, cur.profits),
       pet: mergeArr(o.state.pet, cur.pet),
       media: mergeArr(o.state.media, cur.media),
-      fruitPurchases: mergeArr(o.state.fruitPurchases, cur.fruitPurchases),
-      fruitSales: mergeArr(o.state.fruitSales, cur.fruitSales)
+      fruitPurchases: mergeFruit(o.state.fruitPurchases, cur.fruitPurchases, rv),
+      fruitSales: mergeFruit(o.state.fruitSales, cur.fruitSales, rv),
+      fruitCats: Array.isArray(o.state.fruitCats) && o.state.fruitCats.length ? o.state.fruitCats : (Array.isArray(cur.fruitCats) && cur.fruitCats.length ? cur.fruitCats : null),
+      fruitResetVer: rv
     };
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
     lastRemoteSavedAt = o.savedAt;
@@ -1593,7 +1629,7 @@ function fruitStoreOf(t){
 
 function parseFruitBuy(raw){
   var text = String(raw || '').trim();
-  if (!text) return { ok: false, msg: '先把进货信息写进去，比如：苹果 60斤 3.5元一斤 庆春东路店' };
+  if (!text) return { ok: false, msg: '先把进货信息写进去，比如：苹果 60斤 3.5元一斤（进货记总量，不用写门店）' };
 
   /* 1. 数量（可选：不写斤数时，给「总价+单价」自动反推） */
   var m = text.match(new RegExp('(\\d+(?:\\.\\d+)?)\\s*' + FRUIT_UNIT_RE));
@@ -1811,14 +1847,14 @@ function doParseFruitBuy(){
   if (!oks.length) {
     pendingFruitBuy = null;
     box.innerHTML = '<p class="hint" style="color:#c0392b">' + errs.map(esc).join('<br>') + '</p>' +
-      '<p class="hint">写法示例（一行一条）：<b>苹果 60斤 3.5元一斤 庆春东路店</b> 或 <b>11-04 蜜橘 100斤 共280元 网上店</b></p>';
+      '<p class="hint">写法示例（一行一条）：<b>苹果 60斤 3.5元一斤</b> 或 <b>蜜橘 100斤 共280元</b>（进货记总量，不分门店）</p>';
     return;
   }
   pendingFruitBuy = oks;
   var tot = oks.reduce(function(s, d){ return s + num(d.total); }, 0);
   var html = oks.map(function(d){
     return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(d.item) + ' · ' + d.qty + esc(d.unit) + ' · <span class="money-in">' + money(d.total) + '</span>' +
-      '<div class="it-meta"><span>' + esc(d.date) + '</span><span class="tag">' + esc(d.store || '没认出门店，默认庆春东路店') + '</span><span class="tag">单价 ' + money(d.unitPrice) + '/' + esc(d.unit) + '</span>' + (d.derivedQty ? '<span class="tag" style="background:#fff7e6;color:#b26a00">斤数按单价反推</span>' : '') + '</div></div></div></div>';
+      '<div class="it-meta"><span>' + esc(d.date) + '</span><span class="tag">单价 ' + money(d.unitPrice) + '/' + esc(d.unit) + '</span>' + (d.derivedQty ? '<span class="tag" style="background:#fff7e6;color:#b26a00">斤数按单价反推</span>' : '') + '</div></div></div></div>';
   }).join('');
   if (errs.length) html += '<p class="hint" style="color:#c0392b">以下几行没认出来，请检查后单独重贴：<br>' + errs.map(esc).join('<br>') + '</p>';
   html += '<div class="btn-row"><button class="btn" data-act="fr-buy-ok">确认入库（' + oks.length + '笔 · 共' + money(tot) + '）</button><button class="btn ghost" data-act="fr-buy-cancel">重写</button></div>';
@@ -1829,8 +1865,7 @@ function confirmFruitBuy(){
   if (!pendingFruitBuy || !pendingFruitBuy.length) return;
   var n = 0, tot = 0;
   pendingFruitBuy.forEach(function(d){
-    if (!d.store) d.store = '来伊份庆春东路店';
-    state.fruitPurchases.push({ id: uid(), date: d.date, item: d.item, store: d.store, qty: d.qty, unit: d.unit, unitPrice: d.unitPrice, total: d.total, note: '' });
+    state.fruitPurchases.push({ id: uid(), date: d.date, item: d.item, store: '总仓', qty: d.qty, unit: d.unit, unitPrice: d.unitPrice, total: d.total, note: d.note || '', resetVer: FRUIT_RESET_VER });
     n++; tot += num(d.total);
   });
   state.demo = false;
@@ -1875,7 +1910,7 @@ function confirmFruitSales(){
   if (!pendingFruitSales) return;
   var p = pendingFruitSales;
   p.rows.forEach(function(x){
-    state.fruitSales.push({ id: uid(), date: p.date, store: p.store, weather: p.weather, item: x.item, qty: x.qty, unit: x.unit, revenue: x.revenue, note: '' });
+    state.fruitSales.push({ id: uid(), date: p.date, store: p.store, weather: p.weather, item: x.item, qty: x.qty, unit: x.unit, revenue: x.revenue, note: '', resetVer: FRUIT_RESET_VER });
   });
   state.demo = false;
   pendingFruitSales = null;
@@ -1921,11 +1956,56 @@ function setFrSelUnit(u){
   quickBuyCalc();
 }
 
-/* 渲染层：品类chips */
+/* 品类名单：可编辑，存 state.fruitCats；改名字时历史记录同步改名，库存不断档 */
+function fruitCatsList(){
+  return Array.isArray(state.fruitCats) && state.fruitCats.length ? state.fruitCats : FRUIT_CATS.slice();
+}
+function renameCatInRecords(oldName, newName){
+  state.fruitPurchases.forEach(function(p){ if (p.item === oldName) p.item = newName; });
+  state.fruitSales.forEach(function(s){ if (s.item === oldName) s.item = newName; });
+}
+var catEditBackup = null;
+function renderCatEditor(){
+  var el = document.getElementById('fr-cats-edit');
+  if (!el) return;
+  var cats = fruitCatsList();
+  var rows = cats.map(function(c, i){
+    return '<div class="cat-edit-row"><input type="text" value="' + esc(c) + '" data-cat-i="' + i + '" placeholder="品类名"><button type="button" class="cat-del" data-act="del" data-i="' + i + '" aria-label="删除' + esc(c) + '">删</button></div>';
+  }).join('');
+  el.innerHTML = '<p class="desc" style="margin:0 0 6px">改名后<b>历史进出货记录同步改</b>，库存毛利不断档。删掉不留记录。</p>' + rows +
+    '<div class="cat-add-row"><input type="text" id="cat-new-name" placeholder="新品类名，如：砂糖橘"><button type="button" class="btn" data-act="add" style="min-height:38px;padding:6px 14px;font-size:13px">添加</button></div>' +
+    '<div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" data-act="save" style="flex:1">保存品类</button><button type="button" class="btn" data-act="cancel" style="flex:1;background:#fff;color:var(--text)">取消</button></div>';
+}
+function saveCatEditor(){
+  var el = document.getElementById('fr-cats-edit');
+  if (!el) return;
+  var inputs = el.querySelectorAll('input[data-cat-i]');
+  var cats = [], seen = {};
+  inputs.forEach(function(inp){
+    var name = inp.value.trim().replace(/\s+/g, '');
+    if (!name || seen[name]) return;
+    seen[name] = 1;
+    cats.push(name);
+  });
+  if (!cats.length) { toast('至少留一个品类'); return; }
+  /* 同步改名：旧名单里有、新名单换了名的，历史记录跟着改 */
+  var old = fruitCatsList();
+  cats.forEach(function(n){ if (old.indexOf(n) === -1) {
+    var match = old.filter(function(o){ return o.length >= 2 && (n.indexOf(o) > -1 || o.indexOf(n) > -1); });
+    if (match.length === 1) renameCatInRecords(match[0], n);
+  }});
+  state.fruitCats = cats;
+  saveData();
+  catEditBackup = null;
+  el.style.display = 'none';
+  if (cats.indexOf(frSelCat) === -1) { frSelCat = ''; renderQuickBuyMeta(); renderFruitPrice(); quickBuyCalc(); }
+  refreshAll();
+  toast('品类名单已保存');
+}
 function renderFruitChips(){
   var el = document.getElementById('fr-chips');
   if (!el) return;
-  el.innerHTML = FRUIT_CATS.map(function(c){
+  el.innerHTML = fruitCatsList().map(function(c){
     return '<button type="button" class="fr-chip' + (c === frSelCat ? ' on' : '') + '" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
   }).join('');
 }
@@ -1982,8 +2062,8 @@ function quickFruitBuy(){
   if (!frQuickReady) { toast('总价和单价都填好才能入库'); return; }
   var d = frQuickReady;
   var date = document.getElementById('fr-q-date').value || todayStr();
-  var store = document.getElementById('fr-q-store').value;
-  state.fruitPurchases.push({ id: uid(), date: date, item: frSelCat, store: store, qty: d.qty, unit: d.unit, unitPrice: d.unitPrice, total: d.total, note: '' });
+  var note = (document.getElementById('fr-q-note').value || '').trim();
+  state.fruitPurchases.push({ id: uid(), date: date, item: frSelCat, store: '总仓', qty: d.qty, unit: d.unit, unitPrice: d.unitPrice, total: d.total, note: note, resetVer: FRUIT_RESET_VER });
   state.demo = false;
   frQuickReady = null;
   document.getElementById('fr-q-total').value = '';
@@ -2039,57 +2119,88 @@ function renderFruitPrice(){
   el.innerHTML = svg;
 }
 
-/* 计算层：库存 = 累计进货 − 累计销量（按 店×品类×单位） */
+/* 计算层：总库存 = 累计进货 − 累计销量（不分门店，按 品类×单位） */
 function fruitStockData(){
-  var bought = {};
+  var stock = {}, touched = {};
   state.fruitPurchases.forEach(function(p){
     if (!p.item) return;
-    var k = (p.store || '未分店') + '|' + p.item;
-    if (!bought[k]) bought[k] = {};
+    if (!stock[p.item]) stock[p.item] = {};
     var u = p.unit || '斤';
-    bought[k][u] = (bought[k][u] || 0) + num(p.qty);
+    stock[p.item][u] = (stock[p.item][u] || 0) + num(p.qty);
+    touched[p.item] = 1;
   });
   var orphan = {};
   state.fruitSales.forEach(function(s){
     if (!s.item || !num(s.qty)) return;
-    var k = (s.store || '未分店') + '|' + s.item;
+    touched[s.item] = 1;
     var u = s.unit || '斤';
-    if (bought[k] && bought[k][u] != null) bought[k][u] -= num(s.qty);
-    else if (!orphan[k]) orphan[k] = { item: s.item, unit: u };
+    if (stock[s.item] && stock[s.item][u] != null) stock[s.item][u] -= num(s.qty);
+    else orphan[s.item + '|' + u] = { item: s.item, unit: u };
   });
-  return { bought: bought, orphan: orphan };
+  return { stock: stock, orphan: orphan, touched: touched };
 }
 
-/* 渲染层：库存卡 */
+/* 计算层：补货预估 = 总库存 + 近7天日均销量 → 还能卖几天 */
+function fruitRestockData(){
+  var d = fruitStockData();
+  var winStart = shiftDays(todayStr(), -6);
+  var sold = {}, days = {}; /* sold: 品|单位 窗口内销量; days: 品|单位 有销量的天数 */
+  var daySet = {};
+  state.fruitSales.forEach(function(s){
+    if (!s.item || !num(s.qty)) return;
+    if (s.date < winStart || s.date > todayStr()) return;
+    var k = s.item + '|' + (s.unit || '斤');
+    sold[k] = (sold[k] || 0) + num(s.qty);
+    if (!daySet[k]) daySet[k] = {};
+    daySet[k][s.date] = 1;
+  });
+  Object.keys(daySet).forEach(function(k){ days[k] = Object.keys(daySet[k]).length; });
+  var rows = [];
+  Object.keys(d.touched).forEach(function(item){
+    var units = d.stock[item] || {};
+    Object.keys(units).forEach(function(u){
+      var left = Math.round(units[u] * 10) / 10;
+      var k = item + '|' + u;
+      var avg = days[k] ? Math.round(sold[k] / days[k] * 10) / 10 : 0;
+      var daysLeft = (left > 0 && avg > 0) ? Math.round(left / avg * 10) / 10 : null;
+      var level;
+      if (left <= 0) level = 'now';
+      else if (avg <= 0) level = 'none';
+      else if (daysLeft <= 1.5) level = 'now';
+      else if (daysLeft <= 2.5) level = 'soon';
+      else if (daysLeft <= 4) level = 'watch';
+      else level = 'ok';
+      rows.push({ item: item, unit: u, left: left, avg: avg, daysLeft: daysLeft, level: level });
+    });
+  });
+  var order = { now: 0, soon: 1, watch: 2, ok: 3, none: 4 };
+  rows.sort(function(a, b){ return order[a.level] - order[b.level] || (a.daysLeft == null ? 9 : a.daysLeft) - (b.daysLeft == null ? 9 : b.daysLeft); });
+  return { rows: rows, orphan: d.orphan, hasAny: rows.length > 0 };
+}
+
+/* 渲染层：总库存 & 明日进货预估 */
+var RST_BADGE = { now: ['马上进货', '#c0392b'], soon: ['明天该补', '#b26a00'], watch: ['留意库存', '#8a6d3b'], ok: ['还够卖', '#2e7d32'], none: ['暂无销量', '#777'] };
 function renderFruitStock(){
   var el = document.getElementById('fr-stock');
   if (!el) return;
-  var d = fruitStockData();
-  var byStore = {};
-  Object.keys(d.bought).forEach(function(k){
-    var i = k.indexOf('|');
-    var st = k.slice(0, i), it = k.slice(i + 1);
-    if (!byStore[st]) byStore[st] = [];
-    byStore[st].push({ item: it, units: d.bought[k] });
-  });
-  var stores = Object.keys(byStore).sort();
-  if (!stores.length) { el.innerHTML = '<p class="hint">还没有进货记录，入库后这里自动算库存。</p>'; return; }
+  var d = fruitRestockData();
+  if (!d.hasAny) { el.innerHTML = '<p class="hint">还没有进出货记录。进货和报数录进去后，这里自动算总库存和补货建议。</p>'; return; }
   var html = '';
-  stores.forEach(function(st){
-    html += '<div class="fr-stock-store">' + esc(frShortStore(st)) + '</div>';
-    byStore[st].forEach(function(row){
-      var parts = Object.keys(row.units).map(function(u){
-        var v = Math.round(row.units[u] * 10) / 10;
-        return '<span class="' + (v < 0 ? 'st-neg' : '') + '">' + v + esc(u) + '</span>';
-      }).join(' · ');
-      var neg = Object.keys(row.units).some(function(u){ return row.units[u] < 0; });
-      html += '<div class="fr-stock-line"><span class="st-item">' + esc(row.item) + (neg ? ' ⚠' : '') + '</span><span class="st-val">剩 ' + parts + '</span></div>';
-    });
+  d.rows.forEach(function(r){
+    var b = RST_BADGE[r.level];
+    var daysTxt = r.level === 'none' ? '—' : (r.daysLeft == null ? '—' : (r.daysLeft <= 1 ? '不到1天' : Math.floor(r.daysLeft) + '天左右'));
+    var leftCls = r.left < 0 ? 'st-neg' : (r.level === 'now' && r.left <= 0 ? 'st-neg' : '');
+    html += '<div class="rst-row lv-' + r.level + '">' +
+      '<div class="rst-top"><span class="rst-item">' + esc(r.item) + ' · ' + esc(r.unit) + '</span><span class="rst-badge" style="background:' + b[1] + '">' + b[0] + '</span></div>' +
+      '<div class="rst-nums"><span>剩 <b class="' + leftCls + '">' + r.left + esc(r.unit) + '</b></span>' +
+      '<span>日均卖 <b>' + (r.avg > 0 ? r.avg + esc(r.unit) : '—') + '</b></span>' +
+      '<span>够卖 <b>' + daysTxt + '</b></span></div>' +
+      '</div>';
   });
   var orph = Object.keys(d.orphan);
   if (orph.length) {
-    html += '<p class="hint" style="color:#b26a00;margin-top:8px">⚠ 以下销量没有对应的进货记录（品类名对不上或漏记进货，库存算不准）：' +
-      orph.map(function(k){ var i = k.indexOf('|'); return esc(frShortStore(k.slice(0, i)) + ' · ' + d.orphan[k].item); }).join('；') + '</p>';
+    html += '<p class="hint" style="color:#b26a00;margin-top:8px">⚠ 以下销量没对应进货记录（品类名对不上或漏记进货）：' +
+      orph.map(function(k){ var i = k.indexOf('|'); return esc(d.orphan[k].item + '·' + d.orphan[k].unit); }).join('；') + '</p>';
   }
   el.innerHTML = html;
 }
@@ -2839,7 +2950,7 @@ function importJson(file){
 function clearAll(){
   if (!confirm('清空全部数据（待办+盈利+宠物+自媒体）？\n不能撤销，建议先导出备份。')) return;
   if (!confirm('再确认一次：真的要清空吗？')) return;
-  state = { demo:false, shops: state.shops, todos: [], profits: [], pet: [], media: [] };
+  state = { demo:false, shops: state.shops, todos: [], profits: [], pet: [], media: [], fruitPurchases: [], fruitSales: [], fruitCats: state.fruitCats || null, fruitResetVer: FRUIT_RESET_VER };
   saveData(); refreshAll(); toast('清空了，门店名单保留着');
 }
 
@@ -2876,6 +2987,36 @@ function bindEvents(){
     setFrSelUnit(b.getAttribute('data-unit') || '斤');
   });
   document.getElementById('btn-fr-q-buy').addEventListener('click', quickFruitBuy);
+  /* 品类编辑面板 */
+  document.getElementById('btn-fr-cats-edit').addEventListener('click', function(){
+    var el = document.getElementById('fr-cats-edit');
+    var show = el.style.display === 'none';
+    el.style.display = show ? '' : 'none';
+    if (show) { catEditBackup = fruitCatsList().slice(); renderCatEditor(); }
+  });
+  document.getElementById('fr-cats-edit').addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!b) return;
+    var act = b.getAttribute('data-act');
+    if (act === 'del') {
+      var row = b.closest('.cat-edit-row');
+      if (row) row.remove();
+    } else if (act === 'add') {
+      var name = document.getElementById('cat-new-name').value.trim().replace(/\s+/g, '');
+      if (!name) { toast('先写品类名'); return; }
+      var box = document.createElement('div');
+      box.className = 'cat-edit-row';
+      box.innerHTML = '<input type="text" value="' + esc(name) + '" data-cat-i="new"><button type="button" class="cat-del" data-act="del">删</button>';
+      document.getElementById('fr-cats-edit').querySelector('.cat-add-row').before(box);
+      document.getElementById('cat-new-name').value = '';
+      box.querySelector('input').focus();
+    } else if (act === 'save') {
+      saveCatEditor();
+    } else if (act === 'cancel') {
+      document.getElementById('fr-cats-edit').style.display = 'none';
+      catEditBackup = null;
+    }
+  });
   /* 贴完/打完自动解析：预览和「确认入库」直接出现，不用再点解析按钮 */
   var frBuyTimer = null;
   document.getElementById('fr-buy-text').addEventListener('input', function(){
