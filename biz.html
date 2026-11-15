@@ -133,6 +133,8 @@ body{
 .fr-chips::-webkit-scrollbar{display:none}
 .fr-chip{flex:0 0 auto;padding:9px 14px;border-radius:18px;border:1px solid var(--line);background:#fff;font-size:13.5px;color:var(--text);min-height:38px;cursor:pointer;white-space:nowrap}
 .fr-chip.on{background:var(--olive);border-color:var(--olive);color:#fff;font-weight:600}
+.fr-unit-chips{display:flex;gap:8px;flex-wrap:wrap}
+.fr-unit-chips .fr-chip{padding:8px 16px}
 .fr-q-calc{font-size:15px;font-weight:700;color:var(--olive);min-height:22px;margin:4px 0}
 .fr-q-last{font-size:12.5px;color:var(--muted);margin:0 0 6px}
 .fr-price-cat{color:var(--olive)}
@@ -697,16 +699,16 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
             <option value="来伊份网商店">网上店</option>
           </select>
         </div>
-        <div class="field">
-          <label>单位</label>
-          <select id="fr-q-unit">
-            <option value="斤">斤</option>
-            <option value="公斤">公斤</option>
-            <option value="箱">箱</option>
-            <option value="盒">盒</option>
-            <option value="筐">筐</option>
-            <option value="个">个</option>
-          </select>
+      </div>
+      <div class="field" style="margin-top:8px">
+        <label>单位（点选，不用弹窗）</label>
+        <div class="fr-unit-chips" id="fr-q-unit-chips">
+          <button type="button" class="fr-chip on" data-unit="斤">斤</button>
+          <button type="button" class="fr-chip" data-unit="公斤">公斤</button>
+          <button type="button" class="fr-chip" data-unit="箱">箱</button>
+          <button type="button" class="fr-chip" data-unit="盒">盒</button>
+          <button type="button" class="fr-chip" data-unit="筐">筐</button>
+          <button type="button" class="fr-chip" data-unit="个">个</button>
         </div>
       </div>
       <div class="row">
@@ -1902,9 +1904,22 @@ function delFruitSale(id){
 /* ---------- 品类快速进货 / 价格曲线 / 库存 ---------- */
 var FRUIT_CATS = ['洛川富士', '花牛苹果', '东江湖蜜桔', '库尔勒香梨', '爱媛果冻橙', '阳光玫瑰', '冬枣', '人参果', '赣州脐橙', '涌泉蜜桔', '奶油草莓', '云南蓝莓', '猕猴桃'];
 var frSelCat = '';
+var frSelUnit = '斤';
 var frQuickReady = null;
 
 function frShortStore(s){ return String(s || '').replace(/来伊份/g, ''); }
+
+/* 渲染层：单位chips选中态（frSelUnit 驱动） */
+function renderUnitChips(){
+  document.querySelectorAll('#fr-q-unit-chips .fr-chip').forEach(function(x){
+    x.classList.toggle('on', x.getAttribute('data-unit') === frSelUnit);
+  });
+}
+function setFrSelUnit(u){
+  frSelUnit = u || '斤';
+  renderUnitChips();
+  quickBuyCalc();
+}
 
 /* 渲染层：品类chips */
 function renderFruitChips(){
@@ -1949,7 +1964,7 @@ function quickBuyCalc(){
   if (!el) return;
   var total = num(document.getElementById('fr-q-total').value);
   var price = num(document.getElementById('fr-q-price').value);
-  var unit = document.getElementById('fr-q-unit').value;
+  var unit = frSelUnit;
   if (!frSelCat) { el.textContent = ''; frQuickReady = null; return; }
   if (total > 0 && price > 0) {
     var qty = Math.round(total / price * 10) / 10;
@@ -2842,6 +2857,9 @@ function bindEvents(){
     var b = e.target && e.target.closest ? e.target.closest('.fr-chip') : null;
     if (!b) return;
     frSelCat = b.getAttribute('data-cat') || '';
+    /* 自动切到该品类上次进货用的单位 */
+    var recs = fruitCatRecs(frSelCat);
+    if (recs.length && recs[recs.length - 1].unit) setFrSelUnit(recs[recs.length - 1].unit);
     renderFruitChips();
     renderQuickBuyMeta();
     renderFruitPrice();
@@ -2851,7 +2869,12 @@ function bindEvents(){
   ['fr-q-total', 'fr-q-price'].forEach(function(id){
     document.getElementById(id).addEventListener('input', quickBuyCalc);
   });
-  document.getElementById('fr-q-unit').addEventListener('change', quickBuyCalc);
+  /* 单位点选（替代原生下拉，手机点了必响应） */
+  document.getElementById('fr-q-unit-chips').addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('.fr-chip') : null;
+    if (!b) return;
+    setFrSelUnit(b.getAttribute('data-unit') || '斤');
+  });
   document.getElementById('btn-fr-q-buy').addEventListener('click', quickFruitBuy);
   /* 贴完/打完自动解析：预览和「确认入库」直接出现，不用再点解析按钮 */
   var frBuyTimer = null;
