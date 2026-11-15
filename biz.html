@@ -165,6 +165,11 @@ body{
 .cat-del{flex:0 0 auto;width:40px;min-height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--red);font-size:13px;cursor:pointer}
 .cat-add-row{display:flex;gap:8px;margin-top:8px}
 .cat-add-row input{flex:1;min-height:40px}
+/* 水果卡折叠 */
+.fold-card > h2{cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;padding-right:34px}
+.fold-card > h2::after{content:'';position:absolute;right:6px;top:50%;width:9px;height:9px;border-right:2.5px solid #999;border-bottom:2.5px solid #999;transform:translateY(-70%) rotate(45deg);transition:transform .15s}
+.fold-card.folded > h2::after{transform:translateY(-70%) rotate(-45deg)}
+.fold-card.folded > *:not(h2){display:none}
 .market-list{margin:4px 0 0;padding:0;list-style:none}
 .market-list li{padding:5px 0 5px 15px;position:relative;font-size:13.5px;line-height:1.6}
 .market-list li::before{content:'';position:absolute;left:3px;top:13px;width:6px;height:6px;border-radius:50%;background:var(--olive);opacity:.5}
@@ -698,7 +703,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
 
   <!-- ===== 水果板块（门店页二级面板，随 #biz-pane-fruit 切换显示） ===== -->
   <section class="view" id="view-fruit">
-    <section class="card">
+    <section class="card fold-card" data-fold="qbuy">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         点选进货 · 自动算重量
@@ -743,7 +748,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <button class="btn" id="btn-fr-q-buy">入库这笔进货</button>
     </section>
 
-    <section class="card">
+    <section class="card fold-card" data-fold="textbuy">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         快捷进货
@@ -758,7 +763,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div id="fr-buy-preview"></div>
     </section>
 
-    <section class="card">
+    <section class="card fold-card" data-fold="report">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20V10l5-5 5 5v10"/><path d="M10 14h4"/></svg>
         每日报数（店员报销量）
@@ -794,7 +799,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div id="fr-sales-preview"></div>
     </section>
 
-    <section class="card">
+    <section class="card fold-card" data-fold="profit">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
         单品盈利分析
@@ -807,7 +812,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div class="fr-hint" id="fr-weather-box"></div>
     </section>
 
-    <section class="card">
+    <section class="card fold-card" data-fold="daily">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/></svg>
         每日汇总 · 进货 / 销售
@@ -817,7 +822,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div id="fr-daily"></div>
     </section>
 
-    <section class="card">
+    <section class="card fold-card" data-fold="price">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 2 5-6"/></svg>
         进货价格曲线
@@ -826,7 +831,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div id="fr-price"></div>
     </section>
 
-    <section class="card">
+    <section class="card fold-card" data-fold="stock">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"/><path d="M3 8l2-4h14l2 4"/><path d="M9 12h6"/></svg>
         当前总库存 & 明日进货预估
@@ -835,7 +840,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div id="fr-stock"></div>
     </section>
 
-    <section class="card">
+    <section class="card fold-card" data-fold="records">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"/><path d="M3 8l2-4h14l2 4"/><path d="M9 12h6"/></svg>
         进货 / 销量记录
@@ -845,7 +850,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div id="fr-sales-list"></div>
     </section>
 
-    <section class="card">
+    <section class="card fold-card" data-fold="market">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M10 10.5c.5-3 2-5.5 5-7.5"/><path d="M15 3c1.5.5 3 .5 4.5 0-.5 1.8-1.5 3-3 3.5"/></svg>
         水果大盘 · 杭州参考
@@ -2002,6 +2007,28 @@ function saveCatEditor(){
   refreshAll();
   toast('品类名单已保存');
 }
+
+/* 水果卡折叠：点标题收起/展开，每台设备记住自己的习惯（localStorage） */
+var FRUIT_FOLD_KEY = 'wb_biz_fruit_fold';
+function fruitFoldDefault(){
+  /* 默认收起，只留「点选进货」和「库存&补货预估」展开 */
+  return ['textbuy','report','profit','daily','price','records','market'];
+}
+function loadFruitFold(){
+  var folded = null;
+  try { folded = JSON.parse(localStorage.getItem(FRUIT_FOLD_KEY)); } catch (e) { folded = null; }
+  if (!Array.isArray(folded)) folded = fruitFoldDefault();
+  document.querySelectorAll('#view-fruit .fold-card').forEach(function(c){
+    c.classList.toggle('folded', folded.indexOf(c.getAttribute('data-fold')) > -1);
+  });
+}
+function saveFruitFold(){
+  var folded = [];
+  document.querySelectorAll('#view-fruit .fold-card.folded').forEach(function(c){
+    folded.push(c.getAttribute('data-fold'));
+  });
+  try { localStorage.setItem(FRUIT_FOLD_KEY, JSON.stringify(folded)); } catch (e) {}
+}
 function renderFruitChips(){
   var el = document.getElementById('fr-chips');
   if (!el) return;
@@ -2987,6 +3014,13 @@ function bindEvents(){
     setFrSelUnit(b.getAttribute('data-unit') || '斤');
   });
   document.getElementById('btn-fr-q-buy').addEventListener('click', quickFruitBuy);
+  /* 水果卡折叠：点标题切换，记住状态 */
+  document.getElementById('view-fruit').addEventListener('click', function(e){
+    var h = e.target && e.target.closest ? e.target.closest('.fold-card > h2') : null;
+    if (!h) return;
+    h.parentElement.classList.toggle('folded');
+    saveFruitFold();
+  });
   /* 品类编辑面板 */
   document.getElementById('btn-fr-cats-edit').addEventListener('click', function(){
     var el = document.getElementById('fr-cats-edit');
@@ -3117,6 +3151,7 @@ function init(){
   d = document.getElementById('pt-month'); if (d) d.value = viewMonth;
   d = document.getElementById('fr-month'); if (d) d.value = viewMonth;
   bindEvents();
+  loadFruitFold();
   refreshAll();
   renderSyncStatus();
   if (syncCfg.token && syncCfg.gistId) { startSyncLoop(); syncPull(); }
