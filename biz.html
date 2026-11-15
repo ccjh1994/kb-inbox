@@ -708,7 +708,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
         点选进货 · 自动算重量
       </h2>
-      <p class="desc">左右滑动点选品类 → 填<b>总价</b>和<b>单价</b> → 重量自动算好，一键入库。<b>进货记总量（总仓），不区分门店。</b></p>
+      <p class="desc">点选品类 → <b>总价、重量、单价任填两个</b>，剩下的自动算好 → 一键入库。<b>进货记总量（总仓），不区分门店。</b></p>
       <div class="fr-chips" id="fr-chips"></div>
       <div style="margin:2px 0 8px"><button class="btn" id="btn-fr-cats-edit" style="min-height:36px;padding:6px 14px;font-size:13px">编辑品类（改名 / 增删）</button></div>
       <div id="fr-cats-edit" style="display:none"></div>
@@ -737,6 +737,10 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <div class="field">
           <label>总价（元）</label>
           <input type="number" inputmode="decimal" id="fr-q-total" placeholder="如 255">
+        </div>
+        <div class="field">
+          <label>重量（单位同上）</label>
+          <input type="number" inputmode="decimal" id="fr-q-qty" placeholder="如 85">
         </div>
         <div class="field">
           <label>单价（元 / 每单位）</label>
@@ -2065,28 +2069,35 @@ function renderQuickBuyMeta(){
   el.innerHTML = html;
 }
 
-/* 计算层：总价÷单价 → 重量（点选进货的实时预览） */
+/* 计算层：总价/重量/单价 任填两个，第三个自动算（点选进货的实时预览） */
 function quickBuyCalc(){
   var el = document.getElementById('fr-q-calc');
   if (!el) return;
   var total = num(document.getElementById('fr-q-total').value);
+  var qty = num(document.getElementById('fr-q-qty').value);
   var price = num(document.getElementById('fr-q-price').value);
   var unit = frSelUnit;
   if (!frSelCat) { el.textContent = ''; frQuickReady = null; return; }
-  if (total > 0 && price > 0) {
-    var qty = Math.round(total / price * 10) / 10;
-    el.textContent = '≈ ' + qty + unit + '（' + money(total) + ' ÷ ' + money(price) + '/' + unit + '）';
-    frQuickReady = { qty: qty, unit: unit, unitPrice: price, total: total };
-  } else {
-    el.textContent = total > 0 || price > 0 ? '总价和单价都填上才能算重量' : '';
+  var filled = (total > 0 ? 1 : 0) + (qty > 0 ? 1 : 0) + (price > 0 ? 1 : 0);
+  if (filled < 2) {
+    el.textContent = filled === 1 ? '再随便填一个，剩下那个我算' : '';
     frQuickReady = null;
+    return;
   }
+  var derived = '';
+  if (qty <= 0) { qty = Math.round(total / price * 10) / 10; derived = '重量'; }
+  else if (total <= 0) { total = Math.round(qty * price * 100) / 100; derived = '总价'; }
+  else if (price <= 0) { price = Math.round(total / qty * 100) / 100; derived = '单价'; }
+  if (qty <= 0 || total <= 0 || price <= 0) { el.textContent = '数字要大于 0'; frQuickReady = null; return; }
+  el.innerHTML = (derived ? '<span style="color:#b26a00">' + derived + '自动算</span>：' : '') +
+    qty + unit + ' · ' + money(total) + ' · ' + money(price) + '/' + unit;
+  frQuickReady = { qty: qty, unit: unit, unitPrice: price, total: total };
 }
 
 /* 动作层：点选进货入库 */
 function quickFruitBuy(){
   if (!frSelCat) { toast('先点选一个品类'); return; }
-  if (!frQuickReady) { toast('总价和单价都填好才能入库'); return; }
+  if (!frQuickReady) { toast('总价、重量、单价任填两个才能入库'); return; }
   var d = frQuickReady;
   var date = document.getElementById('fr-q-date').value || todayStr();
   var note = (document.getElementById('fr-q-note').value || '').trim();
@@ -2094,7 +2105,9 @@ function quickFruitBuy(){
   state.demo = false;
   frQuickReady = null;
   document.getElementById('fr-q-total').value = '';
+  document.getElementById('fr-q-qty').value = '';
   document.getElementById('fr-q-price').value = '';
+  document.getElementById('fr-q-note').value = '';
   document.getElementById('fr-q-calc').textContent = '';
   saveData();
   refreshAll();
@@ -3004,7 +3017,7 @@ function bindEvents(){
     quickBuyCalc();
   });
   /* 点选进货：总价/单价/单位变化实时算重量 */
-  ['fr-q-total', 'fr-q-price'].forEach(function(id){
+  ['fr-q-total', 'fr-q-qty', 'fr-q-price'].forEach(function(id){
     document.getElementById(id).addEventListener('input', quickBuyCalc);
   });
   /* 单位点选（替代原生下拉，手机点了必响应） */
