@@ -162,6 +162,7 @@ body{
 /* 品类编辑 */
 .cat-edit-row{display:flex;gap:8px;margin-bottom:6px}
 .cat-edit-row input{flex:1;min-height:40px}
+.cat-edit-row input.cat-retail{flex:0 0 108px;min-width:0}
 .cat-del{flex:0 0 auto;width:40px;min-height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--red);font-size:13px;cursor:pointer}
 .cat-add-row{display:flex;gap:8px;margin-top:8px}
 .cat-add-row input{flex:1;min-height:40px}
@@ -726,7 +727,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <label>单位（点选，不用弹窗）</label>
         <div class="fr-unit-chips" id="fr-q-unit-chips">
           <button type="button" class="fr-chip on" data-unit="斤">斤</button>
-          <button type="button" class="fr-chip" data-unit="公斤">公斤</button>
           <button type="button" class="fr-chip" data-unit="箱">箱</button>
           <button type="button" class="fr-chip" data-unit="盒">盒</button>
           <button type="button" class="fr-chip" data-unit="筐">筐</button>
@@ -742,8 +742,8 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
           <label>重量（单位同上）</label>
           <input type="number" inputmode="decimal" id="fr-q-qty" placeholder="如 85">
         </div>
-        <div class="field">
-          <label>单价（元 / 每单位）</label>
+        <div class="field" style="flex:1.2">
+          <label id="fr-q-price-label">单价（元 / 每斤）</label>
           <input type="number" inputmode="decimal" id="fr-q-price" placeholder="如 3">
         </div>
       </div>
@@ -772,7 +772,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20V10l5-5 5 5v10"/><path d="M10 14h4"/></svg>
         每日报数（店员报销量）
       </h2>
-      <p class="desc">店员报的数原样贴进来，一行一个品，<b>只有金额也行</b>，可贴多行。</p>
+      <p class="desc">店员报的数原样贴进来，一行一个品，<b>只有金额也行</b>，可贴多行。设了零售价的品类（在「编辑品类」里填），只报金额会<b>按零售价估算斤数扣库存</b>（会员折扣实收低于零售价时，库存会略偏多）。</p>
       <div class="row">
         <div class="field">
           <label>日期</label>
@@ -813,6 +813,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       </div>
       <div class="sum-grid" id="fr-sum"></div>
       <div class="fr-perf" id="fr-perf"></div>
+      <div id="fr-retail-suggest"></div>
       <div class="fr-hint" id="fr-weather-box"></div>
     </section>
 
@@ -1087,6 +1088,7 @@ function seed(){
     fruitPurchases: [],
     fruitSales: [],
     fruitCats: null,
+    fruitRetail: {},
     fruitResetVer: 2
   };
   saveData();
@@ -1107,10 +1109,32 @@ function loadData(){
       fruitPurchases: Array.isArray(o.fruitPurchases) ? o.fruitPurchases : [],
       fruitSales: Array.isArray(o.fruitSales) ? o.fruitSales : [],
       fruitCats: Array.isArray(o.fruitCats) && o.fruitCats.length ? o.fruitCats : null,
+      fruitRetail: (o.fruitRetail && typeof o.fruitRetail === 'object' && !Array.isArray(o.fruitRetail)) ? o.fruitRetail : {},
       fruitResetVer: num(o.fruitResetVer)
     };
   } catch (e) { seed(); }
   fruitResetIfNeeded();
+  normalizeFruitUnits();
+}
+/* 公斤统一成斤：历史记录里单位为公斤的，斤数×2、单价÷2，全库只留斤 */
+function normalizeFruitUnits(){
+  var changed = false;
+  state.fruitPurchases.forEach(function(p){
+    if (p && /公斤|kg/i.test(String(p.unit || ''))) {
+      p.qty = Math.round(num(p.qty) * 2 * 10) / 10;
+      if (num(p.unitPrice) > 0) p.unitPrice = Math.round(num(p.unitPrice) / 2 * 100) / 100;
+      p.unit = '斤';
+      changed = true;
+    }
+  });
+  state.fruitSales.forEach(function(s){
+    if (s && /公斤|kg/i.test(String(s.unit || ''))) {
+      s.qty = Math.round(num(s.qty) * 2 * 10) / 10;
+      s.unit = '斤';
+      changed = true;
+    }
+  });
+  if (changed) saveData();
 }
 /* 水果数据重置：版本号一变，所有设备加载页面时自动清空水果进出数据（品类名单保留） */
 var FRUIT_RESET_VER = 2;
@@ -1242,8 +1266,17 @@ function applyRemote(snap){
       fruitPurchases: mergeFruit(o.state.fruitPurchases, cur.fruitPurchases, rv),
       fruitSales: mergeFruit(o.state.fruitSales, cur.fruitSales, rv),
       fruitCats: Array.isArray(o.state.fruitCats) && o.state.fruitCats.length ? o.state.fruitCats : (Array.isArray(cur.fruitCats) && cur.fruitCats.length ? cur.fruitCats : null),
+      fruitRetail: (function(){
+        var a = (o.state.fruitRetail && typeof o.state.fruitRetail === 'object') ? o.state.fruitRetail : {};
+        var b = (cur.fruitRetail && typeof cur.fruitRetail === 'object') ? cur.fruitRetail : {};
+        var out = {};
+        Object.keys(b).forEach(function(k){ out[k] = b[k]; });
+        Object.keys(a).forEach(function(k){ if (num(a[k]) > 0) out[k] = a[k]; });
+        return out;
+      })(),
       fruitResetVer: rv
     };
+    normalizeFruitUnits();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
     lastRemoteSavedAt = o.savedAt;
     lastLocalSavedAt = o.savedAt;
@@ -1710,6 +1743,13 @@ function parseFruitBuy(raw){
   }
   if (!qty) return { ok: false, msg: '缺斤数：直接写（如 60斤），或「总价+单价」一起给我（如 共112元 单价3.6），我自动算斤数' };
 
+  /* 公斤统一折算成斤（库内只留斤）：斤数×2、单价÷2，总价不变 */
+  if (/公斤|kg/i.test(unit)) {
+    qty = Math.round(qty * 2 * 10) / 10;
+    if (unitPrice > 0) unitPrice = Math.round(unitPrice / 2 * 100) / 100;
+    unit = '斤';
+  }
+
   return { ok: true, data: { date: date, item: item, store: store, qty: qty, unit: unit, unitPrice: unitPrice, total: total, derivedQty: derivedQty } };
 }
 
@@ -1736,7 +1776,7 @@ function fruitMatchItem(w, known){
   return null;
 }
 
-function parseFruitSalesLine(line, known){
+function parseFruitSalesLine(line, known, retailMap){
   var s = String(line || '').trim().replace(/，|、|，/g, ' ').replace(/\s+/g, ' ');
   if (!s) return null;
   var w = s.replace(/卖了|卖出|售出|收入|收了|营业额|销售额|总共|一共|大概|左右|今天|今日/g, ' ');
@@ -1763,21 +1803,35 @@ function parseFruitSalesLine(line, known){
   var revenue = parseFloat(nums[nums.length - 1]);
   if (!item) item = '未分品';
   /* 5. 没写斤数但给了售价 → 反推斤数 */
-  var derived = false;
+  var derived = false, estRetail = false, retailUsed = 0;
   if (!qty && sellPrice > 0 && revenue > 0) {
     qty = Math.round(revenue / sellPrice * 10) / 10;
     unit = /公斤|kg|KG/i.test(String(pm ? pm[0] : '')) ? '公斤' : '斤';
     derived = true;
   }
-  return { item: item, qty: qty, unit: unit, revenue: revenue, sellPrice: sellPrice, derived: derived };
+  /* 5.5 连售价都没给：按该品类设置的零售价估算斤数（会员折扣实收可能低于零售价，估算值偏保守） */
+  if (!qty && revenue > 0 && retailMap && num(retailMap[item]) > 0) {
+    retailUsed = num(retailMap[item]);
+    qty = Math.round(revenue / retailUsed * 10) / 10;
+    unit = '斤';
+    derived = true;
+    estRetail = true;
+  }
+  /* 公斤统一折算成斤 */
+  if (/公斤|kg/i.test(unit)) {
+    qty = Math.round(qty * 2 * 10) / 10;
+    if (sellPrice > 0) sellPrice = Math.round(sellPrice / 2 * 100) / 100;
+    unit = '斤';
+  }
+  return { item: item, qty: qty, unit: unit, revenue: revenue, sellPrice: sellPrice, derived: derived, estRetail: estRetail, retailUsed: retailUsed };
 }
 
-function parseFruitSalesReport(raw, known){
+function parseFruitSalesReport(raw, known, retailMap){
   var lines = String(raw || '').split(/\n|；|;/);
   var rows = [], errs = [];
   lines.forEach(function(l){
     if (!l.trim()) return;
-    var r = parseFruitSalesLine(l, known);
+    var r = parseFruitSalesLine(l, known, retailMap);
     if (!r) return;
     if (r.err) errs.push(r.err);
     else rows.push(r);
@@ -1898,7 +1952,7 @@ function doParseFruitSales(){
   var date = document.getElementById('fr-date').value || todayStr();
   var store = document.getElementById('fr-store').value;
   var weather = document.getElementById('fr-weather').value;
-  var r = parseFruitSalesReport(document.getElementById('fr-sales-text').value, fruitKnownItems());
+  var r = parseFruitSalesReport(document.getElementById('fr-sales-text').value, fruitKnownItems(), state.fruitRetail || {});
   if (!r.ok) {
     pendingFruitSales = null;
     box.innerHTML = '<p class="hint">' + esc(r.msg) + '</p>';
@@ -1909,7 +1963,9 @@ function doParseFruitSales(){
   var html = r.rows.map(function(x){
     revSum += num(x.revenue);
     var qtyTxt = num(x.qty) > 0 ? x.qty + esc(x.unit) : '金额口径';
-    var tag = x.derived ? '<span class="tag">按售价' + money(x.sellPrice) + '/斤反推' + x.qty + '斤</span>' : '';
+    var tag = '';
+    if (x.estRetail) tag = '<span class="tag" style="background:#fff7e6;color:#b26a00">按零售价' + money(x.retailUsed) + '/' + esc(x.unit) + '估' + x.qty + esc(x.unit) + '</span>';
+    else if (x.derived) tag = '<span class="tag">按售价' + money(x.sellPrice) + '/' + esc(x.unit) + '反推' + x.qty + esc(x.unit) + '</span>';
     return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(x.item) + ' · ' + qtyTxt + ' · <span class="money-in">' + money(x.revenue) + '</span>' + tag + '</div></div></div>';
   }).join('');
   if (r.errs.length) html += '<p class="hint" style="color:#c0392b">以下 ' + r.errs.length + ' 行没认出来（其他行照常入库）：<br>' + esc(r.errs.join('；')) + '</p>';
@@ -1921,7 +1977,7 @@ function confirmFruitSales(){
   if (!pendingFruitSales) return;
   var p = pendingFruitSales;
   p.rows.forEach(function(x){
-    state.fruitSales.push({ id: uid(), date: p.date, store: p.store, weather: p.weather, item: x.item, qty: x.qty, unit: x.unit, revenue: x.revenue, note: '', resetVer: FRUIT_RESET_VER });
+    state.fruitSales.push({ id: uid(), date: p.date, store: p.store, weather: p.weather, item: x.item, qty: x.qty, unit: x.unit, revenue: x.revenue, note: x.estRetail ? '按零售价估算斤数' : '', resetVer: FRUIT_RESET_VER });
   });
   state.demo = false;
   pendingFruitSales = null;
@@ -1964,6 +2020,8 @@ function renderUnitChips(){
 function setFrSelUnit(u){
   frSelUnit = u || '斤';
   renderUnitChips();
+  var lbl = document.getElementById('fr-q-price-label');
+  if (lbl) lbl.textContent = '单价（元 / 每' + frSelUnit + '）';
   quickBuyCalc();
 }
 
@@ -1980,10 +2038,11 @@ function renderCatEditor(){
   var el = document.getElementById('fr-cats-edit');
   if (!el) return;
   var cats = fruitCatsList();
+  var retail = state.fruitRetail || {};
   var rows = cats.map(function(c, i){
-    return '<div class="cat-edit-row"><input type="text" value="' + esc(c) + '" data-cat-i="' + i + '" placeholder="品类名"><button type="button" class="cat-del" data-act="del" data-i="' + i + '" aria-label="删除' + esc(c) + '">删</button></div>';
+    return '<div class="cat-edit-row"><input type="text" value="' + esc(c) + '" data-cat-i="' + i + '" placeholder="品类名"><input type="number" inputmode="decimal" class="cat-retail" value="' + (num(retail[c]) > 0 ? num(retail[c]) : '') + '" data-retail-i="' + i + '" placeholder="零售价/斤" aria-label="' + esc(c) + '的零售价"><button type="button" class="cat-del" data-act="del" data-i="' + i + '" aria-label="删除' + esc(c) + '">删</button></div>';
   }).join('');
-  el.innerHTML = '<p class="desc" style="margin:0 0 6px">改名后<b>历史进出货记录同步改</b>，库存毛利不断档。删掉不留记录。</p>' + rows +
+  el.innerHTML = '<p class="desc" style="margin:0 0 6px">改名后<b>历史进出货记录同步改</b>。零售价填每斤（或每箱/每盒）的门市价：<b>报数只报金额时按它估算斤数扣库存</b>；不填的品类，只报金额的销量不会估算斤数。</p>' + rows +
     '<div class="cat-add-row"><input type="text" id="cat-new-name" placeholder="新品类名，如：砂糖橘"><button type="button" class="btn" data-act="add" style="min-height:38px;padding:6px 14px;font-size:13px">添加</button></div>' +
     '<div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" data-act="save" style="flex:1">保存品类</button><button type="button" class="btn" data-act="cancel" style="flex:1;background:#fff;color:var(--text)">取消</button></div>';
 }
@@ -1991,12 +2050,14 @@ function saveCatEditor(){
   var el = document.getElementById('fr-cats-edit');
   if (!el) return;
   var inputs = el.querySelectorAll('input[data-cat-i]');
-  var cats = [], seen = {};
+  var cats = [], retail = {}, seen = {};
   inputs.forEach(function(inp){
     var name = inp.value.trim().replace(/\s+/g, '');
     if (!name || seen[name]) return;
     seen[name] = 1;
     cats.push(name);
+    var rt = inp.nextElementSibling && inp.nextElementSibling.classList && inp.nextElementSibling.classList.contains('cat-retail') ? num(inp.nextElementSibling.value) : 0;
+    if (rt > 0) retail[name] = rt;
   });
   if (!cats.length) { toast('至少留一个品类'); return; }
   /* 同步改名：旧名单里有、新名单换了名的，历史记录跟着改 */
@@ -2006,6 +2067,7 @@ function saveCatEditor(){
     if (match.length === 1) renameCatInRecords(match[0], n);
   }});
   state.fruitCats = cats;
+  state.fruitRetail = retail;
   saveData();
   catEditBackup = null;
   el.style.display = 'none';
@@ -2304,6 +2366,27 @@ function renderFruit(){
     }).join('');
   }
 
+  /* 零售价建议：加权平均成本 ÷ 0.7 → 毛利率保 30%，向上取到 0.1 元 */
+  var sugEl = document.getElementById('fr-retail-suggest');
+  if (sugEl) {
+    var basisAll = fruitCostBasis();
+    var srows = Object.keys(basisAll).map(function(k){
+      var i = k.indexOf('|');
+      return { item: k.slice(0, i), unit: k.slice(i + 1), qty: basisAll[k].qty, cost: basisAll[k].cost };
+    }).filter(function(r){ return r.qty > 0 && r.cost / r.qty > 0; })
+      .sort(function(a, b){ return (b.cost / b.qty) - (a.cost / a.qty); });
+    if (!srows.length) {
+      sugEl.innerHTML = '<p class="desc" style="margin:14px 0 6px">零售价建议（毛利率保 30%）</p><div class="empty">先进货，才好按成本算建议零售价。</div>';
+    } else {
+      sugEl.innerHTML = '<p class="desc" style="margin:14px 0 6px">零售价建议（按加权平均进货成本，<b>建议价 = 成本 ÷ 0.7</b>，即毛利率 30%；会员折扣后实收别低于它）：</p>' +
+        srows.map(function(r){
+          var avg = r.cost / r.qty;
+          var sug = Math.ceil(avg / 0.7 * 10) / 10;
+          return '<div class="fr-stock-line"><span class="st-item">' + esc(r.item) + '</span><span class="st-val">成本 ' + money(avg) + '/' + esc(r.unit) + ' → 建议 ≥ <b style="color:var(--olive)">' + sug.toFixed(1) + '</b>/' + esc(r.unit) + '</span></div>';
+        }).join('');
+    }
+  }
+
   var wx = fruitWeather(mk), wparts = [];
   if (wx.sunny) wparts.push('晴天 ' + wx.sunny.days + ' 天 · 日均卖 ' + money(wx.sunny.avg));
   if (wx.rainy) wparts.push('雨天 ' + wx.rainy.days + ' 天 · 日均卖 ' + money(wx.rainy.avg));
@@ -2325,7 +2408,7 @@ function renderFruit(){
   document.getElementById('fr-sales-list').innerHTML = slist.length
     ? '<p style="font-size:12.5px;color:var(--muted);margin:12px 0 2px">本月销量 ' + slist.length + ' 条 · 合计 <b class="money-in">+' + money(revTotal) + '</b></p>' + slist.map(function(x){
         return '<div class="item"><div class="it-main"><div class="it-txt">' + esc(x.item) + (num(x.qty) > 0 ? ' ' + num(x.qty) + esc(x.unit) : '') + ' · <span class="money-in">' + money(num(x.revenue)) + '</span>' +
-          '<div class="it-meta"><span>' + esc(x.date) + '</span><span class="tag">' + esc(x.store.replace('来伊份', '')) + '</span>' + (x.weather ? '<span class="tag">' + esc(x.weather) + '</span>' : '') + '</div></div></div>' +
+          '<div class="it-meta"><span>' + esc(x.date) + '</span><span class="tag">' + esc(x.store.replace('来伊份', '')) + '</span>' + (x.weather ? '<span class="tag">' + esc(x.weather) + '</span>' : '') + (x.note ? '<span class="tag" style="background:#fff7e6;color:#b26a00">' + esc(x.note) + '</span>' : '') + '</div></div></div>' +
           '<div class="it-act"><button class="icon-btn" data-act="fs-del" data-id="' + x.id + '" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div></div>';
       }).join('')
     : '<div class="empty">还没有销量记录</div>';
@@ -2993,7 +3076,7 @@ function importJson(file){
 function clearAll(){
   if (!confirm('清空全部数据（待办+盈利+宠物+自媒体）？\n不能撤销，建议先导出备份。')) return;
   if (!confirm('再确认一次：真的要清空吗？')) return;
-  state = { demo:false, shops: state.shops, todos: [], profits: [], pet: [], media: [], fruitPurchases: [], fruitSales: [], fruitCats: state.fruitCats || null, fruitResetVer: FRUIT_RESET_VER };
+  state = { demo:false, shops: state.shops, todos: [], profits: [], pet: [], media: [], fruitPurchases: [], fruitSales: [], fruitCats: state.fruitCats || null, fruitRetail: state.fruitRetail || {}, fruitResetVer: FRUIT_RESET_VER };
   saveData(); refreshAll(); toast('清空了，门店名单保留着');
 }
 
