@@ -162,7 +162,8 @@ body{
 /* 品类编辑 */
 .cat-edit-row{display:flex;gap:8px;margin-bottom:6px}
 .cat-edit-row input{flex:1;min-height:40px}
-.cat-edit-row input.cat-retail{flex:0 0 108px;min-width:0}
+.cat-edit-row input.cat-retail{flex:0 0 84px;min-width:0}
+.cat-ru{flex:0 0 40px;min-height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text);font-size:13px;cursor:pointer}
 .cat-del{flex:0 0 auto;width:40px;min-height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--red);font-size:13px;cursor:pointer}
 .cat-add-row{display:flex;gap:8px;margin-top:8px}
 .cat-add-row input{flex:1;min-height:40px}
@@ -1115,6 +1116,7 @@ function loadData(){
   } catch (e) { seed(); }
   fruitResetIfNeeded();
   normalizeFruitUnits();
+  ensureFruitCats();
 }
 /* 公斤统一成斤：历史记录里单位为公斤的，斤数×2、单价÷2，全库只留斤 */
 function normalizeFruitUnits(){
@@ -1267,16 +1269,18 @@ function applyRemote(snap){
       fruitSales: mergeFruit(o.state.fruitSales, cur.fruitSales, rv),
       fruitCats: Array.isArray(o.state.fruitCats) && o.state.fruitCats.length ? o.state.fruitCats : (Array.isArray(cur.fruitCats) && cur.fruitCats.length ? cur.fruitCats : null),
       fruitRetail: (function(){
+        function rvOk(v){ return typeof v === 'number' ? v > 0 : !!(v && typeof v === 'object' && num(v.p) > 0); }
         var a = (o.state.fruitRetail && typeof o.state.fruitRetail === 'object') ? o.state.fruitRetail : {};
         var b = (cur.fruitRetail && typeof cur.fruitRetail === 'object') ? cur.fruitRetail : {};
         var out = {};
         Object.keys(b).forEach(function(k){ out[k] = b[k]; });
-        Object.keys(a).forEach(function(k){ if (num(a[k]) > 0) out[k] = a[k]; });
+        Object.keys(a).forEach(function(k){ if (rvOk(a[k])) out[k] = a[k]; });
         return out;
       })(),
       fruitResetVer: rv
     };
     normalizeFruitUnits();
+    ensureFruitCats();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
     lastRemoteSavedAt = o.savedAt;
     lastLocalSavedAt = o.savedAt;
@@ -1809,11 +1813,15 @@ function parseFruitSalesLine(line, known, retailMap){
     unit = /公斤|kg|KG/i.test(String(pm ? pm[0] : '')) ? '公斤' : '斤';
     derived = true;
   }
-  /* 5.5 连售价都没给：按该品类设置的零售价估算斤数（会员折扣实收可能低于零售价，估算值偏保守） */
-  if (!qty && revenue > 0 && retailMap && num(retailMap[item]) > 0) {
-    retailUsed = num(retailMap[item]);
-    qty = Math.round(revenue / retailUsed * 10) / 10;
-    unit = '斤';
+  /* 5.5 连售价都没给：按该品类设置的零售价估算斤数/盒数（会员折扣实收可能低于零售价，估算值偏保守） */
+  var rv = retailMap ? retailMap[item] : null;
+  var rp = 0, ru = '斤';
+  if (typeof rv === 'number') rp = rv;
+  else if (rv && typeof rv === 'object') { rp = num(rv.p); ru = rv.u || '斤'; }
+  if (!qty && revenue > 0 && rp > 0) {
+    retailUsed = rp;
+    qty = Math.round(revenue / rp * 10) / 10;
+    unit = ru;
     derived = true;
     estRetail = true;
   }
@@ -2004,7 +2012,16 @@ function delFruitSale(id){
 }
 
 /* ---------- 品类快速进货 / 价格曲线 / 库存 ---------- */
-var FRUIT_CATS = ['洛川富士', '花牛苹果', '东江湖蜜桔', '库尔勒香梨', '爱媛果冻橙', '阳光玫瑰', '冬枣', '人参果', '赣州脐橙', '涌泉蜜桔', '奶油草莓', '云南蓝莓', '猕猴桃'];
+var FRUIT_CATS = ['洛川富士', '花牛苹果', '东江湖蜜桔', '库尔勒香梨', '爱媛果冻橙', '阳光玫瑰', '冬枣', '人参果', '赣州脐橙', '涌泉蜜桔', '奶油草莓', '云南蓝莓', '猕猴桃', '怡颗莓'];
+/* 老设备已保存过品类名单的，自动补进新品类（一次） */
+function ensureFruitCats(){
+  var cats = fruitCatsList();
+  if (cats.indexOf('怡颗莓') === -1) {
+    cats.push('怡颗莓');
+    state.fruitCats = cats;
+    saveData();
+  }
+}
 var frSelCat = '';
 var frSelUnit = '斤';
 var frQuickReady = null;
@@ -2040,9 +2057,12 @@ function renderCatEditor(){
   var cats = fruitCatsList();
   var retail = state.fruitRetail || {};
   var rows = cats.map(function(c, i){
-    return '<div class="cat-edit-row"><input type="text" value="' + esc(c) + '" data-cat-i="' + i + '" placeholder="品类名"><input type="number" inputmode="decimal" class="cat-retail" value="' + (num(retail[c]) > 0 ? num(retail[c]) : '') + '" data-retail-i="' + i + '" placeholder="零售价/斤" aria-label="' + esc(c) + '的零售价"><button type="button" class="cat-del" data-act="del" data-i="' + i + '" aria-label="删除' + esc(c) + '">删</button></div>';
+    var v = retail[c];
+    var p = typeof v === 'number' ? v : (v && num(v.p)) || '';
+    var u = (v && typeof v === 'object' && v.u) ? v.u : '斤';
+    return '<div class="cat-edit-row"><input type="text" value="' + esc(c) + '" data-cat-i="' + i + '" placeholder="品类名"><input type="number" inputmode="decimal" class="cat-retail" value="' + (num(p) > 0 ? num(p) : '') + '" data-retail-i="' + i + '" placeholder="零售价" aria-label="' + esc(c) + '的零售价"><button type="button" class="cat-ru" data-act="ru" aria-label="切换单位">' + u + '</button><button type="button" class="cat-del" data-act="del" data-i="' + i + '" aria-label="删除' + esc(c) + '">删</button></div>';
   }).join('');
-  el.innerHTML = '<p class="desc" style="margin:0 0 6px">改名后<b>历史进出货记录同步改</b>。零售价填每斤（或每箱/每盒）的门市价：<b>报数只报金额时按它估算斤数扣库存</b>；不填的品类，只报金额的销量不会估算斤数。</p>' + rows +
+  el.innerHTML = '<p class="desc" style="margin:0 0 6px">改名后<b>历史进出货记录同步改</b>。零售价填门市价，右侧按钮切单位（按斤就选斤、按盒卖就选盒）：<b>报数只报金额时按它估算斤数/盒数扣库存</b>；不填的品类，只报金额的销量不会估算。</p>' + rows +
     '<div class="cat-add-row"><input type="text" id="cat-new-name" placeholder="新品类名，如：砂糖橘"><button type="button" class="btn" data-act="add" style="min-height:38px;padding:6px 14px;font-size:13px">添加</button></div>' +
     '<div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn" data-act="save" style="flex:1">保存品类</button><button type="button" class="btn" data-act="cancel" style="flex:1;background:#fff;color:var(--text)">取消</button></div>';
 }
@@ -2057,7 +2077,10 @@ function saveCatEditor(){
     seen[name] = 1;
     cats.push(name);
     var rt = inp.nextElementSibling && inp.nextElementSibling.classList && inp.nextElementSibling.classList.contains('cat-retail') ? num(inp.nextElementSibling.value) : 0;
-    if (rt > 0) retail[name] = rt;
+    if (rt > 0) {
+      var ub = inp.nextElementSibling.nextElementSibling;
+      retail[name] = { p: rt, u: (ub && ub.classList && ub.classList.contains('cat-ru') ? ub.textContent : '斤') || '斤' };
+    }
   });
   if (!cats.length) { toast('至少留一个品类'); return; }
   /* 同步改名：旧名单里有、新名单换了名的，历史记录跟着改 */
@@ -3134,6 +3157,9 @@ function bindEvents(){
     if (act === 'del') {
       var row = b.closest('.cat-edit-row');
       if (row) row.remove();
+    } else if (act === 'ru') {
+      var us = ['斤', '盒', '箱', '筐', '个'];
+      b.textContent = us[(us.indexOf(b.textContent) + 1) % us.length];
     } else if (act === 'add') {
       var name = document.getElementById('cat-new-name').value.trim().replace(/\s+/g, '');
       if (!name) { toast('先写品类名'); return; }
