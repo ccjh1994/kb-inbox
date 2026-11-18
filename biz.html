@@ -691,9 +691,9 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
         <svg class="sec-ic ic-pet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
         快捷接单
       </h2>
-      <p class="desc">接了单，一句话丢进来，日期、收入、行程自动拆好，同时标到日历上。<br>日期写法：<b>18号到26号</b>、<b>1号到10天</b>、<b>5</b>（当月5号）、<b>5到10号</b>；频次：<b>每天</b> / <b>隔天</b> / <b>隔两天</b>。<br>例如：<b>18号到26号每天喂猫 总收入585 在湖悦章府</b></p>
+      <p class="desc">接了单，一句话丢进来，日期、收入、行程自动拆好，同时标到日历上。<br>日期：<b>18号到26号</b>、<b>20，22，24号</b>（指定几天）、<b>1号到10天</b>、<b>隔两天</b>、<b>5</b>（当月5号）；金额：<b>单次85元</b>（自动×次数）或<b>总收入585</b>。<br>例如：<b>20，22，24号喂猫 单次85元 在湖悦章府</b></p>
       <div class="field">
-        <textarea id="qk-text" rows="2" placeholder="例如：1号到10天隔两天喂猫 总收入585 在湖悦章府"></textarea>
+        <textarea id="qk-text" rows="2" placeholder="例如：20，22，24号喂猫 单次85元 在湖悦章府"></textarea>
       </div>
       <button class="btn" id="btn-parse-visit">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10"/><path d="M17 9l4 3-4 3"/></svg>
@@ -1604,6 +1604,7 @@ function parseVisit(raw){
   var t = text.replace(/现在/g, '');
   var cur = new Date(), Y = cur.getFullYear(), M = cur.getMonth() + 1;
   var m, start = null, end = null;
+  var explicitDates = null; /* 离散日期列表：20，22，24号 */
 
   /* 关键词归一化：把口语频次统一成可识别的写法（在解析日期/频次前做） */
   t = t
@@ -1612,7 +1613,25 @@ function parseVisit(raw){
     .replace(/每隔\s*一\s*天/g, '隔天').replace(/每隔\s*两\s*天/g, '隔两天')
     .replace(/每隔\s*三\s*天/g, '隔三天');
 
-  /* 日期范围：支持多种写法。纯数字（如「5」）按当月 5 号；「1号到10天」按 1~10 号 */
+  /* 离散日期列表（优先）：20，22，24号 / 20、22、24 / 11月20、22、24号 */
+  var dlist = t.match(/(?:(\d{1,2})月)?\s*((?:\d{1,2}\s*[，,、\s]\s*){1,}\d{1,2})\s*[号日]/);
+  if (dlist && !/[到至~—]/.test(dlist[0])) {
+    var dns = dlist[2].match(/\d{1,2}/g);
+    if (dns && dns.length >= 2) {
+      var dmo = dlist[1] ? parseInt(dlist[1], 10) : M;
+      explicitDates = [];
+      dns.forEach(function(dd){
+        var dt = mkDateOf(Y, dmo, parseInt(dd, 10));
+        if (dt && explicitDates.indexOf(dt) === -1) explicitDates.push(dt);
+      });
+      explicitDates.sort();
+      start = { m: dmo, d: parseInt(dns[0], 10) };
+      end = { m: dmo, d: parseInt(dns[dns.length - 1], 10) };
+    }
+  }
+
+  /* 日期范围：支持多种写法。纯数字（如「5」）按当月 5 号；「1号到10天」按 1~10 号（离散列表优先，没识别到才走） */
+  if (!explicitDates) {
   if ((m = t.match(/(\d{1,2})月(\d{1,2})[日号]?\s*(?:到|至|~|—|-)\s*(?:(\d{1,2})月)?(\d{1,2})\s*(?:[日号]|天)/))) {
     start = { m: parseInt(m[1], 10), d: parseInt(m[2], 10) };
     end = { m: m[3] ? parseInt(m[3], 10) : start.m, d: parseInt(m[4], 10) };
@@ -1638,7 +1657,8 @@ function parseVisit(raw){
     else if ((m = t.match(/(?:^|\s)(\d{1,2})(?=\s|$)/))) { start = { m: M, d: +m[1] }; }
     if (start) end = { m: start.m, d: start.d };
   }
-  if (!start) return { ok: false, msg: '没认出上门日期。试试「18号到26号」「1号到10天」「5」（当月5号）这种写法' };
+  } /* end if(!explicitDates) */
+  if (!start) return { ok: false, msg: '没认出上门日期。试试「18号到26号」「20，22，24号」「1号到10天」「5」（当月5号）这种写法' };
   var y1 = start.y || Y, y2 = end.y || Y;
   /* 跨年/跨月：结束早于开始时自动进位（12月28到1月2号 → 明年 1 月） */
   if (!end.y && end.m < start.m) y2 = y1 + 1;
@@ -1663,14 +1683,18 @@ function parseVisit(raw){
     step = 2;
   }
 
-  /* 展开日期序列 */
+  /* 展开日期序列：离散列表直接用，否则按范围×频次展开 */
   var dates = [];
-  var cursor = s1;
-  var guard = 0;
-  while (diffDays(cursor, s2) >= 0 && guard < 400) {
-    for (var j = 0; j < perDayCount; j++) dates.push(cursor);
-    cursor = shiftDays(cursor, step);
-    guard++;
+  if (explicitDates) {
+    dates = explicitDates.slice();
+  } else {
+    var cursor = s1;
+    var guard = 0;
+    while (diffDays(cursor, s2) >= 0 && guard < 400) {
+      for (var j = 0; j < perDayCount; j++) dates.push(cursor);
+      cursor = shiftDays(cursor, step);
+      guard++;
+    }
   }
 
   /* 金额：先把日期数字从文本里摘掉，再找金额 */
@@ -1683,8 +1707,16 @@ function parseVisit(raw){
     .replace(/每天\s*[一二两三2-9]\s*次/g, ' ')
     .replace(/一天\s*[一二两三2-9]\s*次/g, ' ')
     .replace(/隔[一两二三2-9]?天/g, ' ');
-  var total = null;
-  if ((m = t2.match(/(?:总?收入|合计|共|收|¥|￥)\s*([0-9]+(?:\.[0-9]+)?)/))) {
+  var total = null, unitPriceGiven = 0;
+  /* 单次/每次/单价：先记单次价，合计=单次×次数（如「单次85元」×3次=255） */
+  if ((m = t2.match(/(?:单次|每次|单价|一次|每次上门|[¥￥])\s*[:：]?\s*([0-9]+(?:\.[0-9]+)?)\s*元?/))) {
+    unitPriceGiven = parseFloat(m[1]);
+  }
+  if ((m = t2.match(/(?:总?收入|合计|共收|一共|总共|总金额|总计)\s*[:：]?\s*([0-9]+(?:\.[0-9]+)?)/))) {
+    total = parseFloat(m[1]); /* 明确给了总收入，以它为准 */
+  } else if (unitPriceGiven > 0) {
+    total = Math.round(unitPriceGiven * dates.length * 100) / 100;
+  } else if ((m = t2.match(/(?:收|¥|￥|共)\s*([0-9]+(?:\.[0-9]+)?)/))) {
     total = parseFloat(m[1]);
   } else {
     var nums = t2.match(/[0-9]+(?:\.[0-9]+)?/g);
@@ -1695,7 +1727,7 @@ function parseVisit(raw){
       if (total === null) total = parseFloat(nums[nums.length - 1]);
     }
   }
-  if (!total || total <= 0) return { ok: false, msg: '没认出这单总收入，把金额写进去，比如「总收入585」' };
+  if (!total || total <= 0) return { ok: false, msg: '没认出这单金额。写「总收入585」或「单次85元」（自动×次数）都行' };
 
   /* 地点：优先「地点X / 在X」，都没有则从剩余文本抓中文词组 */
   var place = '';
@@ -1717,7 +1749,8 @@ function parseVisit(raw){
   return {
     ok: true, place: place, animal: animal,
     start: s1, end: s2, dates: dates,
-    times: times, total: total, perVisit: perVisit, step: step, perDayCount: perDayCount
+    times: times, total: total, perVisit: perVisit, step: step, perDayCount: perDayCount,
+    unitPriceGiven: unitPriceGiven
   };
 }
 function mediaSeries(platform){
@@ -3189,13 +3222,17 @@ function doParseVisit(){
   }
   pendingVisit = v;
   var freqTxt = v.step === 4 ? '（隔三天一次）' : v.step === 3 ? '（隔两天一次）' : v.step === 2 ? '（隔天一次）' : (v.perDayCount > 1 ? '（每天 ' + v.perDayCount + ' 次）' : '');
+  var dateTxt = v.dates.length && v.dates[0] === v.start && v.dates[v.dates.length - 1] === v.end && v.times !== (diffDays(v.start, v.end) + 1)
+    ? v.dates.map(function(d){ return d.slice(5); }).join('、')  /* 离散/隔天：列出具体日 */
+    : v.start + ' 到 ' + v.end;
   var rows = [
     ['服务', '上门喂养' + freqTxt],
-    ['日期', v.start + ' 到 ' + v.end],
-    ['上门次数', v.times + ' 次'],
-    ['这单总收入', money(v.total)],
-    ['每次收入', money(v.perVisit)]
+    ['日期', dateTxt],
+    ['上门次数', v.times + ' 次']
   ];
+  if (v.unitPriceGiven > 0) rows.push(['单次价', money(v.unitPriceGiven) + ' × ' + v.times + ' 次 = ' + money(v.total)]);
+  rows.push(['这单总收入', money(v.total)]);
+  rows.push(['每次收入', money(v.perVisit)]);
   if (v.place) rows.splice(1, 0, ['地点', v.place]);
   if (v.animal) rows.splice(1, 0, ['宠物', v.animal]);
   el.innerHTML = '<div class="pv"><div class="pv-title">认出来了，确认一下</div>' +
