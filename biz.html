@@ -3855,6 +3855,17 @@ function bindEvents(){
 function init(){
   loadData();
   loadSyncCfg();
+  /* 一键配置高德 key：链接 #amap=KEY 自动存本设备并抹掉地址栏痕迹（key 不写进代码） */
+  (function(){
+    var mh = (location.hash || '').match(/(?:^|#|&)amap=([0-9a-zA-Z]{16,})/);
+    if (mh && mh[1]) {
+      try {
+        localStorage.setItem(AMAP_KEY_STORE, mh[1]);
+        if (history && history.replaceState) history.replaceState(null, '', location.pathname + location.search);
+        setTimeout(function(){ toast('高德 key 已配置到本设备，导航可以一键直达了'); }, 250);
+      } catch (e) {}
+    }
+  })();
   loadAmapKey();
   viewMonth = currentMonth();
   petYear = todayStr().slice(0, 4);
