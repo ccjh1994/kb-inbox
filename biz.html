@@ -3198,12 +3198,20 @@ function renderCalDetail(){
       '</div>';
   }).join('');
   html += '<div class="cal-tip" style="color:var(--amber)">改时间点右侧铅笔：只改这一家，日历/待办/流水会一起更新，不影响其他家。</div>';
+  /* 整条路线：真实 <a href> 链接——手机浏览器里必须是用户直接点链接才调得起高德，JS 的 a.click() 会被拦 */
+  var routeReps = groups.map(function(g){ return { place: g.place, lng: g.rep.lng, lat: g.rep.lat }; });
+  var routeUrl = amapRouteUrl(routeReps);
   html += '<div class="cal-act-row">' +
-    '<button class="btn" data-act="cal-route" style="background:#1a73e8;color:#fff">' +
+    '<a class="btn" href="' + routeUrl + '" target="_blank" rel="noopener" style="background:#1a73e8;color:#fff;text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center">' +
       '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>' +
-      '高德规划整条路线</button>' +
+      '高德规划整条路线</a>' +
     '<button class="btn ghost" data-act="cal-copy">复制地址清单</button>' +
     '</div>';
+  /* 微信/QQ 等内置浏览器无法调起高德 App（官方限制），给出明确指引 */
+  if (/MicroMessenger|QQ\//i.test(navigator.userAgent)) {
+    html += '<div class="cal-tip" style="color:var(--red);background:var(--red-soft);padding:8px;border-radius:8px;margin-top:8px">' +
+      '你现在是在<b>微信/QQ 内置浏览器</b>里打开，这里点导航<b>调不起高德 App</b>。请先点右上角「···」→「<b>在浏览器打开</b>」，再点导航按钮即可直接跳转。</div>';
+  }
   if (uniq.length) {
     html += '<div class="cal-tip">逐个导航（点一下从当前位置直接导航到这个小区，最可靠）：<br>' +
       groups.map(function(g){
@@ -3831,14 +3839,9 @@ function bindEvents(){
       });
       var url = amapRouteUrl(reps);
       if (url) {
-        /* 必须在用户点击手势内同步跳转，window.open 会被手机 webview 拦截导致调不起高德 */
-        var a = document.createElement('a');
-        a.href = url;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        toast('正在打开高德，从当前位置出发按顺序导航');
+        /* 兜底路径（正常走真实<a>链接）：iOS/部分浏览器可用 location.href */
+        toast('正在打开高德…');
+        window.location.href = url;
       } else toast('这天没有可规划的小区');
     }
     else if (act === 'cal-copy') {
