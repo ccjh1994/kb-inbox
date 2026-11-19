@@ -3089,6 +3089,27 @@ function amapNavUrl(rec){
 }
 /* 兼容旧调用：传名称字符串 */
 function amapSearchUrl(name){ return amapNavUrl(name); }
+/* 高德 App 原生导航协议：带坐标时调起 App 直接开始导航（不是停在规划页）。dev=0=高德坐标不再偏移 */
+function amapScheme(rec){
+  if (!rec || typeof rec !== 'object' || !(num(rec.lng) > 0 && num(rec.lat) > 0)) return '';
+  var name = rec.place || petPlaceOf(rec) || '目的地';
+  var isiOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
+  var base = isiOS ? 'iosamap://navi?sourceApplication=biz&backScheme=iosamap&'
+                   : 'androidamap://navi?sourceApplication=biz&';
+  return base + 'poiname=' + encodeURIComponent(name) +
+    '&lat=' + rec.lat + '&lon=' + rec.lng + '&dev=0&style=2';
+}
+/* 动作层：单点直接导航——先试 App 原生协议，没调起则降级网页版 */
+function openAmapNav(rec){
+  var scheme = amapScheme(rec);
+  var web = amapNavUrl(rec);
+  if (!scheme) { window.location.href = web; return; }
+  /* App 调起成功后页面会进入 hidden；1.8 秒后若还在前台，说明没装/没调起，降级网页版 */
+  setTimeout(function(){
+    if (document.visibilityState === 'visible') window.location.href = web;
+  }, 1800);
+  window.location.href = scheme;
+}
 /* 多点路线：to=最后一站，via=前面的站（官方 via 只稳支持一个；有坐标时多个用 | 拼，App 多能识别） */
 function amapRouteUrl(places){
   var arr = places.filter(Boolean);
@@ -3214,15 +3235,17 @@ function renderCalDetail(){
   }
   if (uniq.length) {
     html += '<div class="cal-tip">逐个导航（点一下从当前位置直接导航到这个小区，最可靠）：<br>' +
-      groups.map(function(g){
+      groups.map(function(g, gi){
         var withCoord = num(g.rep.lng) > 0 && num(g.rep.lat) > 0;
-        return '<a href="' + amapNavUrl(g.rep) + '" target="_blank" rel="noopener" style="display:inline-block;margin:3px 6px 0 0;padding:3px 9px;border:1px solid ' + (withCoord ? 'var(--pet)' : 'var(--line)') + ';border-radius:8px;color:var(--pet);text-decoration:none;font-size:12px">' + esc(g.place) + (withCoord ? ' ▸导航' : ' ↗') + '</a>';
+        return '<button type="button" data-act="amap-one" data-idx="' + gi + '" style="margin:3px 6px 0 0;padding:5px 10px;border:1px solid ' + (withCoord ? 'var(--pet)' : 'var(--line)') + ';border-radius:8px;color:var(--pet);background:#fff;font-size:12px;cursor:pointer;min-height:34px">' + esc(g.place) + (withCoord ? ' ▸导航' : ' ↗') + '</button>';
       }).join('') +
-      '<br><br>' + (AMAP_KEY ? '带「▸导航」的小区已存坐标，点一下高德会直接开始导航。' : '还没配高德 key，当前按名称跳转，可能要在高德里点一下搜索结果才导航。去「备份」页填 key 可一键直达。') +
-      '整条路线按上面顺序串好，从你当前位置出发；没装高德 App 会自动用网页版。</div>';
+      '<br><br>' + (AMAP_KEY ? '带「▸导航」的小区已存坐标，点一下会<b>直接开始导航</b>（没装高德 App 自动转网页版）。' : '还没配高德 key，点小区会打开网页版规划。去「备份」页填 key 可直接开始导航。') +
+      '「整条路线」是把当天几个小区串成一条线给你看规划（高德不支持一步直达多点导航，规划好后点高德里的「开始」即可）；单个小区点「▸导航」则是直接导航。</div>';
   }
   detail.innerHTML = html;
+  amapStops = groups.map(function(g){ return g.rep; }); /* 供单点导航按钮取用 */
 }
+var amapStops = [];
 
 function renderMedia(){
   var platform = document.getElementById('media-platform').value;
@@ -3843,6 +3866,12 @@ function bindEvents(){
         toast('正在打开高德…');
         window.location.href = url;
       } else toast('这天没有可规划的小区');
+    }
+    else if (act === 'amap-one') {
+      var gi = parseInt(btn.getAttribute('data-idx'), 10);
+      var rec = amapStops[gi];
+      if (rec) openAmapNav(rec); /* 用户点击手势内同步跳原生协议 */
+      else toast('这条记录没有坐标');
     }
     else if (act === 'cal-copy') {
       var stops = petTripsOnDay(calSelected).map(function(x){ return petPlaceOf(x); }).filter(Boolean);
