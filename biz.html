@@ -1065,6 +1065,23 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
     </section>
     <section class="card">
       <h2>
+        <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+        高德导航 · 一键直接开始导航
+      </h2>
+      <p class="desc">填了高德 key 后，录单时自动把小区名换成经纬度，点导航就能<b>真正直接开始导航</b>、多小区也能串成一条路线。key 只存在本设备浏览器，不进代码不上传。</p>
+      <div class="field">
+        <label>高德 Web 服务 Key</label>
+        <input type="password" id="amap-key" placeholder="粘贴你申请的高德 Web 服务 key">
+      </div>
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn" id="btn-amap-save">保存 Key</button>
+        <button class="btn ghost" id="btn-amap-test">测试坐标查询</button>
+      </div>
+      <p class="hint" id="amap-state"></p>
+      <p class="hint">申请（一次即可）：打开 <a href="https://console.amap.com/dev/key/app" target="_blank" rel="noopener" style="color:var(--olive);font-weight:550">高德开放平台控制台</a> → 创建应用 → 添加 Key，<b>服务平台选「Web服务」</b>（不是 Web端JS）→ 复制 key 粘上面。新 key 有每日免费额度，个人用足够。建议在高德控制台给这个 key 绑定调用来源/IP 白名单更安全。</p>
+    </section>
+    <section class="card">
+      <h2>
         <svg class="sec-ic ic-todo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H7a4 4 0 01-.9-7.9 5.5 5.5 0 0110.7-1.6A4 4 0 0117.5 19z"/></svg>
         云同步 · 电脑手机实时同步
       </h2>
@@ -1255,6 +1272,78 @@ function loadSyncCfg(){
     syncCfg.gistId = o.gistId || '';
   } catch (e) {}
   try { lastLocalSavedAt = localStorage.getItem(KEY + '_stamp') || ''; } catch (e) {}
+}
+
+/* ---------- 高德地理编码（Web服务 key + JSONP，纯静态页可跨域） ---------- */
+var AMAP_KEY = '';              /* 本设备填写的 key，不进 code、不进云同步 */
+var AMAP_KEY_STORE = 'wb_biz_amap_key';
+var geoCache = {};              /* 内存缓存：小区名 → {lng,lat} 或 null */
+var geoSeq = 0;
+function loadAmapKey(){
+  try { AMAP_KEY = localStorage.getItem(AMAP_KEY_STORE) || ''; } catch (e) { AMAP_KEY = ''; }
+  var inp = document.getElementById('amap-key');
+  if (inp) inp.value = AMAP_KEY;
+  renderAmapState();
+}
+function saveAmapKey(){
+  var inp = document.getElementById('amap-key');
+  AMAP_KEY = inp ? inp.value.trim() : '';
+  try {
+    if (AMAP_KEY) localStorage.setItem(AMAP_KEY_STORE, AMAP_KEY);
+    else localStorage.removeItem(AMAP_KEY_STORE);
+  } catch (e) {}
+  geoCache = {}; /* key 换了，缓存作废 */
+  renderAmapState();
+  toast(AMAP_KEY ? '高德 key 已保存，录单时会自动查坐标' : '已清除高德 key');
+}
+function renderAmapState(){
+  var el = document.getElementById('amap-state');
+  if (!el) return;
+  var cached = Object.keys(geoCache).filter(function(k){ return geoCache[k] && geoCache[k].lng; }).length;
+  el.textContent = AMAP_KEY
+    ? '状态：已配置 key' + (cached ? ' · 已缓存 ' + cached + ' 个小区坐标' : ' · 录单时自动查坐标') + '。没填坐标的旧记录，点一次导航会用名称兜底。'
+    : '状态：未配置。当前用「小区名」跳转（可能要多点一下搜索结果）。填 key 后可一键直接导航。';
+}
+/* JSONP 查询地址→坐标。cb 回调 (name, coord|null)。无 key 直接返回 null */
+function geocodePlace(name, cb){
+  name = String(name || '').trim();
+  if (!name) { cb(null); return; }
+  if (geoCache[name] !== undefined) { cb(geoCache[name]); return; }
+  if (!AMAP_KEY) { cb(null); return; }
+  var seq = ++geoSeq;
+  var cbName = 'wbGeocb_' + seq;
+  var scId = 'wbgeo_' + seq;
+  var done = false;
+  function finish(coord){
+    if (done) return;
+    done = true;
+    geoCache[name] = coord;
+    try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+    var scEl = document.getElementById(scId);
+    if (scEl) scEl.remove();
+    cb(coord);
+  }
+  window[cbName] = function(res){
+    try {
+      if (res && res.status === '1' && res.geocodes && res.geocodes.length) {
+        var loc = res.geocodes[0].location;
+        var pp = String(loc || '').split(',');
+        if (pp.length === 2 && parseFloat(pp[0]) > 0 && parseFloat(pp[1]) > 0) {
+          finish({ lng: parseFloat(pp[0]), lat: parseFloat(pp[1]), addr: res.geocodes[0].formatted_address || '' });
+          return;
+        }
+      }
+    } catch (e) {}
+    finish(null);
+  };
+  var sc = document.createElement('script');
+  sc.id = scId;
+  sc.src = 'https://restapi.amap.com/v3/geocode/geo?output=JSON&city=' + encodeURIComponent('杭州') +
+    '&address=' + encodeURIComponent(name) + '&key=' + encodeURIComponent(AMAP_KEY) + '&callback=' + cbName;
+  sc.onerror = function(){ finish(null); };
+  document.head.appendChild(sc);
+  /* 8 秒超时兜底 */
+  setTimeout(function(){ finish(null); }, 8000);
 }
 function saveSyncCfg(){
   try { localStorage.setItem(SYNC_KEY, JSON.stringify(syncCfg)); } catch (e) {}
@@ -2985,20 +3074,30 @@ function petPlaceOf(x){
   var c = String(x.customer || '');
   return c.replace(/[（(].*?[）)]/g, '').replace(/^上门/, '').trim() || c;
 }
-/* 高德 URI（免 key，纯跳转，不引外部 SDK）：直接导航到单个地点（from 空=当前位置） */
-function amapSearchUrl(name){
-  return 'https://uri.amap.com/navigation?from=&to=' + encodeURIComponent(name) +
+/* 高德 location 片段：有坐标用「lng,lat,名称」(官方格式，能真正直接导航)；否则退回纯名称 */
+function amapPoint(rec){
+  var name = typeof rec === 'string' ? rec : (rec && rec.place) || petPlaceOf(rec) || '';
+  if (rec && typeof rec === 'object' && num(rec.lng) > 0 && num(rec.lat) > 0) {
+    return rec.lng + ',' + rec.lat + ',' + name;
+  }
+  return name;
+}
+/* 单点导航：from 空=当前位置，to=目标 */
+function amapNavUrl(rec){
+  return 'https://uri.amap.com/navigation?from=&to=' + encodeURIComponent(amapPoint(rec)) +
     '&mode=car&policy=1&src=biz&coordinate=gaode&callnative=1';
 }
-/* 高德 URI：多点导航（from 留空=当前位置；to=最后一个小区；via=中间小区，官方 via 只稳支持一个，多小区走兜底） */
+/* 兼容旧调用：传名称字符串 */
+function amapSearchUrl(name){ return amapNavUrl(name); }
+/* 多点路线：to=最后一站，via=前面的站（官方 via 只稳支持一个；有坐标时多个用 | 拼，App 多能识别） */
 function amapRouteUrl(places){
   var arr = places.filter(Boolean);
   if (!arr.length) return '';
-  var dest = arr[arr.length - 1];
-  var via = arr.length > 1 ? arr.slice(0, -1).join('|') : '';
+  var pts = arr.map(amapPoint);
+  var dest = pts[pts.length - 1];
   var url = 'https://uri.amap.com/navigation?from=&to=' + encodeURIComponent(dest) +
     '&mode=car&policy=1&src=biz&coordinate=gaode&callnative=1';
-  if (via) url += '&via=' + encodeURIComponent(via);
+  if (pts.length > 1) url += '&via=' + encodeURIComponent(pts.slice(0, -1).join('|'));
   return url;
 }
 /* 复制文本到剪贴板（含非 HTTPS / 老浏览器兜底） */
@@ -3082,8 +3181,9 @@ function renderCalDetail(){
   var groups = [], groupMap = {};
   recs.forEach(function(x){
     var p = petPlaceOf(x) || '未写小区';
-    if (!groupMap[p]) { groupMap[p] = { place: p, animal: x.animal || '', items: [] }; groups.push(groupMap[p]); }
+    if (!groupMap[p]) { groupMap[p] = { place: p, animal: x.animal || '', items: [], rep: x }; groups.push(groupMap[p]); }
     groupMap[p].items.push(x);
+    if (!groupMap[p].rep.lng && x.lng) groupMap[p].rep = x; /* 代表记录优先用有坐标的 */
   });
   var uniq = groups.map(function(g){ return g.place; });
   var wd = ['日', '一', '二', '三', '四', '五', '六'][new Date(calSelected + 'T00:00:00').getDay()];
@@ -3106,8 +3206,12 @@ function renderCalDetail(){
     '</div>';
   if (uniq.length) {
     html += '<div class="cal-tip">逐个导航（点一下从当前位置直接导航到这个小区，最可靠）：<br>' +
-      uniq.map(function(p){ return '<a href="' + amapSearchUrl(p) + '" target="_blank" rel="noopener" style="display:inline-block;margin:3px 6px 0 0;padding:3px 9px;border:1px solid var(--line);border-radius:8px;color:var(--pet);text-decoration:none;font-size:12px">' + esc(p) + ' ↗</a>'; }).join('') +
-      '<br><br>整条路线按上面顺序串好，从你当前位置出发；没装高德 App 会自动用网页版。小区名识别不准时，用「逐个导航」或「复制地址清单」在高德里手动加途经点。</div>';
+      groups.map(function(g){
+        var withCoord = num(g.rep.lng) > 0 && num(g.rep.lat) > 0;
+        return '<a href="' + amapNavUrl(g.rep) + '" target="_blank" rel="noopener" style="display:inline-block;margin:3px 6px 0 0;padding:3px 9px;border:1px solid ' + (withCoord ? 'var(--pet)' : 'var(--line)') + ';border-radius:8px;color:var(--pet);text-decoration:none;font-size:12px">' + esc(g.place) + (withCoord ? ' ▸导航' : ' ↗') + '</a>';
+      }).join('') +
+      '<br><br>' + (AMAP_KEY ? '带「▸导航」的小区已存坐标，点一下高德会直接开始导航。' : '还没配高德 key，当前按名称跳转，可能要在高德里点一下搜索结果才导航。去「备份」页填 key 可一键直达。') +
+      '整条路线按上面顺序串好，从你当前位置出发；没装高德 App 会自动用网页版。</div>';
   }
   detail.innerHTML = html;
 }
@@ -3335,10 +3439,13 @@ function savePetEdit(){
     rec.todoId = t.id; /* 顺手补上关联，下次可精确匹配 */
   });
   state.demo = false;
+  /* 小区名变了：坐标作废，重新查（日期变了不影响坐标） */
+  if (newPlace !== oldPlace) { rec.lng = null; rec.lat = null; rec.geoAddr = ''; }
   saveData();
   closePetEdit();
   refreshAll(); /* 统一刷新：日历、流水、行程、待办一起重渲染 */
   toast('已改好：' + newDate + ' · ' + newPlace + (todos.length ? '，日程已同步' : ''));
+  if (newPlace !== oldPlace) fillCoordsForPlaces([newPlace], true);
 }
 function addPet(){
   var amt = document.getElementById('pt-amt').value;
@@ -3397,6 +3504,25 @@ function doParseVisit(){
     '<div class="btn-row"><button class="btn" data-act="pv-ok">确认录入</button><button class="btn ghost" data-act="pv-cancel">重写</button></div>' +
     '</div>';
 }
+/* 给指定小区名查坐标并回填到所有匹配的 pet 记录（异步，查到后保存+刷新） */
+function fillCoordsForPlaces(places, silent){
+  if (!AMAP_KEY) return;
+  var uniq = [];
+  places.forEach(function(p){ if (p && uniq.indexOf(p) === -1) uniq.push(p); });
+  uniq.forEach(function(p){
+    geocodePlace(p, function(coord){
+      if (!coord) return;
+      var changed = false;
+      state.pet.forEach(function(x){
+        if ((x.place || petPlaceOf(x)) === p && (x.lng !== coord.lng || x.lat !== coord.lat)) {
+          x.lng = coord.lng; x.lat = coord.lat; x.geoAddr = coord.addr || '';
+          changed = true;
+        }
+      });
+      if (changed) { saveData(); renderPetCalendar(); renderAmapState(); if (!silent) renderPet(); }
+    });
+  });
+}
 function confirmVisit(){
   if (!pendingVisit || !pendingVisit.ok) return;
   var v = pendingVisit;
@@ -3420,6 +3546,7 @@ function confirmVisit(){
   document.getElementById('visit-preview').innerHTML = '';
   refreshAll();
   toast('录好了：' + label + '，' + v.times + ' 次行程 · ' + money(v.total) + ' 已按天入账');
+  fillCoordsForPlaces([v.place], true); /* 有 key 时后台补坐标 */
 }
 function cancelVisit(){
   pendingVisit = null;
@@ -3602,6 +3729,15 @@ function bindEvents(){
   document.getElementById('btn-clear-all').addEventListener('click', clearAll);
   document.getElementById('btn-auto-bk').addEventListener('click', function(){ renderAutoBackups(this); });
   document.getElementById('btn-sync-create').addEventListener('click', function(){ syncCreate(this); });
+  document.getElementById('btn-amap-save').addEventListener('click', saveAmapKey);
+  document.getElementById('btn-amap-test').addEventListener('click', function(){
+    if (!AMAP_KEY) { toast('先填并保存高德 key'); return; }
+    toast('正在测试坐标查询…');
+    geocodePlace('湖悦章府', function(coord){
+      if (coord) { toast('成功：湖悦章府 → ' + coord.lng + ',' + coord.lat); renderAmapState(); }
+      else toast('查询失败：检查 key 是否为「Web服务」类型、是否绑定了正确的 IP/域名白名单');
+    });
+  });
   document.getElementById('btn-sync-connect').addEventListener('click', function(){ syncConnect(this); });
   document.getElementById('btn-sync-off').addEventListener('click', syncOff);
   document.getElementById('btn-sync-history').addEventListener('click', function(){ showSyncHistory(this); });
@@ -3684,9 +3820,16 @@ function bindEvents(){
       renderPetCalendar();
     }
     else if (act === 'cal-route') {
-      var stops = petTripsOnDay(calSelected).map(function(x){ return petPlaceOf(x); }).filter(Boolean);
-      var uniq = []; stops.forEach(function(p){ if (uniq.indexOf(p) === -1) uniq.push(p); });
-      var url = amapRouteUrl(uniq);
+      /* 按小区去重，代表记录优先带坐标，保证用真实坐标规划 */
+      var recs = petTripsOnDay(calSelected), seen = {}, reps = [];
+      recs.forEach(function(x){
+        var p = petPlaceOf(x); if (!p || seen[p]) return;
+        seen[p] = 1;
+        var same = recs.filter(function(y){ return petPlaceOf(y) === p; });
+        var rep = same.filter(function(y){ return num(y.lng) > 0; })[0] || x;
+        reps.push({ place: p, lng: rep.lng, lat: rep.lat });
+      });
+      var url = amapRouteUrl(reps);
       if (url) {
         /* 必须在用户点击手势内同步跳转，window.open 会被手机 webview 拦截导致调不起高德 */
         var a = document.createElement('a');
@@ -3712,6 +3855,7 @@ function bindEvents(){
 function init(){
   loadData();
   loadSyncCfg();
+  loadAmapKey();
   viewMonth = currentMonth();
   petYear = todayStr().slice(0, 4);
   calYm = viewMonth;
