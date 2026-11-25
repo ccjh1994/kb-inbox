@@ -1190,7 +1190,8 @@ function seed(){
     fruitSales: [],
     fruitCats: null,
     fruitRetail: {},
-    fruitResetVer: 3
+    fruitResetVer: 3,
+    delTomb: []
   };
   saveData();
 }
@@ -1211,12 +1212,49 @@ function loadData(){
       fruitSales: Array.isArray(o.fruitSales) ? o.fruitSales : [],
       fruitCats: Array.isArray(o.fruitCats) && o.fruitCats.length ? o.fruitCats : null,
       fruitRetail: (o.fruitRetail && typeof o.fruitRetail === 'object' && !Array.isArray(o.fruitRetail)) ? o.fruitRetail : {},
-      fruitResetVer: num(o.fruitResetVer)
+      fruitResetVer: num(o.fruitResetVer),
+      delTomb: Array.isArray(o.delTomb) ? o.delTomb : []
     };
   } catch (e) { seed(); }
   fruitResetIfNeeded();
+  purgeTombed();
   normalizeFruitUnits();
   ensureFruitCats();
+}
+/* ---------- 删除墓碑：让删除跨设备生效，防止被云同步「联合」复活 ---------- */
+var TOMB_MAX = 500; /* 墓碑上限，超出丢最旧的，避免永久膨胀 */
+function markDeleted(id){
+  if (!id) return;
+  if (!Array.isArray(state.delTomb)) state.delTomb = [];
+  if (state.delTomb.indexOf(id) === -1) state.delTomb.push(id);
+  if (state.delTomb.length > TOMB_MAX) state.delTomb = state.delTomb.slice(-TOMB_MAX);
+}
+/* 从所有集合里剔除已删除的 ID（本地加载后、云端合并后各跑一次） */
+function purgeTombed(){
+  if (!Array.isArray(state.delTomb) || !state.delTomb.length) return;
+  var tomb = {};
+  state.delTomb.forEach(function(id){ tomb[id] = 1; });
+  function clean(arr){ return (arr || []).filter(function(x){ return !x || x.id == null || !tomb[x.id]; }); }
+  var before = (state.todos || []).length + (state.profits || []).length + (state.pet || []).length +
+    (state.media || []).length + (state.fruitPurchases || []).length + (state.fruitSales || []).length;
+  state.todos = clean(state.todos);
+  state.profits = clean(state.profits);
+  state.pet = clean(state.pet);
+  state.media = clean(state.media);
+  state.fruitPurchases = clean(state.fruitPurchases);
+  state.fruitSales = clean(state.fruitSales);
+  var after = (state.todos || []).length + (state.profits || []).length + (state.pet || []).length +
+    (state.media || []).length + (state.fruitPurchases || []).length + (state.fruitSales || []).length;
+  if (after !== before) saveData();
+}
+/* 合并两端的墓碑（并集） */
+function mergeTomb(a, b){
+  var out = [], seen = {};
+  (a || []).concat(b || []).forEach(function(id){
+    if (id != null && !seen[id]) { seen[id] = 1; out.push(id); }
+  });
+  if (out.length > TOMB_MAX) out = out.slice(-TOMB_MAX);
+  return out;
 }
 /* 公斤统一成斤：历史记录里单位为公斤的，斤数×2、单价÷2，全库只留斤 */
 function normalizeFruitUnits(){
@@ -1458,9 +1496,11 @@ function applyRemote(snap){
         Object.keys(a).forEach(function(k){ if (rvOk(a[k])) out[k] = a[k]; });
         return out;
       })(),
-      fruitResetVer: rv
+      fruitResetVer: rv,
+      delTomb: mergeTomb(o.state.delTomb, cur.delTomb) /* 合并两端墓碑，删除跨设备生效 */
     };
     fruitResetIfNeeded(); /* 合并后再清一次：确保任何<25号的残留记录都被剔除 */
+    purgeTombed();        /* 剔除已被任何一端删除的条目，防止复活 */
     normalizeFruitUnits();
     ensureFruitCats();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
@@ -2239,11 +2279,13 @@ function cancelFruitSales(){
 }
 
 function delFruitPurchase(id){
+  markDeleted(id);
   state.fruitPurchases = state.fruitPurchases.filter(function(x){ return x.id !== id; });
   saveData(); refreshAll();
 }
 
 function delFruitSale(id){
+  markDeleted(id);
   state.fruitSales = state.fruitSales.filter(function(x){ return x.id !== id; });
   saveData(); refreshAll();
 }
@@ -3364,6 +3406,7 @@ function todoTomorrow(id){
   saveData(); refreshAll(); toast('推到明天了');
 }
 function delTodo(id){
+  markDeleted(id);
   state.todos = state.todos.filter(function(x){ return x.id !== id; });
   saveData(); refreshAll();
 }
@@ -3387,6 +3430,7 @@ function addProfit(){
   toast('记好了，利润自动算');
 }
 function delProfit(id){
+  markDeleted(id);
   state.profits = state.profits.filter(function(x){ return x.id !== id; });
   saveData(); refreshAll();
 }
@@ -3402,8 +3446,8 @@ function addShop(){
 function delPet(id, idsParam){
   /* idsParam：合并组批量删除（逗号分隔）；否则删单条 */
   var idSet = {};
-  if (idsParam) String(idsParam).split(',').forEach(function(x){ if (x) idSet[x] = 1; });
-  else idSet[id] = 1;
+  if (idsParam) String(idsParam).split(',').forEach(function(x){ if (x) { idSet[x] = 1; markDeleted(x); } });
+  else { idSet[id] = 1; markDeleted(id); }
   var recs = state.pet.filter(function(x){ return idSet[x.id]; });
   var delTodoIds = {}, petIds = {};
   recs.forEach(function(r){
@@ -3421,6 +3465,7 @@ function delPet(id, idsParam){
       }
     }
   });
+  Object.keys(delTodoIds).forEach(function(tid){ markDeleted(tid); });
   state.pet = state.pet.filter(function(x){ return !petIds[x.id]; });
   state.todos = state.todos.filter(function(t){ return !delTodoIds[t.id]; });
   saveData(); refreshAll();
@@ -3507,6 +3552,7 @@ function addPet(){
   toast('记好了');
 }
 function delMedia(id){
+  markDeleted(id);
   state.media = state.media.filter(function(x){ return x.id !== id; });
   saveData(); refreshAll();
 }
@@ -3659,8 +3705,10 @@ function importJson(file){
         todos: Array.isArray(o.todos) ? o.todos : [],
         profits: Array.isArray(o.profits) ? o.profits : [],
         pet: Array.isArray(o.pet) ? o.pet : [],
-        media: Array.isArray(o.media) ? o.media : []
+        media: Array.isArray(o.media) ? o.media : [],
+        delTomb: Array.isArray(o.delTomb) ? o.delTomb : []
       };
+      purgeTombed();
       saveData(); refreshAll(); toast('导入了 ' + n + ' 条');
     } catch (e) { toast('文件读不出来，确认是本页导出的 JSON'); }
   };
@@ -3669,7 +3717,7 @@ function importJson(file){
 function clearAll(){
   if (!confirm('清空全部数据（待办+盈利+宠物+自媒体）？\n不能撤销，建议先导出备份。')) return;
   if (!confirm('再确认一次：真的要清空吗？')) return;
-  state = { demo:false, shops: state.shops, todos: [], profits: [], pet: [], media: [], fruitPurchases: [], fruitSales: [], fruitCats: state.fruitCats || null, fruitRetail: state.fruitRetail || {}, fruitResetVer: FRUIT_RESET_VER };
+  state = { demo:false, shops: state.shops, todos: [], profits: [], pet: [], media: [], fruitPurchases: [], fruitSales: [], fruitCats: state.fruitCats || null, fruitRetail: state.fruitRetail || {}, fruitResetVer: FRUIT_RESET_VER, delTomb: state.delTomb || [] };
   saveData(); refreshAll(); toast('清空了，门店名单保留着');
 }
 
