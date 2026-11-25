@@ -864,7 +864,7 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
           <label>门店</label>
           <select id="fr-store">
             <option value="来伊份庆春东路店">庆春东路店</option>
-            <option value="来伊份网商店">网上店</option>
+            <option value="来伊份网商店">网商店</option>
           </select>
         </div>
         <div class="field">
@@ -1190,7 +1190,7 @@ function seed(){
     fruitSales: [],
     fruitCats: null,
     fruitRetail: {},
-    fruitResetVer: 2
+    fruitResetVer: 3
   };
   saveData();
 }
@@ -1238,12 +1238,20 @@ function normalizeFruitUnits(){
   });
   if (changed) saveData();
 }
-/* 水果数据重置：版本号一变，所有设备加载页面时自动清空水果进出数据（品类名单保留） */
-var FRUIT_RESET_VER = 2;
+/* 水果数据重置：版本号一变，所有设备加载页面时执行清理（品类名单/零售价保留）
+   v3：只删 2026-11-25 之前的进出记录，25 号及之后保留并重新打版本标记 */
+var FRUIT_RESET_VER = 3;
+var FRUIT_CUT_DATE = '2026-11-25';
 function fruitResetIfNeeded(){
-  if (state.fruitResetVer !== FRUIT_RESET_VER) {
-    state.fruitPurchases = [];
-    state.fruitSales = [];
+  var v = num(state.fruitResetVer);
+  if (v !== FRUIT_RESET_VER) {
+    function keep(x){
+      if (!x || !x.date || x.date < FRUIT_CUT_DATE) return false; /* 25号之前（含无日期）删除 */
+      x.resetVer = FRUIT_RESET_VER;
+      return true;
+    }
+    state.fruitPurchases = (state.fruitPurchases || []).filter(keep);
+    state.fruitSales = (state.fruitSales || []).filter(keep);
     state.fruitResetVer = FRUIT_RESET_VER;
     saveData();
   }
@@ -1419,7 +1427,8 @@ function applyRemote(snap){
     var o = JSON.parse(snap);
     if (!o || !o.state) return false;
     var cur = state;
-    var rv = num(o.state.fruitResetVer) || cur.fruitResetVer || 0;
+    /* 取两端较大版本：旧设备(version低)推来的快照不能把本机的新版本拉回去，否则清掉的数据会复活 */
+    var rv = Math.max(num(o.state.fruitResetVer) || 0, num(cur.fruitResetVer) || 0);
     /* 水果重置版本以下的旧条目一律丢弃（防旧设备把已清空的数据推回来） */
     function mergeFruit(remote, local, rv){
       var seen = {}, out = [];
@@ -1451,6 +1460,7 @@ function applyRemote(snap){
       })(),
       fruitResetVer: rv
     };
+    fruitResetIfNeeded(); /* 合并后再清一次：确保任何<25号的残留记录都被剔除 */
     normalizeFruitUnits();
     ensureFruitCats();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
