@@ -149,6 +149,28 @@ body{
 .fr-stock-line .st-item{font-weight:550}
 .fr-stock-line .st-val{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;white-space:nowrap}
 .fr-stock-line .st-neg{color:var(--red);font-weight:650}
+/* 按品种罗列：可展开明细卡 */
+.fr-var{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:#fff;overflow:hidden}
+.fr-var-hd{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;list-style:none;min-height:48px}
+.fr-var-hd::-webkit-details-marker{display:none}
+.fr-var-hd::before{content:'';flex:0 0 8px;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
+.fr-var[open] .fr-var-hd::before{transform:rotate(45deg)}
+.fr-var-name{flex:1;min-width:0;font-weight:650;font-size:14.5px;color:var(--text)}
+.fr-var-rev{font-size:13px;color:var(--text);white-space:nowrap}
+.fr-var-unit{font-size:11.5px;color:var(--muted);min-width:52px;text-align:right;white-space:nowrap}
+.fr-var-body{padding:2px 12px 12px;border-top:1px dashed var(--line)}
+.fr-var-sec-t{font-size:12px;font-weight:650;color:var(--olive-deep);margin:10px 0 4px}
+.fr-var-line{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.fr-var-line:last-child{border-bottom:none}
+.fr-var-line>span:first-child{flex:0 0 62px;color:var(--muted);font-variant-numeric:tabular-nums}
+.fr-var-line>span:nth-child(2){flex:0 0 auto;font-variant-numeric:tabular-nums;font-weight:600}
+.fr-var-meta{flex:1;min-width:0;color:var(--muted);font-size:11.5px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-var-profit{margin-top:10px;padding:8px 10px;background:var(--olive-softer);border-radius:8px;font-size:12.5px}
+@media(max-width:560px){
+  .fr-var-line>span:first-child{flex:0 0 52px}
+  .fr-var-meta{font-size:10.5px}
+  .fr-var-unit{min-width:44px}
+}
 /* 总库存 & 补货预估 */
 .rst-head{display:none}
 .rst-row{padding:9px 2px;border-bottom:1px dashed var(--line)}
@@ -814,6 +836,27 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
 
   <!-- ===== 水果板块（门店页二级面板，随 #biz-pane-fruit 切换显示） ===== -->
   <section class="view" id="view-fruit">
+    <section class="card fold-card" data-fold="profit">
+      <h2>
+        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
+        单品盈利分析
+      </h2>
+      <div class="month-bar">
+        <input type="month" id="fr-month" aria-label="选择月份">
+      </div>
+      <div class="sum-grid" id="fr-sum"></div>
+      <div class="fr-perf" id="fr-perf"></div>
+      <div id="fr-retail-suggest"></div>
+      <div class="fr-hint" id="fr-weather-box"></div>
+    </section>
+    <section class="card" id="fr-varieties-card">
+      <h2>
+        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
+        按品种看（点开看每天销量 + 历史进价）
+      </h2>
+      <p class="desc">每个品种一张卡，本月卖得多的排前面。<b>点一下展开</b>：上半是本月每天的销量，下半是每次进货的单价历史。</p>
+      <div id="fr-varieties"></div>
+    </section>
     <section class="card fold-card" data-fold="qbuy">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
@@ -861,7 +904,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div class="fr-q-calc" id="fr-q-calc"></div>
       <button class="btn" id="btn-fr-q-buy">入库这笔进货</button>
     </section>
-
     <section class="card fold-card" data-fold="textbuy">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M8 3l4 6 4-6"/><path d="M5 9h14l-1.5 11a2 2 0 01-2 1.8h-7a2 2 0 01-2-1.8L5 9z"/></svg>
@@ -876,7 +918,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <button class="btn" id="btn-fr-buy">解析进货</button>
       <div id="fr-buy-preview"></div>
     </section>
-
     <section class="card fold-card" data-fold="report">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20V10l5-5 5 5v10"/><path d="M10 14h4"/></svg>
@@ -912,21 +953,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <button class="btn" id="btn-fr-sales">解析报数</button>
       <div id="fr-sales-preview"></div>
     </section>
-
-    <section class="card fold-card" data-fold="profit">
-      <h2>
-        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 4 3 5-7"/></svg>
-        单品盈利分析
-      </h2>
-      <div class="month-bar">
-        <input type="month" id="fr-month" aria-label="选择月份">
-      </div>
-      <div class="sum-grid" id="fr-sum"></div>
-      <div class="fr-perf" id="fr-perf"></div>
-      <div id="fr-retail-suggest"></div>
-      <div class="fr-hint" id="fr-weather-box"></div>
-    </section>
-
     <section class="card fold-card" data-fold="daily">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/></svg>
@@ -936,16 +962,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div class="fr-daily-head"><span>日期</span><span>进货支出</span><span>销售额</span></div>
       <div id="fr-daily"></div>
     </section>
-
-    <section class="card fold-card" data-fold="price">
-      <h2>
-        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 2 5-6"/></svg>
-        进货价格曲线
-      </h2>
-      <p class="desc">当前品类：<b class="fr-price-cat" id="fr-price-cat">未选择（在上面点选品类）</b>。每个品每次进货价的走势，涨跌一眼看出。</p>
-      <div id="fr-price"></div>
-    </section>
-
     <section class="card fold-card" data-fold="stock">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"/><path d="M3 8l2-4h14l2 4"/><path d="M9 12h6"/></svg>
@@ -954,7 +970,14 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <p class="desc">总库存 = 累计进货 − 累计销量（不分门店）。结合最近 7 天日均销量，自动算每个品类还能卖几天、明天该不该进货。红色负数 = 销量超过进货，检查漏记。</p>
       <div id="fr-stock"></div>
     </section>
-
+    <section class="card fold-card" data-fold="price">
+      <h2>
+        <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 2 5-6"/></svg>
+        进货价格曲线
+      </h2>
+      <p class="desc">当前品类：<b class="fr-price-cat" id="fr-price-cat">未选择（在上面点选品类）</b>。每个品每次进货价的走势，涨跌一眼看出。</p>
+      <div id="fr-price"></div>
+    </section>
     <section class="card fold-card" data-fold="records">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8"/><path d="M3 8l2-4h14l2 4"/><path d="M9 12h6"/></svg>
@@ -964,7 +987,6 @@ footer.mob-foot{text-align:center;color:var(--muted);font-size:12px;padding:18px
       <div id="fr-purchase-list"></div>
       <div id="fr-sales-list"></div>
     </section>
-
     <section class="card fold-card" data-fold="market">
       <h2>
         <svg class="sec-ic ic-fruit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M10 10.5c.5-3 2-5.5 5-7.5"/><path d="M15 3c1.5.5 3 .5 4.5 0-.5 1.8-1.5 3-3 3.5"/></svg>
@@ -2407,10 +2429,10 @@ function saveCatEditor(){
 }
 
 /* 水果卡折叠：点标题收起/展开，每台设备记住自己的习惯（localStorage） */
-var FRUIT_FOLD_KEY = 'wb_biz_fruit_fold';
+var FRUIT_FOLD_KEY = 'wb_biz_fruit_fold_v2'; /* v2：配合新版按品种布局，重置到新默认展开状态 */
 function fruitFoldDefault(){
-  /* 默认收起，只留「点选进货」和「库存&补货预估」展开 */
-  return ['textbuy','report','profit','daily','price','records','market'];
+  /* 默认只展开「本月总销售」和高频的「点选进货」，品种明细卡独立常驻展开；其余收起，进页面更清爽 */
+  return ['textbuy','report','daily','price','stock','records','market'];
 }
 function loadFruitFold(){
   var folded = null;
@@ -2656,8 +2678,92 @@ function renderFruitStock(){
   el.innerHTML = html;
 }
 
+/* 计算层：某品种在指定月份的每日销量（按日期升序） */
+function fruitDailyByCat(cat, mk){
+  var map = {};
+  state.fruitSales.forEach(function(s){
+    if (s.item !== cat || monthKeyOf(s.date) !== mk) return;
+    if (!map[s.date]) map[s.date] = { rev: 0, qty: 0, unit: '', stores: {} };
+    map[s.date].rev += num(s.revenue);
+    map[s.date].qty += num(s.qty);
+    if (s.unit) map[s.date].unit = s.unit;
+    if (s.store) map[s.date].stores[s.store.replace('来伊份', '')] = 1;
+  });
+  return Object.keys(map).sort().map(function(d){
+    return { date: d, rev: map[d].rev, qty: map[d].qty, unit: map[d].unit, stores: Object.keys(map[d].stores) };
+  });
+}
+/* 计算层：某品种的历史进货价（全时段，按日期降序，保留每次单价） */
+function fruitBuyHistoryByCat(cat){
+  return state.fruitPurchases.filter(function(p){ return p.item === cat; })
+    .slice().sort(function(a, b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+}
+/* 渲染层：按品种罗列 —— 每个品种一张可展开卡，点开看每日销量+历史进价（纯读 state） */
+function renderFruitVarieties(){
+  var el = document.getElementById('fr-varieties');
+  if (!el) return;
+  var mk = viewMonth;
+  /* 品种集合：品类名单 + 数据里实际出现的品名，去重；本月有销量的排前 */
+  var cats = [], seen = {};
+  function add(c){ if (c && !seen[c]) { seen[c] = 1; cats.push(c); } }
+  fruitCatsList().forEach(add);
+  state.fruitSales.forEach(function(s){ if (monthKeyOf(s.date) === mk) add(s.item); });
+  state.fruitPurchases.forEach(function(p){ if (monthKeyOf(p.date) === mk) add(p.item); });
+  /* 本月销量排行 */
+  var perfMap = {};
+  fruitPerf(mk).forEach(function(b){ perfMap[b.item] = b; });
+  cats.sort(function(a, b){
+    var ra = perfMap[a] ? perfMap[a].revenue : 0, rb = perfMap[b] ? perfMap[b].revenue : 0;
+    return rb - ra;
+  });
+  if (!cats.length) { el.innerHTML = '<div class="empty">还没有品类，去「编辑品类」加几个，或先进一笔货。</div>'; return; }
+
+  var html = '';
+  cats.forEach(function(cat){
+    var p = perfMap[cat];
+    var rev = p ? p.revenue : 0, qty = p ? num(p.qty) : 0, unit = p ? (p.unit || '') : '';
+    var hasData = rev > 0 || fruitBuyHistoryByCat(cat).length > 0;
+    var daily = fruitDailyByCat(cat, mk);
+    var hist = fruitBuyHistoryByCat(cat);
+    var marginTxt = '';
+    if (p && p.costKnown && p.revenue > 0) {
+      var mg = Math.round((p.revenue - p.cost) / p.revenue * 1000) / 10;
+      marginTxt = ' · 毛利 <b style="color:' + (p.revenue - p.cost >= 0 ? 'var(--green)' : 'var(--red)') + '">' + money(p.revenue - p.cost) + '（' + mg + '%）</b>';
+    }
+    html += '<details class="fr-var"' + (hasData && rev > 0 ? ' open' : '') + '>' +
+      '<summary class="fr-var-hd"><span class="fr-var-name">' + esc(cat) + '</span>' +
+      '<span class="fr-var-rev">' + (rev > 0 ? '本月 <b class="money-in">' + money(rev) + '</b>' : '<span style="color:var(--muted)">本月无销量</span>') + '</span>' +
+      '<span class="fr-var-unit">' + (qty > 0 ? qty + esc(unit) : '') + '</span></summary>' +
+      '<div class="fr-var-body">';
+    /* 每日销量 */
+    html += '<div class="fr-var-sec-t">本月每日销量</div>';
+    if (daily.length) {
+      html += daily.map(function(d){
+        return '<div class="fr-var-line"><span>' + esc(d.date.slice(5)) + '</span>' +
+          '<span class="money-in">' + money(d.rev) + '</span>' +
+          '<span class="fr-var-meta">' + (d.qty > 0 ? d.qty + esc(d.unit) : '仅金额') + (d.stores.length ? ' · ' + esc(d.stores.join('/')) : '') + '</span></div>';
+      }).join('');
+    } else html += '<div class="empty" style="padding:8px">本月还没有销量记录</div>';
+    /* 历史进货价 */
+    html += '<div class="fr-var-sec-t" style="margin-top:10px">历史进货价（每次）</div>';
+    if (hist.length) {
+      html += hist.slice(0, 30).map(function(x){
+        var up = num(x.unitPrice);
+        return '<div class="fr-var-line"><span>' + esc(x.date) + '</span>' +
+          '<span>' + (up > 0 ? '¥' + up.toFixed(2) + '/' + esc(x.unit || '斤') : '未记单价') + '</span>' +
+          '<span class="fr-var-meta">' + num(x.qty) + esc(x.unit || '') + ' · ' + money(fruitBuyVal(x)) + (x.note ? ' · ' + esc(x.note) : '') + '</span></div>';
+      }).join('');
+      if (hist.length > 30) html += '<div class="fr-var-meta" style="padding:6px 0">…另有 ' + (hist.length - 30) + ' 笔更早记录</div>';
+    } else html += '<div class="empty" style="padding:8px">还没有进货记录</div>';
+    if (marginTxt) html += '<div class="fr-var-profit">毛利小结：' + marginTxt + '</div>';
+    html += '</div></details>';
+  });
+  el.innerHTML = html;
+}
+
 function renderFruit(){
   var mk = viewMonth;
+  renderFruitVarieties(); /* 按品种明细（单向调用独立渲染层） */
   var purchases = state.fruitPurchases.filter(function(x){ return monthKeyOf(x.date) === mk; });
   var sales = state.fruitSales.filter(function(x){ return monthKeyOf(x.date) === mk; });
   var buyTotal = 0, revTotal = 0, profit = 0, costKnown = true;
