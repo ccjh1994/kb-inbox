@@ -3865,7 +3865,8 @@ function importJson(file){
     try {
       var o = JSON.parse(reader.result);
       if (!o || !Array.isArray(o.shops)) throw new Error('bad');
-      var n = (o.todos || []).length + (o.profits || []).length + (o.pet || []).length + (o.media || []).length;
+      var n = (o.todos || []).length + (o.profits || []).length + (o.pet || []).length + (o.media || []).length +
+        (o.fruitPurchases || []).length + (o.fruitSales || []).length;
       if (!confirm('确认导入 ' + n + ' 条数据？当前数据会被覆盖。')) return;
       state = {
         demo: !!o.demo,
@@ -3874,10 +3875,18 @@ function importJson(file){
         profits: Array.isArray(o.profits) ? o.profits : [],
         pet: Array.isArray(o.pet) ? o.pet : [],
         media: Array.isArray(o.media) ? o.media : [],
+        fruitPurchases: Array.isArray(o.fruitPurchases) ? o.fruitPurchases : [],
+        fruitSales: Array.isArray(o.fruitSales) ? o.fruitSales : [],
+        fruitCats: Array.isArray(o.fruitCats) && o.fruitCats.length ? o.fruitCats : null,
+        fruitRetail: (o.fruitRetail && typeof o.fruitRetail === 'object' && !Array.isArray(o.fruitRetail)) ? o.fruitRetail : {},
+        fruitResetVer: num(o.fruitResetVer) || FRUIT_RESET_VER,
         delTomb: Array.isArray(o.delTomb) ? o.delTomb : []
       };
       purgeTombed();
-      saveData(); refreshAll(); toast('导入了 ' + n + ' 条');
+      fruitResetIfNeeded();
+      normalizeFruitUnits();
+      ensureFruitCats();
+      saveData(); refreshAll(); toast('导入了 ' + n + ' 条（含水果 ' + ((o.fruitPurchases || []).length + (o.fruitSales || []).length) + ' 笔）');
     } catch (e) { toast('文件读不出来，确认是本页导出的 JSON'); }
   };
   reader.readAsText(file);
